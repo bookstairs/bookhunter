@@ -8,7 +8,7 @@ import (
 )
 
 // PrintTable would print a table-like message from the given struct.
-func PrintTable(title string, head table.Row, data interface{}) {
+func PrintTable(title string, head table.Row, data any) {
 	t := table.NewWriter()
 	t.SetOutputMirror(os.Stdout)
 	t.SetTitle(title)

@@ -17,7 +17,7 @@ const (
 var ErrNeedSignin = errors.New("need user account to download books")
 
 // DecodeResponse would parse the http response into a json based content.
-func DecodeResponse(resp *http.Response, data interface{}) (err error) {
+func DecodeResponse(resp *http.Response, data any) (err error) {
 	decoder := json.NewDecoder(resp.Body)
 	err = decoder.Decode(data)
 

@@ -21,6 +21,7 @@ builds:
       - windows
       - darwin
     goarch:
+      - "386"
       - amd64
       - arm64
 
@@ -49,17 +50,20 @@ brews:
     homepage: "https://github.com/bibliolater"
     description: "Software to download chinese ebooks from Internet."
     license: "MIT"
+    install: |
+      bin.install "bookhunter"
     post_install: |
-      # Install completions
-      (prefix/"completions").mkdir
+      # Install shell completions
+      output = Utils.safe_popen_read("#{bin}/bookhunter", "completion", "bash")
+      (bash_completion/"goreleaser").write output
 
-      system "#{bin}/bookhunter completion zsh > #{prefix}/completions/_bookhunter"
-      system "#{bin}/bookhunter completion bash > #{prefix}/completions/bookhunter.bash"
+      output = Utils.safe_popen_read("#{bin}/bookhunter", "completion", "zsh")
+      (zsh_completion/"_goreleaser").write output
 
-      zsh_completion.install "#{prefix}/completions/_bookhunter"
-      bash_completion.install "#{prefix}/completions/bookhunter.bash"
-
-      rmdir prefix/"completions"
+      output = Utils.safe_popen_read("#{bin}/bookhunter", "completion", "fish")
+      (fish_completion/"goreleaser.fish").write output
+    test: |
+      system "#{bin}/bookhunter -v"
 
 checksum:
   name_template: 'checksums.txt'
