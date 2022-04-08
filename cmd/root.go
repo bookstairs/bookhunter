@@ -27,5 +27,6 @@ func Execute() {
 
 func init() {
 	rootCmd.AddCommand(talebookCmd)
+	rootCmd.AddCommand(sanqiuCmd)
 	rootCmd.AddCommand(versionCmd)
 }

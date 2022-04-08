@@ -32,6 +32,8 @@ type downloadWorker struct {
 
 // Download would start download books from given website.
 func (worker *downloadWorker) Download() {
+	log.Infof("Start to download book.")
+
 	// Try to acquire book ID from storage.
 	for bookID := worker.progress.AcquireBookID(); bookID != progress.NoBookToDownload; bookID = worker.progress.AcquireBookID() {
 		// Acquire book info.

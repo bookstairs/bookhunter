@@ -5,61 +5,16 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
-	"os"
 	"path"
 	"strings"
-	"sync"
-	"time"
 
 	"github.com/bibliolater/bookhunter/pkg/log"
 	"github.com/bibliolater/bookhunter/pkg/progress"
 	"github.com/bibliolater/bookhunter/pkg/spider"
 )
 
-// The download config.
-type config struct {
-	Website       string        // The website for talebook.
-	Username      string        // The login user.
-	Password      string        // The password for login user.
-	DownloadPath  string        // Use the executed directory as the default download path.
-	CookieFile    string        // The cookie file to use in this download progress.
-	ProgressFile  string        // The progress file serving the remaining book id.
-	InitialBookID int           // The book id start to download.
-	Formats       []string      // The file formats you want to download
-	Timeout       time.Duration // The request timeout for a single request.
-	Retry         int           // The maximum retry times for a timeout request.
-	UserAgent     string        // The user agent for the download request.
-	Rename        bool          // Rename the file by using book ID.
-}
-
-// The main instance for start downloading the book.
-type talebook struct {
-	wait       *sync.WaitGroup
-	downloader *downloadWorker
-}
-
-// NewDownloadConfig will return a default blank config.
-func NewDownloadConfig() *config {
-	dir, err := os.Getwd()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	return &config{
-		DownloadPath:  dir,
-		CookieFile:    "cookies",
-		ProgressFile:  "progress",
-		InitialBookID: 1,
-		Formats:       []string{"EPUB", "MOBI", "PDF"},
-		Timeout:       10 * time.Minute,
-		Retry:         5,
-		UserAgent:     spider.DefaultUserAgent,
-		Rename:        false,
-	}
-}
-
-// NewTalebook will create the download instance.
-func NewTalebook(c *config) *talebook {
+// NewDownloader will create the download instance.
+func NewDownloader(c *spider.DownloadConfig) *downloadWorker {
 	// Create cookiejar.
 	cookieFile := path.Join(c.DownloadPath, c.CookieFile)
 	cookieJar, err := spider.NewCookieJar(cookieFile)
@@ -104,7 +59,7 @@ func NewTalebook(c *config) *talebook {
 	}
 
 	// Create download worker
-	downloader := &downloadWorker{
+	return &downloadWorker{
 		website:      c.Website,
 		progress:     p,
 		client:       client,
@@ -114,15 +69,6 @@ func NewTalebook(c *config) *talebook {
 		formats:      c.Formats,
 		rename:       c.Rename,
 	}
-
-	return &talebook{
-		downloader: downloader,
-	}
-}
-
-func (t *talebook) Start() {
-	log.Infof("Start to download book.")
-	t.downloader.Download()
 }
 
 // login to the given website by username and password. We will save the cookie into file.
