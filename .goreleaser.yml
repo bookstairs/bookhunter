@@ -1,0 +1,49 @@
+project_name: bookhunter
+
+before:
+  hooks:
+    - go mod tidy
+
+builds:
+  - id: bookhunter
+    ldflags:
+      - -s -w
+      - -X github.com/syhily/bookhunter/cmd.gitMajor={{ .Major }}
+      - -X github.com/syhily/bookhunter/cmd.gitMinor={{ .Minor }}
+      - -X github.com/syhily/bookhunter/cmd.gitVersion={{ .Version }}
+      - -X github.com/syhily/bookhunter/cmd.gitCommit={{ .Commit }}
+      - -X github.com/syhily/bookhunter/cmd.gitTreeState=clean
+      - -X github.com/syhily/bookhunter/cmd.buildDate={{ .Date }}
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - windows
+      - darwin
+    goarch:
+      - amd64
+      - arm64
+
+checksum:
+  name_template: 'checksums.txt'
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - '^docs:'
+      - '^test:'
+      - '^web:'
+
+archives:
+  - id: bookhunter
+    builds:
+      - bookhunter
+    format: tar.gz
+    wrap_in_directory: "true"
+    format_overrides:
+      - goos: windows
+        format: zip
+
+snapshot:
+  name_template: "{{ incminor .Version }}-next"
