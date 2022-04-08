@@ -24,7 +24,7 @@ linters-settings:
   gocyclo:
     min-complexity: 15
   goimports:
-    local-prefixes: github.com/syhily/bookhunter
+    local-prefixes: github.com/bibliolater/bookhunter
   lll:
     line-length: 140
   misspell:
@@ -43,7 +43,7 @@ linters:
 
   # Re-enable the comments after golangci-lint supports go 1.18
   enable:
-  # - bodyclose
+    # - bodyclose
     - deadcode
     - depguard
     - dogsled
@@ -58,21 +58,21 @@ linters:
     - goimports
     - goprintffuncname
     - gosec
-  # - gosimple
+    # - gosimple
     - govet
     - ineffassign
     - lll
     - misspell
     - nakedret
-  # - noctx
+    # - noctx
     - nolintlint
-  # - staticcheck
-  # - structcheck
-  # - stylecheck
+    # - staticcheck
+    # - structcheck
+    # - stylecheck
     - typecheck
     - unconvert
-  # - unparam
-  # - unused
+    # - unparam
+    # - unused
     - varcheck
     - whitespace
 

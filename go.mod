@@ -1,4 +1,4 @@
-module github.com/syhily/bookhunter
+module github.com/bibliolater/bookhunter
 
 go 1.18
 

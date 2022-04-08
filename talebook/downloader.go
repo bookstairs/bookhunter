@@ -11,13 +11,10 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/syhily/bookhunter/pkg/progress"
-
-	"github.com/syhily/bookhunter/pkg/spider"
-
-	"github.com/syhily/bookhunter/pkg/rename"
-
-	"github.com/syhily/bookhunter/pkg/log"
+	"github.com/bibliolater/bookhunter/pkg/log"
+	"github.com/bibliolater/bookhunter/pkg/progress"
+	"github.com/bibliolater/bookhunter/pkg/rename"
+	"github.com/bibliolater/bookhunter/pkg/spider"
 )
 
 // downloadWorker is the download instance.

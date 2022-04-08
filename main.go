@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/syhily/bookhunter/cmd"
+	"github.com/bibliolater/bookhunter/cmd"
 )
 
 // main the entrypoint for the downloader.

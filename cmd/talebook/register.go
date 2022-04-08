@@ -5,14 +5,12 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/syhily/bookhunter/pkg/spider"
-
-	"github.com/syhily/bookhunter/pkg/log"
-	"github.com/syhily/bookhunter/talebook"
-
 	"github.com/jedib0t/go-pretty/v6/table"
-
 	"github.com/spf13/cobra"
+
+	"github.com/bibliolater/bookhunter/pkg/log"
+	"github.com/bibliolater/bookhunter/pkg/spider"
+	"github.com/bibliolater/bookhunter/talebook"
 )
 
 // Used for register account on talebook website.

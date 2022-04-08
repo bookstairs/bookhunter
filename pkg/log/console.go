@@ -5,9 +5,8 @@ import (
 	"os"
 	"time"
 
-	"github.com/mitchellh/colorstring"
-
 	"github.com/k0kubun/go-ansi"
+	"github.com/mitchellh/colorstring"
 )
 
 var ansiStdout = ansi.NewAnsiStdout()

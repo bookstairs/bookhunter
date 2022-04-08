@@ -8,7 +8,7 @@ import (
 	"os"
 	"sync"
 
-	"github.com/syhily/bookhunter/pkg/log"
+	"github.com/bibliolater/bookhunter/pkg/log"
 )
 
 type jar struct {

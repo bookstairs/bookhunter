@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"runtime"
 
-	"github.com/syhily/bookhunter/pkg/log"
-
 	"github.com/spf13/cobra"
+
+	"github.com/bibliolater/bookhunter/pkg/log"
 )
 
 var (

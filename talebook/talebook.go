@@ -11,11 +11,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/syhily/bookhunter/pkg/progress"
-
-	"github.com/syhily/bookhunter/pkg/spider"
-
-	"github.com/syhily/bookhunter/pkg/log"
+	"github.com/bibliolater/bookhunter/pkg/log"
+	"github.com/bibliolater/bookhunter/pkg/progress"
+	"github.com/bibliolater/bookhunter/pkg/spider"
 )
 
 // The download config.
