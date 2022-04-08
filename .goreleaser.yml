@@ -45,6 +45,7 @@ brews:
     commit_author:
       name: syhily
       email: syhily@gmail.com
+    folder: Formula
     homepage: "https://github.com/bibliolater"
     description: "Software to download chinese ebooks from Internet."
     license: "MIT"
