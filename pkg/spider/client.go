@@ -96,6 +96,8 @@ func (s *Client) request(r *http.Request, referer string) (*http.Response, error
 
 	// Check http status code
 	if resp.StatusCode != http.StatusOK {
+		// Close this body manually.
+		_ = resp.Body.Close()
 		return nil, errors.New(resp.Status)
 	} else {
 		return resp, nil
