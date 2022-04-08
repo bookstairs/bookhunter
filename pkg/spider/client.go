@@ -78,16 +78,28 @@ func (s *Client) request(r *http.Request, referer string) (*http.Response, error
 		r.Header.Set("referer", referer)
 	}
 
-	resp, err := s.client.Do(r)
-	if err != nil {
-		return nil, err
+	var resp *http.Response
+
+	for i := 0; i < s.config.Retry; i++ {
+		var err error
+		if resp, err = s.client.Do(r); err != nil {
+			if IsTimeOut(err) {
+				// Retry the timeout request.
+				continue
+			} else {
+				return nil, err
+			}
+		}
+
+		break
 	}
 
+	// Check http status code
 	if resp.StatusCode != http.StatusOK {
 		return nil, errors.New(resp.Status)
+	} else {
+		return resp, nil
 	}
-
-	return resp, nil
 }
 
 // CheckRedirect add extra check func for 302 or 301 redirect.

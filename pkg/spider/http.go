@@ -2,7 +2,6 @@ package spider
 
 import (
 	"encoding/json"
-	"fmt"
 	"mime"
 	"net"
 	"net/http"
@@ -61,11 +60,11 @@ func GenerateUrl(base string, paths ...string) string {
 	return builder.String()
 }
 
-// WrapTimeOut would convert the timeout error with a better prefix in error message.
-func WrapTimeOut(err error) error {
+// IsTimeOut would check if the request timeout.
+func IsTimeOut(err error) bool {
 	if timeoutErr, ok := err.(net.Error); ok && timeoutErr.Timeout() {
-		return fmt.Errorf("timeout %v", timeoutErr)
+		return true
+	} else {
+		return false
 	}
-
-	return err
 }

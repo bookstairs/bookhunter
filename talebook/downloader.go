@@ -62,11 +62,13 @@ func (worker *downloadWorker) Download() {
 				err = worker.downloadBook(bookID, info.Book.Title, file.Format, file.Href)
 				if err == nil {
 					break
-				}
-
-				// Log the error after last try.
-				if i == worker.retry-1 {
-					log.Fatal(err)
+				} else if spider.IsTimeOut(err) {
+					if i == worker.retry-1 {
+						log.Fatal(err)
+					}
+					continue
+				} else {
+					break
 				}
 			}
 		}
@@ -108,7 +110,7 @@ func (worker *downloadWorker) downloadBook(bookID int64, title, format, href str
 
 	resp, err := worker.client.Get(site, "")
 	if err != nil {
-		return spider.WrapTimeOut(err)
+		return err
 	}
 	defer func() { _ = resp.Body.Close() }()
 
@@ -150,7 +152,7 @@ func (worker *downloadWorker) downloadBook(bookID int64, title, format, href str
 	// Write file content
 	_, err = io.Copy(io.MultiWriter(writer, bar), resp.Body)
 	if err != nil {
-		return spider.WrapTimeOut(err)
+		return err
 	}
 
 	return nil
