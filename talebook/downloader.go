@@ -2,14 +2,11 @@ package talebook
 
 import (
 	"errors"
-	"fmt"
 	"io"
-	"net/http"
 	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
-	"sync"
 
 	"github.com/bibliolater/bookhunter/pkg/log"
 	"github.com/bibliolater/bookhunter/pkg/progress"
@@ -20,9 +17,8 @@ import (
 // downloadWorker is the download instance.
 type downloadWorker struct {
 	website      string
-	wait         *sync.WaitGroup
 	progress     *progress.Progress
-	client       *http.Client
+	client       *spider.Client
 	userAgent    string
 	retry        int
 	downloadPath string
@@ -53,7 +49,7 @@ func (worker *downloadWorker) Download() {
 		}
 
 		if info == nil {
-			log.Infof("[%d/%d] Book with ID %d is not exist on target website.", bookID, worker.progress.Size(), bookID)
+			log.Warnf("[%d/%d] Book with ID %d is not exist on target website.", bookID, worker.progress.Size(), bookID)
 			worker.downloadedBook(bookID)
 			continue
 		}
@@ -77,9 +73,6 @@ func (worker *downloadWorker) Download() {
 
 		worker.downloadedBook(bookID)
 	}
-
-	// Finish this download worker
-	worker.wait.Done()
 }
 
 // downloadedBook would record the download statue into storage.
@@ -113,21 +106,11 @@ func (worker *downloadWorker) downloadBook(bookID int64, title, format, href str
 		site = spider.GenerateUrl(worker.website, href)
 	}
 
-	req, err := http.NewRequest(http.MethodGet, site, http.NoBody)
-	if err != nil {
-		return fmt.Errorf("illegal book download request: %w", err)
-	}
-
-	req.Header.Set("User-Agent", worker.userAgent)
-	resp, err := worker.client.Do(req)
+	resp, err := worker.client.Get(site, "")
 	if err != nil {
 		return spider.WrapTimeOut(err)
 	}
-
 	defer func() { _ = resp.Body.Close() }()
-	if resp.StatusCode != http.StatusOK {
-		return errors.New(resp.Status)
-	}
 
 	// Generate file name.
 	filename := strconv.FormatInt(bookID, 10) + "." + strings.ToLower(format)
@@ -177,22 +160,11 @@ func (worker *downloadWorker) downloadBook(bookID int64, title, format, href str
 func (worker *downloadWorker) queryBookInfo(bookID int64) (*BookResponse, error) {
 	site := spider.GenerateUrl(worker.website, "/api/book", strconv.FormatInt(bookID, 10))
 
-	req, err := http.NewRequest(http.MethodGet, site, http.NoBody)
+	resp, err := worker.client.Get(site, "")
 	if err != nil {
 		return nil, err
 	}
-
-	req.Header.Set("User-Agent", worker.userAgent)
-
-	resp, err := worker.client.Do(req)
-	if err != nil {
-		return nil, err
-	}
-
 	defer func() { _ = resp.Body.Close() }()
-	if resp.StatusCode != http.StatusOK {
-		return nil, errors.New(resp.Status)
-	}
 
 	result := &BookResponse{}
 	if err := spider.DecodeResponse(resp, result); err != nil {

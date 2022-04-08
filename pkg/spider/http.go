@@ -2,7 +2,6 @@ package spider
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"mime"
 	"net"
@@ -11,10 +10,9 @@ import (
 )
 
 const (
-	DefaultUserAgent = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.51 Safari/537.36"
+	HTTP  = "http://"
+	HTTPS = "https://"
 )
-
-var ErrNeedSignin = errors.New("need user account to download books")
 
 // DecodeResponse would parse the http response into a json based content.
 func DecodeResponse(resp *http.Response, data any) (err error) {
@@ -44,20 +42,20 @@ func GenerateUrl(base string, paths ...string) string {
 	url := strings.TrimRight(base, "/")
 
 	// Add schema prefix
-	if !strings.HasPrefix(url, "http://") && !strings.HasPrefix(url, "https://") {
-		url = "http://" + url
+	if !strings.HasPrefix(url, HTTPS) && !strings.HasPrefix(url, HTTP) {
+		url = HTTP + url
 	}
 
 	var builder strings.Builder
 	builder.WriteString(url)
 
 	// Join request path.
-	for _, path := range paths {
-		path = strings.TrimRight(path, "/")
-		if !strings.HasPrefix(path, "/") {
+	for _, p := range paths {
+		p = strings.TrimRight(p, "/")
+		if !strings.HasPrefix(p, "/") {
 			builder.WriteString("/")
 		}
-		builder.WriteString(path)
+		builder.WriteString(p)
 	}
 
 	return builder.String()

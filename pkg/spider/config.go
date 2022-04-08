@@ -1,13 +1,24 @@
 package spider
 
 import (
+	"errors"
 	"os"
+	"strings"
 	"time"
 
+	"github.com/jedib0t/go-pretty/v6/table"
 	"github.com/spf13/cobra"
 
 	"github.com/bibliolater/bookhunter/pkg/log"
 )
+
+var (
+	ErrInitialBookID = errors.New("illegal book id, it should exceed 0")
+	ErrRetryTimes    = errors.New("illegal retry times, it should exceed 0")
+	ErrThreadCounts  = errors.New("illegal download thread counts, it should exceed 0")
+)
+
+const DefaultUserAgent = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.51 Safari/537.36"
 
 type DownloadConfig struct {
 	Website       string        // The website for talebook.
@@ -22,6 +33,7 @@ type DownloadConfig struct {
 	Retry         int           // The maximum retry times for a timeout request.
 	UserAgent     string        // The user agent for the download request.
 	Rename        bool          // Rename the file by using book ID.
+	Thread        int           // The number of download thread.
 }
 
 // NewDownloadConfig will return a default blank config.
@@ -41,6 +53,7 @@ func NewDownloadConfig() *DownloadConfig {
 		Retry:         5,
 		UserAgent:     DefaultUserAgent,
 		Rename:        false,
+		Thread:        1,
 	}
 }
 
@@ -63,4 +76,24 @@ func BindDownloadArgs(command *cobra.Command, config *DownloadConfig) {
 	command.Flags().IntVarP(&config.Retry, "retry", "r", config.Retry, "The max retry times for timeout download request.")
 	command.Flags().StringVarP(&config.UserAgent, "user-agent", "a", config.UserAgent, "Set User-Agent for download request.")
 	command.Flags().BoolVarP(&config.Rename, "rename", "n", config.Rename, "Rename the book file by book ID.")
+}
+
+// ValidateDownloadConfig would print the final download config table.
+func ValidateDownloadConfig(config *DownloadConfig) {
+	if config.InitialBookID < 1 {
+		log.Fatal(ErrInitialBookID)
+	}
+	if config.Retry < 1 {
+		log.Fatal(ErrRetryTimes)
+	}
+	for i, format := range config.Formats {
+		// Make sure all the format should be upper case.
+		config.Formats[i] = strings.ToUpper(format)
+	}
+	if config.Thread < 1 {
+		log.Fatal(ErrThreadCounts)
+	}
+
+	// Print download configuration.
+	log.PrintTable("Download Config Info", table.Row{"Config Key", "Config Value"}, config)
 }

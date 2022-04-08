@@ -1,10 +1,6 @@
 package talebook
 
 import (
-	"net/http"
-	"net/url"
-	"strings"
-
 	"github.com/jedib0t/go-pretty/v6/table"
 	"github.com/spf13/cobra"
 
@@ -55,36 +51,29 @@ func register() {
 	// Print download configuration.
 	log.PrintTable("Register Config Info", table.Row{"Config Key", "Config Value"}, &regConf)
 
-	// Create register request.
+	// Create http client.
+	config := spider.NewDownloadConfig()
+	config.UserAgent = regConf.userAgent
+	client := spider.NewClient(config)
+
 	website := spider.GenerateUrl(regConf.website, "/api/user/sign_up")
 	referer := spider.GenerateUrl(regConf.website, "/signup")
-	values := url.Values{
-		"username": {regConf.username},
-		"password": {regConf.password},
-		"nickname": {regConf.username},
-		"email":    {regConf.email},
+	form := spider.Form{
+		spider.Field{Key: "username", Value: regConf.username},
+		spider.Field{Key: "password", Value: regConf.password},
+		spider.Field{Key: "nickname", Value: regConf.username},
+		spider.Field{Key: "email", Value: regConf.email},
 	}
 
-	req, err := http.NewRequest(http.MethodPost, website, strings.NewReader(values.Encode()))
-	if err != nil {
-		log.Fatal("Illegal login request: %w", err)
-	}
-	req.Header.Set("User-Agent", regConf.userAgent)
-	req.Header.Set("referer", referer)
-	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-
-	form, err := http.DefaultClient.Do(req)
+	// Get http get response
+	resp, err := client.FormPost(website, referer, form)
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	defer func() { _ = form.Body.Close() }()
-	if form.StatusCode != http.StatusOK {
-		log.Fatalf("Error in register user, message: %s", form.Status)
-	}
+	defer func() { _ = resp.Body.Close() }()
 
 	result := &talebook.CommonResponse{}
-	if err = spider.DecodeResponse(form, result); err != nil {
+	if err := spider.DecodeResponse(resp, result); err != nil {
 		log.Fatal(err)
 	}
 

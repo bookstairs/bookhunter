@@ -2,50 +2,44 @@ package talebook
 
 import (
 	"errors"
-	"fmt"
 	"net/http"
-	"net/url"
 	"path"
-	"strings"
 
 	"github.com/bibliolater/bookhunter/pkg/log"
 	"github.com/bibliolater/bookhunter/pkg/progress"
 	"github.com/bibliolater/bookhunter/pkg/spider"
 )
 
+var ErrNeedSignin = errors.New("need user account to download books")
+
 // NewDownloader will create the download instance.
 func NewDownloader(c *spider.DownloadConfig) *downloadWorker {
-	// Create cookiejar.
-	cookieFile := path.Join(c.DownloadPath, c.CookieFile)
-	cookieJar, err := spider.NewCookieJar(cookieFile)
-	if err != nil {
-		log.Fatal(err)
-	}
-
 	// Create common http client.
-	client := &http.Client{Jar: cookieJar, Timeout: c.Timeout}
+	client := spider.NewClient(c)
 
 	// Disable login redirect.
 	loginUrl := spider.GenerateUrl(c.Website, "/login")
-	client.CheckRedirect = func(req *http.Request, via []*http.Request) error {
-		if req.URL.String() == loginUrl {
-			return spider.ErrNeedSignin
-		}
+	client.CheckRedirect(
+		func(req *http.Request, via []*http.Request) error {
+			if req.URL.String() == loginUrl {
+				return ErrNeedSignin
+			}
 
-		// Allow 10 redirects by default.
-		if len(via) >= 10 {
-			return errors.New("stopped after 10 redirects")
-		}
-		return nil
-	}
+			// Allow 10 redirects by default.
+			if len(via) >= 10 {
+				return errors.New("stopped after 10 redirects")
+			}
+			return nil
+		},
+	)
 
 	// Try to signin if required.
-	if err := login(c.Username, c.Password, c.Website, c.UserAgent, client); err != nil {
+	if err := login(c.Username, c.Password, c.Website, client); err != nil {
 		log.Fatal(err)
 	}
 
 	// Try to find last book ID.
-	last, err := lastBookID(c.Website, c.UserAgent, client)
+	last, err := lastBookID(c.Website, client)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -73,7 +67,7 @@ func NewDownloader(c *spider.DownloadConfig) *downloadWorker {
 
 // login to the given website by username and password. We will save the cookie into file.
 // Thus, you don't need to signin twice.
-func login(username, password, website, userAgent string, client *http.Client) error {
+func login(username, password, website string, client *spider.Client) error {
 	if username == "" || password == "" {
 		// No need to login.
 		return nil
@@ -83,31 +77,19 @@ func login(username, password, website, userAgent string, client *http.Client) e
 
 	site := spider.GenerateUrl(website, "/api/user/sign_in")
 	referer := spider.GenerateUrl(website, "/login")
-	values := url.Values{
-		"username": {username},
-		"password": {password},
+	form := spider.Form{
+		spider.Field{Key: "username", Value: username},
+		spider.Field{Key: "password", Value: password},
 	}
 
-	req, err := http.NewRequest(http.MethodPost, site, strings.NewReader(values.Encode()))
-	if err != nil {
-		return fmt.Errorf("illegal login request: %w", err)
-	}
-	req.Header.Set("User-Agent", userAgent)
-	req.Header.Set("referer", referer)
-	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-
-	form, err := client.Do(req)
+	resp, err := client.FormPost(site, referer, form)
 	if err != nil {
 		return err
 	}
-
-	defer func() { _ = form.Body.Close() }()
-	if form.StatusCode != http.StatusOK {
-		return errors.New(form.Status)
-	}
+	defer func() { _ = resp.Body.Close() }()
 
 	result := &LoginResponse{}
-	if err := spider.DecodeResponse(form, result); err != nil {
+	if err := spider.DecodeResponse(resp, result); err != nil {
 		return err
 	}
 
@@ -120,26 +102,15 @@ func login(username, password, website, userAgent string, client *http.Client) e
 }
 
 // lastBookID will return the last available book ID.
-func lastBookID(website, userAgent string, client *http.Client) (int64, error) {
+func lastBookID(website string, client *spider.Client) (int64, error) {
 	site := spider.GenerateUrl(website, "/api/recent")
 	referer := spider.GenerateUrl(website, "/recent")
 
-	req, err := http.NewRequest(http.MethodGet, site, http.NoBody)
-	if err != nil {
-		return 0, fmt.Errorf("illegal book id request: %w", err)
-	}
-	req.Header.Set("User-Agent", userAgent)
-	req.Header.Set("referer", referer)
-
-	resp, err := client.Do(req)
+	resp, err := client.Get(site, referer)
 	if err != nil {
 		return 0, err
 	}
-
 	defer func() { _ = resp.Body.Close() }()
-	if resp.StatusCode != http.StatusOK {
-		return 0, errors.New(resp.Status)
-	}
 
 	result := &BookListResponse{}
 	if err := spider.DecodeResponse(resp, result); err != nil {

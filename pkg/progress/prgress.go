@@ -72,6 +72,13 @@ func NewProgress(start, size int64, path string) (*Progress, error) {
 
 		// Recalculate start index.
 		startIndex(progress)
+
+		// Support book update, increase the progress size.
+		if progress.Len() < uint(size) {
+			p := bitset.New(uint(size))
+			progress.Copy(p)
+			progress = p
+		}
 	}
 
 	assigned := bitset.New(progress.Len())
