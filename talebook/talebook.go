@@ -23,7 +23,6 @@ type downloadWorker struct {
 	website      string
 	progress     *progress.Progress
 	client       *spider.Client
-	userAgent    string
 	retry        int
 	downloadPath string
 	formats      []string
@@ -31,7 +30,7 @@ type downloadWorker struct {
 }
 
 // NewDownloader will create the download instance.
-func NewDownloader(c *spider.DownloadConfig) *downloadWorker {
+func NewDownloader(c *spider.Config) *downloadWorker {
 	// Create common http client.
 	client := spider.NewClient(c)
 
@@ -57,7 +56,7 @@ func NewDownloader(c *spider.DownloadConfig) *downloadWorker {
 	}
 
 	// Try to find last book ID.
-	last, err := lastBookID(c.Website, client)
+	last, err := latestBookID(c.Website, client)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -75,7 +74,6 @@ func NewDownloader(c *spider.DownloadConfig) *downloadWorker {
 		website:      c.Website,
 		progress:     p,
 		client:       client,
-		userAgent:    c.UserAgent,
 		retry:        c.Retry,
 		downloadPath: c.DownloadPath,
 		formats:      c.Formats,
@@ -119,8 +117,8 @@ func login(username, password, website string, client *spider.Client) error {
 	return nil
 }
 
-// lastBookID will return the last available book ID.
-func lastBookID(website string, client *spider.Client) (int64, error) {
+// latestBookID will return the last available book ID.
+func latestBookID(website string, client *spider.Client) (int64, error) {
 	site := spider.GenerateUrl(website, "/api/recent")
 	referer := spider.GenerateUrl(website, "/recent")
 
@@ -155,7 +153,7 @@ func lastBookID(website string, client *spider.Client) (int64, error) {
 
 // Download would start download books from given website.
 func (worker *downloadWorker) Download() {
-	log.Infof("Start to download book.")
+	log.Info("Start to download book.")
 
 	// Try to acquire book ID from storage.
 	for bookID := worker.progress.AcquireBookID(); bookID != progress.NoBookToDownload; bookID = worker.progress.AcquireBookID() {
@@ -184,18 +182,13 @@ func (worker *downloadWorker) Download() {
 		// Find formats to download.
 		for _, file := range info.Book.Files {
 			for i := 0; i < worker.retry; i++ {
-				var err error
-
-				err = worker.downloadBook(bookID, info.Book.Title, file.Format, file.Href)
+				err := worker.downloadBook(bookID, info.Book.Title, file.Format, file.Href)
 				if err == nil {
 					break
-				} else if spider.IsTimeOut(err) {
-					if i == worker.retry-1 {
-						log.Fatal(err)
-					}
+				} else if spider.IsTimeOut(err) && i <= worker.retry {
 					continue
 				} else {
-					break
+					log.Fatal(err)
 				}
 			}
 		}
@@ -204,10 +197,28 @@ func (worker *downloadWorker) Download() {
 	}
 }
 
-// downloadedBook would record the download statue into storage.
-func (worker *downloadWorker) downloadedBook(bookID int64) {
-	if err := worker.progress.SaveBookID(bookID); err != nil {
-		log.Fatal(err)
+// queryBookInfo will find the required book information.
+func (worker *downloadWorker) queryBookInfo(bookID int64) (*BookResponse, error) {
+	site := spider.GenerateUrl(worker.website, "/api/book", strconv.FormatInt(bookID, 10))
+
+	resp, err := worker.client.Get(site, "")
+	if err != nil {
+		return nil, err
+	}
+	defer func() { _ = resp.Body.Close() }()
+
+	result := &BookResponse{}
+	if err := spider.DecodeResponse(resp, result); err != nil {
+		return nil, err
+	}
+
+	switch result.Err {
+	case SuccessStatus:
+		return result, nil
+	case BookNotFoundStatus:
+		return nil, nil
+	default:
+		return nil, errors.New(result.Msg)
 	}
 }
 
@@ -274,7 +285,7 @@ func (worker *downloadWorker) downloadBook(bookID int64, title, format, href str
 	defer func() { _ = writer.Close() }()
 
 	// Add download progress
-	bar := log.NewProgressBar(bookID, worker.lastBookID(), format+" "+title, resp.ContentLength)
+	bar := log.NewProgressBar(bookID, worker.progress.Size(), format+" "+title, resp.ContentLength)
 
 	// Write file content
 	_, err = io.Copy(io.MultiWriter(writer, bar), resp.Body)
@@ -285,32 +296,9 @@ func (worker *downloadWorker) downloadBook(bookID int64, title, format, href str
 	return nil
 }
 
-// queryBookInfo will find the required book information.
-func (worker *downloadWorker) queryBookInfo(bookID int64) (*BookResponse, error) {
-	site := spider.GenerateUrl(worker.website, "/api/book", strconv.FormatInt(bookID, 10))
-
-	resp, err := worker.client.Get(site, "")
-	if err != nil {
-		return nil, err
+// downloadedBook would record the download statue into storage.
+func (worker *downloadWorker) downloadedBook(bookID int64) {
+	if err := worker.progress.SaveBookID(bookID); err != nil {
+		log.Fatal(err)
 	}
-	defer func() { _ = resp.Body.Close() }()
-
-	result := &BookResponse{}
-	if err := spider.DecodeResponse(resp, result); err != nil {
-		return nil, err
-	}
-
-	switch result.Err {
-	case SuccessStatus:
-		return result, nil
-	case BookNotFoundStatus:
-		return nil, nil
-	default:
-		return nil, errors.New(result.Msg)
-	}
-}
-
-// lastBookID will return the last book's ID
-func (worker *downloadWorker) lastBookID() int64 {
-	return worker.progress.Size()
 }

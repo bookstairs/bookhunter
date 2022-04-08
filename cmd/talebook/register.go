@@ -52,7 +52,7 @@ func register() {
 	log.PrintTable("Register Config Info", table.Row{"Config Key", "Config Value"}, &regConf)
 
 	// Create http client.
-	config := spider.NewDownloadConfig()
+	config := spider.NewConfig()
 	config.UserAgent = regConf.userAgent
 	client := spider.NewClient(config)
 

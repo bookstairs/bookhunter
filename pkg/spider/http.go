@@ -21,6 +21,17 @@ func DecodeResponse(resp *http.Response, data any) (err error) {
 	return
 }
 
+// Extension the file extension from the link or file name.
+func Extension(link string) string {
+	end := strings.LastIndex(link, "?")
+	if end >= 0 {
+		link = link[:end]
+	}
+	start := strings.LastIndex(link, ".") + 1
+
+	return strings.ToLower(link[start:])
+}
+
 // Filename parse the file name from Content-Disposition header.
 // If there is no such head, we would return blank string.
 func Filename(resp *http.Response) (name string) {

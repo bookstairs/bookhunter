@@ -9,7 +9,7 @@ import (
 )
 
 // Used for downloading books from sanqiu website.
-var c = spider.NewDownloadConfig()
+var c = spider.NewConfig()
 
 // sanqiuCmd used for download books from sanqiu.com
 var sanqiuCmd = &cobra.Command{
@@ -22,8 +22,15 @@ var sanqiuCmd = &cobra.Command{
 		// Create the downloader
 		downloader := sanqiu.NewDownloader(c)
 
-		// Start download books.
-		downloader.Download()
+		for i := 0; i < c.Thread; i++ {
+			// Create a thread.
+			downloader.Fork()
+			// Download books in this thread.
+			go downloader.Download()
+		}
+
+		// Wait all the thread have finished.
+		downloader.Join()
 
 		// Finished all the tasks.
 		log.Info("Successfully download all the books.")

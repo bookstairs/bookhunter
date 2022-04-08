@@ -20,7 +20,7 @@ var (
 
 const DefaultUserAgent = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.51 Safari/537.36"
 
-type DownloadConfig struct {
+type Config struct {
 	Website       string        // The website for talebook.
 	Username      string        // The login user.
 	Password      string        // The password for login user.
@@ -36,14 +36,14 @@ type DownloadConfig struct {
 	Thread        int           // The number of download thread.
 }
 
-// NewDownloadConfig will return a default blank config.
-func NewDownloadConfig() *DownloadConfig {
+// NewConfig will return a default blank config.
+func NewConfig() *Config {
 	dir, err := os.Getwd()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	return &DownloadConfig{
+	return &Config{
 		DownloadPath:  dir,
 		CookieFile:    "cookies",
 		ProgressFile:  "progress",
@@ -58,7 +58,7 @@ func NewDownloadConfig() *DownloadConfig {
 }
 
 // BindDownloadArgs will bind the download arguments to cobra command.
-func BindDownloadArgs(command *cobra.Command, config *DownloadConfig) {
+func BindDownloadArgs(command *cobra.Command, config *Config) {
 	command.Flags().StringVarP(&config.DownloadPath, "download", "d", config.DownloadPath,
 		"The book directory you want to use, default would be current working directory.")
 
@@ -79,7 +79,7 @@ func BindDownloadArgs(command *cobra.Command, config *DownloadConfig) {
 }
 
 // ValidateDownloadConfig would print the final download config table.
-func ValidateDownloadConfig(config *DownloadConfig) {
+func ValidateDownloadConfig(config *Config) {
 	if config.InitialBookID < 1 {
 		log.Fatal(ErrInitialBookID)
 	}

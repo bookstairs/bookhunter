@@ -13,7 +13,13 @@ import (
 
 type Client struct {
 	client *http.Client
-	config *DownloadConfig
+	config *Config
+}
+
+// Query used for get
+type Query struct {
+	Key   string
+	Value string
 }
 
 // Form used for post
@@ -24,7 +30,7 @@ type Field struct {
 }
 
 // NewClient would create a client with persisted cookie file.
-func NewClient(config *DownloadConfig) *Client {
+func NewClient(config *Config) *Client {
 	// Create cookiejar.
 	cookieFile := path.Join(config.DownloadPath, config.CookieFile)
 	cookieJar, err := NewCookieJar(cookieFile)
@@ -37,10 +43,18 @@ func NewClient(config *DownloadConfig) *Client {
 }
 
 // Get would perform http get.
-func (s *Client) Get(link, referer string) (*http.Response, error) {
+func (s *Client) Get(link, referer string, params ...*Query) (*http.Response, error) {
 	req, err := http.NewRequest(http.MethodGet, link, http.NoBody)
 	if err != nil {
 		return nil, err
+	}
+
+	if len(params) > 0 {
+		query := req.URL.Query()
+		for _, param := range params {
+			query.Add(param.Key, param.Value)
+		}
+		req.URL.RawQuery = query.Encode()
 	}
 
 	return s.request(req, referer)

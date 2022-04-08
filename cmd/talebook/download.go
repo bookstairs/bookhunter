@@ -9,7 +9,7 @@ import (
 )
 
 // Used for downloading books from talebook website.
-var downloadConfig = spider.NewDownloadConfig()
+var downloadConfig = spider.NewConfig()
 
 // DownloadCmd represents the download command
 var DownloadCmd = &cobra.Command{
