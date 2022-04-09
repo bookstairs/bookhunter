@@ -125,6 +125,10 @@ func (d *downloader) Download() {
 				log.Fatal(err)
 			}
 
+			if len(links) == 0 {
+				log.Warnf("[%d/%d] No downloadable links found, this resource could be banned.", bookID, d.progress.Size())
+			}
+
 			for _, l := range links {
 				for i := 0; i < d.retry; i++ {
 					err := d.downloadBook(metadata, l)

@@ -96,6 +96,8 @@ func resolveTelegram(client *Client, url, passcode, shareId, fileId string, resu
 		}
 
 		return nil
+	} else if strings.Trim(content, " ") == "" {
+		return nil
 	} else {
 		return errors.New(content)
 	}
