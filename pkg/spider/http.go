@@ -5,6 +5,7 @@ import (
 	"mime"
 	"net"
 	"net/http"
+	"net/url"
 	"strings"
 )
 
@@ -36,6 +37,7 @@ func Extension(link string) string {
 // If there is no such head, we would return blank string.
 func Filename(resp *http.Response) (name string) {
 	if disposition := resp.Header.Get("Content-Disposition"); disposition != "" {
+		disposition, _ = url.QueryUnescape(disposition)
 		if _, params, err := mime.ParseMediaType(disposition); err == nil {
 			if filename, ok := params["filename"]; ok {
 				name = filename
@@ -49,15 +51,15 @@ func Filename(resp *http.Response) (name string) {
 // GenerateUrl would remove the "/" suffix and add schema prefix to url.
 func GenerateUrl(base string, paths ...string) string {
 	// Remove suffix
-	url := strings.TrimRight(base, "/")
+	l := strings.TrimRight(base, "/")
 
 	// Add schema prefix
-	if !strings.HasPrefix(url, HTTPS) && !strings.HasPrefix(url, HTTP) {
-		url = HTTP + url
+	if !strings.HasPrefix(l, HTTPS) && !strings.HasPrefix(l, HTTP) {
+		l = HTTP + l
 	}
 
 	var builder strings.Builder
-	builder.WriteString(url)
+	builder.WriteString(l)
 
 	// Join request path.
 	for _, p := range paths {
