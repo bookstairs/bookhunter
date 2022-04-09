@@ -126,7 +126,7 @@ func (storage *Progress) SaveBookID(bookID int64) error {
 	storage.lock.Lock()
 	defer storage.lock.Unlock()
 
-	if bookID >= int64(storage.progress.Len()) {
+	if bookID > int64(storage.progress.Len()) {
 		return errors.New(fmt.Sprintf("invalid book id: %d", bookID))
 	}
 
