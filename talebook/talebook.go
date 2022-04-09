@@ -153,10 +153,11 @@ func latestBookID(website string, client *spider.Client) (int64, error) {
 
 // Download would start download books from given website.
 func (worker *downloadWorker) Download() {
-	log.Info("Start to download book.")
+	bookID := worker.progress.AcquireBookID()
+	log.Infof("Start to download book from %d.", bookID)
 
 	// Try to acquire book ID from storage.
-	for bookID := worker.progress.AcquireBookID(); bookID != progress.NoBookToDownload; bookID = worker.progress.AcquireBookID() {
+	for ; bookID != progress.NoBookToDownload; bookID = worker.progress.AcquireBookID() {
 		// Acquire book info.
 		var info *BookResponse
 		for i := 0; i < worker.retry; i++ {

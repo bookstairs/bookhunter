@@ -3,6 +3,8 @@ package log
 import (
 	"fmt"
 	"os"
+	"runtime/debug"
+	"strings"
 	"time"
 
 	"github.com/k0kubun/go-ansi"
@@ -13,49 +15,66 @@ var (
 	ansiStdout = ansi.NewAnsiStdout()
 )
 
+const (
+	info  = "[green][INFO][reset]"
+	warn  = "[yellow][WARN][reset]"
+	fatal = "[red][Fatal][reset]"
+)
+
 // Infof would print the log with in info level.
 func Infof(format string, v ...any) {
-	printLog("[green][INFO][reset]", fmt.Sprintf(format, v...))
+	printLog(info, fmt.Sprintf(format, v...))
 }
 
 // Info would print the log with in info level.
 func Info(v ...any) {
-	printLog("[green][INFO][reset]", formatArgs(v...))
+	printLog(info, formatArgs(v...))
 }
 
 // Warnf would print the log with in warn level.
 func Warnf(format string, v ...any) {
-	printLog("[yellow][WARN][reset]", fmt.Sprintf(format, v...))
+	printLog(warn, fmt.Sprintf(format, v...))
 }
 
 // Warn would print the log with in warn level.
 func Warn(v ...any) {
-	printLog("[green][INFO][reset]", formatArgs(v...))
+	printLog(warn, formatArgs(v...))
 }
 
 // Fatalf would print the log with in fatal level. And exit the program.
 func Fatalf(format string, v ...any) {
-	printLog("[red][Fatal][reset]", fmt.Sprintf(format, v...))
+	printLog(fatal, fmt.Sprintf(format, v...))
+	printStack()
 	os.Exit(-1)
 }
 
 // Fatal would print the log with in fatal level. And exit the program.
 func Fatal(v ...any) {
-	printLog("[green][INFO][reset]", formatArgs(v...))
+	printLog(fatal, formatArgs(v...))
+	printStack()
 	os.Exit(-1)
 }
 
-// printLog would print a colorful log level and log time.
-func printLog(level, log string) {
-	_, _ = fmt.Fprintln(ansiStdout, logTime(), colorstring.Color(level), log)
+// printStack is a hard coded stack trace, we will pick out the main cause of the application.
+func printStack() {
+	cause := strings.Split(string(debug.Stack()), "\n")[8]
+	cause = strings.TrimLeft(cause, "\t")
+
+	printLog("[red][Fatal][reset]", "Cause: "+cause)
 }
 
+// formatArgs will format all the arguments.
 func formatArgs(args ...any) string {
 	if len(args) == 0 {
 		return ""
 	} else {
 		return fmt.Sprint(args...)
 	}
+}
+
+// printLog would print a colorful log level and log time.
+func printLog(level, log string) {
+	_, _ = fmt.Fprintln(ansiStdout, logTime(), colorstring.Color(level), log)
 }
 
 // logTime will print the current time

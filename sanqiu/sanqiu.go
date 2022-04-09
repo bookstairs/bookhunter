@@ -105,10 +105,11 @@ func (d *downloader) Fork() {
 
 // Download would start download books from given website.
 func (d *downloader) Download() {
-	log.Info("Start to download book.")
+	bookID := d.progress.AcquireBookID()
+	log.Infof("Start to download book from %d.", bookID)
 
 	// Try to acquire book ID from storage.
-	for bookID := d.progress.AcquireBookID(); bookID != progress.NoBookToDownload; bookID = d.progress.AcquireBookID() {
+	for ; bookID != progress.NoBookToDownload; bookID = d.progress.AcquireBookID() {
 		// Acquire book metadata from website.
 		metadata := d.bookMetadata(bookID)
 		if metadata == nil {
