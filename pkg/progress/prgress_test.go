@@ -11,7 +11,7 @@ func tempFile() string {
 	return path.Join(tempDir, "acquire-book-id")
 }
 
-func TestStorage_AcquireBookID(t *testing.T) {
+func TestProgress_AcquireBookID(t *testing.T) {
 	file := tempFile()
 	defer func() { _ = os.Remove(file) }()
 
@@ -28,7 +28,7 @@ func TestStorage_AcquireBookID(t *testing.T) {
 	}
 }
 
-func TestStorage_SaveBookID(t *testing.T) {
+func TestProgress_SaveBookID(t *testing.T) {
 	file := tempFile()
 	defer func() { _ = os.Remove(file) }()
 
