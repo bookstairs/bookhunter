@@ -3,8 +3,6 @@ package log
 import (
 	"fmt"
 	"os"
-	"runtime/debug"
-	"strings"
 	"time"
 
 	"github.com/k0kubun/go-ansi"
@@ -44,23 +42,13 @@ func Warn(v ...any) {
 // Fatalf would print the log with in fatal level. And exit the program.
 func Fatalf(format string, v ...any) {
 	printLog(fatal, fmt.Sprintf(format, v...))
-	printStack()
 	os.Exit(-1)
 }
 
 // Fatal would print the log with in fatal level. And exit the program.
 func Fatal(v ...any) {
 	printLog(fatal, formatArgs(v...))
-	printStack()
 	os.Exit(-1)
-}
-
-// printStack is a hard coded stack trace, we will pick out the main cause of the application.
-func printStack() {
-	cause := strings.Split(string(debug.Stack()), "\n")[8]
-	cause = strings.TrimLeft(cause, "\t")
-
-	printLog("[red][Fatal][reset]", "Cause: "+cause)
 }
 
 // formatArgs will format all the arguments.
