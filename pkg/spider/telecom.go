@@ -10,10 +10,10 @@ import (
 const telecomAPI = "https://api.noki.top/pan/cloud189/shareToDown"
 
 var archiveFormats = []string{
-	"zip",
-	"tar",
-	"gz",
-	"rar",
+	"ZIP",
+	"TAR",
+	"GZ",
+	"RAR",
 }
 
 type TelecomResponse struct {
@@ -82,15 +82,17 @@ func resolveTelegram(client *Client, url, passcode, shareId, fileId string, resu
 				return err
 			}
 		}
+
 		return nil
 	} else if strings.HasPrefix(content, "http") {
 		// This is a download link. We won't filter the format.
-		ext := Extension(content)
-		if exts, ok := results[ext]; ok {
-			exts = append(exts, content)
-			results[ext] = exts
+		format := strings.ToUpper(Extension(content))
+
+		if links, ok := results[format]; ok {
+			links = append(links, content)
+			results[format] = links
 		} else {
-			results[ext] = []string{content}
+			results[format] = []string{content}
 		}
 
 		return nil

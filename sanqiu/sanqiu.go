@@ -139,6 +139,9 @@ func (d *downloader) Download() {
 		} else {
 			log.Warnf("[%d/%d] Book with ID %d don't have telecom link, skip.", bookID, d.progress.Size(), bookID)
 		}
+
+		// Finished the book download.
+		d.downloadedBook(bookID)
 	}
 
 	d.wait.Done()
