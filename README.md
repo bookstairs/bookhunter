@@ -1,7 +1,7 @@
 # bookhunter
 
 Downloading books from [talebook](https://github.com/talebook/talebook), [www.sanqiu.cc](https://www.sanqiu.cc/)
-This is totally rewrite fork compare to its [original version](https://github.com/hellojukay/bookhunter).
+This is totally rewrite fork compare to its [original version](https://github.com/hellojukay/dl-talebook).
 
 ## Feature
 
