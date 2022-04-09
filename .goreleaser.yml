@@ -52,7 +52,7 @@ brews:
     license: "MIT"
     install: |
       bin.install "bookhunter"
-    post_install: |
+
       # Install shell completions
       output = Utils.safe_popen_read("#{bin}/bookhunter", "completion", "bash")
       (bash_completion/"goreleaser").write output
