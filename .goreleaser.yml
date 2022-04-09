@@ -55,13 +55,13 @@ brews:
 
       # Install shell completions
       output = Utils.safe_popen_read("#{bin}/bookhunter", "completion", "bash")
-      (bash_completion/"goreleaser").write output
+      (bash_completion/"bookhunter").write output
 
       output = Utils.safe_popen_read("#{bin}/bookhunter", "completion", "zsh")
-      (zsh_completion/"_goreleaser").write output
+      (zsh_completion/"_bookhunter").write output
 
       output = Utils.safe_popen_read("#{bin}/bookhunter", "completion", "fish")
-      (fish_completion/"goreleaser.fish").write output
+      (fish_completion/"bookhunter.fish").write output
     test: |
       system "#{bin}/bookhunter -v"
 
