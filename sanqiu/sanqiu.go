@@ -1,7 +1,9 @@
 package sanqiu
 
 import (
+	"errors"
 	"io"
+	"net/http"
 	"os"
 	"path"
 	"path/filepath"
@@ -39,6 +41,13 @@ type downloader struct {
 func NewDownloader(config *spider.Config) *downloader {
 	// Create common http client.
 	client := spider.NewClient(config)
+	client.CheckRedirect(func(req *http.Request, via []*http.Request) error {
+		// Allow 10 redirects by default.
+		if len(via) >= 10 {
+			return errors.New("stopped after 10 redirects")
+		}
+		return nil
+	})
 
 	// Get last book ID
 	last, err := latestBookID(client)
