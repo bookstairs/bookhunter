@@ -63,7 +63,7 @@ brews:
       output = Utils.safe_popen_read("#{bin}/bookhunter", "completion", "fish")
       (fish_completion/"bookhunter.fish").write output
     test: |
-      system "#{bin}/bookhunter -v"
+      system "#{bin}/bookhunter version"
 
 checksum:
   name_template: 'checksums.txt'
