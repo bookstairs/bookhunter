@@ -3,7 +3,6 @@ package spider
 import (
 	"encoding/json"
 	"mime"
-	"net"
 	"net/http"
 	"net/url"
 	"strings"
@@ -71,13 +70,4 @@ func GenerateUrl(base string, paths ...string) string {
 	}
 
 	return builder.String()
-}
-
-// IsTimeOut would check if the request timeout.
-func IsTimeOut(err error) bool {
-	if timeoutErr, ok := err.(net.Error); ok && timeoutErr.Timeout() {
-		return true
-	} else {
-		return false
-	}
 }

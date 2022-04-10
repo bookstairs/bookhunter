@@ -43,7 +43,7 @@ func NewClient(config *Config) *Client {
 }
 
 // Get would perform http get.
-func (s *Client) Get(link, referer string, params ...*Query) (*http.Response, error) {
+func (c *Client) Get(link, referer string, params ...*Query) (*http.Response, error) {
 	req, err := http.NewRequest(http.MethodGet, link, http.NoBody)
 	if err != nil {
 		return nil, err
@@ -57,11 +57,11 @@ func (s *Client) Get(link, referer string, params ...*Query) (*http.Response, er
 		req.URL.RawQuery = query.Encode()
 	}
 
-	return s.request(req, referer)
+	return c.request(req, referer)
 }
 
 // FormPost would post with form-url-encoded.
-func (s *Client) FormPost(link, referer string, form Form) (*http.Response, error) {
+func (c *Client) FormPost(link, referer string, form Form) (*http.Response, error) {
 	// Prepare form data.
 	values := make(url.Values, len(form))
 	for _, field := range form {
@@ -82,30 +82,24 @@ func (s *Client) FormPost(link, referer string, form Form) (*http.Response, erro
 
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 
-	return s.request(req, referer)
+	return c.request(req, referer)
 }
 
 // request would perform the final request and check.
-func (s *Client) request(r *http.Request, referer string) (*http.Response, error) {
-	r.Header.Set("User-Agent", s.config.UserAgent)
+func (c *Client) request(r *http.Request, referer string) (*http.Response, error) {
+	r.Header.Set("User-Agent", c.config.UserAgent)
 	if referer != "" {
 		r.Header.Set("referer", referer)
 	}
 
 	var resp *http.Response
 
-	for i := 0; i < s.config.Retry; i++ {
-		var err error
-		if resp, err = s.client.Do(r); err != nil {
-			if IsTimeOut(err) {
-				// Retry the timeout request.
-				continue
-			} else {
-				return nil, err
-			}
-		}
-
-		break
+	err := c.Retry(func() (err error) {
+		resp, err = c.client.Do(r)
+		return err
+	})
+	if err != nil {
+		return nil, err
 	}
 
 	// Check http status code
@@ -119,6 +113,6 @@ func (s *Client) request(r *http.Request, referer string) (*http.Response, error
 }
 
 // CheckRedirect add extra check func for 302 or 301 redirect.
-func (s *Client) CheckRedirect(checkFunc func(req *http.Request, via []*http.Request) error) {
-	s.client.CheckRedirect = checkFunc
+func (c *Client) CheckRedirect(checkFunc func(req *http.Request, via []*http.Request) error) {
+	c.client.CheckRedirect = checkFunc
 }

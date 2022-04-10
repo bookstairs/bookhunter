@@ -183,12 +183,11 @@ func (worker *downloadWorker) Download() {
 		// Find formats to download.
 		for _, file := range info.Book.Files {
 			for i := 0; i < worker.retry; i++ {
-				err := worker.downloadBook(bookID, info.Book.Title, file.Format, file.Href)
-				if err == nil {
-					break
-				} else if spider.IsTimeOut(err) && i <= worker.retry {
-					continue
-				} else {
+				err := worker.client.Retry(func() error {
+					return worker.downloadBook(bookID, info.Book.Title, file.Format, file.Href)
+				})
+
+				if err != nil {
 					log.Fatal(err)
 				}
 			}

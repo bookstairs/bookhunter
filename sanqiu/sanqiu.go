@@ -139,15 +139,11 @@ func (d *downloader) Download() {
 			}
 
 			for _, l := range links {
-				for i := 0; i < d.retry; i++ {
-					err := d.downloadBook(metadata, l)
-					if err == nil {
-						break
-					} else if spider.IsTimeOut(err) && i < d.retry {
-						continue
-					} else {
-						log.Fatal(err)
-					}
+				err := d.client.Retry(func() error {
+					return d.downloadBook(metadata, l)
+				})
+				if err != nil {
+					log.Fatal(err)
 				}
 			}
 		} else {
