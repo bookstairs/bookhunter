@@ -8,6 +8,8 @@ import (
 	"github.com/bibliolater/bookhunter/sanqiu"
 )
 
+const lowestBookID = 163
+
 // Used for downloading books from sanqiu website.
 var c = spider.NewConfig()
 
@@ -16,10 +18,15 @@ var sanqiuCmd = &cobra.Command{
 	Use:   "sanqiu",
 	Short: "A tool for downloading books from sanqiu.com",
 	Run: func(cmd *cobra.Command, args []string) {
-		// Validate config
+		// Validate config.
 		spider.ValidateDownloadConfig(c)
 
-		// Create the downloader
+		// Set the default start index.
+		if c.InitialBookID < lowestBookID {
+			c.InitialBookID = lowestBookID
+		}
+
+		// Create the downloader.
 		downloader := sanqiu.NewDownloader(c)
 
 		for i := 0; i < c.Thread; i++ {
