@@ -16,7 +16,7 @@ var (
 const (
 	info  = "[green][INFO][reset]"
 	warn  = "[yellow][WARN][reset]"
-	fatal = "[red][Fatal][reset]"
+	fatal = "[red][fatal][reset]"
 )
 
 // Infof would print the log with in info level.
