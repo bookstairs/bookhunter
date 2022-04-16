@@ -35,7 +35,7 @@ var telegramCmd = &cobra.Command{
 		//}
 		//
 		//// Wait all the thread have finished.
-		downloader.Join()
+		//downloader.Join()
 
 		// Finished all the tasks.
 		log.Info("Successfully download all the books.")
