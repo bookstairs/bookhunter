@@ -195,10 +195,11 @@ func (d *downloader) startDownloads() error {
 				ChannelID:  channelInfo.ID,
 				AccessHash: channelInfo.AccessHash,
 			},
-			Filter:   &tg.InputMessagesFilterEmpty{},
-			Q:        "",
-			OffsetID: part.Offset,
-			Limit:    part.Limit,
+			Filter:    &tg.InputMessagesFilterEmpty{},
+			Q:         "",
+			OffsetID:  part.Offset,
+			Limit:     part.Limit,
+			AddOffset: -part.Limit,
 		})
 		if err != nil {
 			panic(err)

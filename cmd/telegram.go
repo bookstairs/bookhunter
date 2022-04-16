@@ -56,7 +56,7 @@ func init() {
 	telegramCmd.Flags().IntVar(&telegram.ChunkSize, "chunkSize", telegram.ChunkSize,
 		"The ChunkSize for download telegram. 4096 < ChunkSize < 512 * 1024")
 	telegramCmd.Flags().IntVar(&telegram.LoadMessageSize, "loadMessageSize", telegram.LoadMessageSize,
-		"The loadMessageSize is used to set the size of the number of messages obtained by requesting telegram API.")
+		"The loadMessageSize is used to set the size of the number of messages obtained by requesting telegram API. 0 < loadMessageSize < 100")
 
 	// Set common download config arguments.
 	spider.BindDownloadArgs(telegramCmd, d)
