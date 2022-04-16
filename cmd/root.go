@@ -13,7 +13,8 @@ var rootCmd = &cobra.Command{
 	Long: `You can use this command to download book from these websites.
 
 1. Self-hosted talebook websites
-2. https://www.sanqiu.cc`,
+2. https://www.sanqiu.cc
+3. Telegram channel`,
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
@@ -28,5 +29,6 @@ func Execute() {
 func init() {
 	rootCmd.AddCommand(talebookCmd)
 	rootCmd.AddCommand(sanqiuCmd)
+	rootCmd.AddCommand(telegramCmd)
 	rootCmd.AddCommand(versionCmd)
 }
