@@ -42,8 +42,6 @@ func init() {
 		"The appID for telegram.")
 	telegramCmd.Flags().StringVar(&telegram.AppHash, "appHash", telegram.AppHash,
 		"The appHash for telegram.")
-	telegramCmd.Flags().IntVar(&telegram.ChunkSize, "chunkSize", telegram.ChunkSize,
-		"The ChunkSize for download telegram. 4096 < ChunkSize < 512 * 1024")
 	telegramCmd.Flags().IntVar(&telegram.LoadMessageSize, "loadMessageSize", telegram.LoadMessageSize,
 		"The loadMessageSize is used to set the size of the number of messages obtained by requesting telegram API. 0 < loadMessageSize < 100")
 

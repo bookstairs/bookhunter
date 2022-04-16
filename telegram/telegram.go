@@ -32,7 +32,6 @@ var (
 	ReLogin         bool
 	AppID           int
 	AppHash         string
-	ChunkSize       = 512 * 1024
 	LoadMessageSize = 20
 	LastId          int
 )
