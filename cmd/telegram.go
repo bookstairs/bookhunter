@@ -26,17 +26,6 @@ var telegramCmd = &cobra.Command{
 		if err != nil {
 			panic(err)
 		}
-
-		//for i := 0; i < c.Thread; i++ {
-		//	// Create a thread.
-		//	downloader.Fork()
-		//	// Download books in this thread.
-		//	go downloader.Download()
-		//}
-		//
-		//// Wait all the thread have finished.
-		//downloader.Join()
-
 		// Finished all the tasks.
 		log.Info("Successfully download all the books.")
 	},

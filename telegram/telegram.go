@@ -56,6 +56,7 @@ type tgFile struct {
 	format       string
 	fileSize     int
 	documentFile *tg.InputDocumentFileLocation
+	savePath     string
 }
 
 func NewDownloader(config *spider.Config) *downloader {
@@ -131,15 +132,25 @@ func (d *downloader) Exec() error {
 		if err != nil {
 			return err
 		}
+		ch := make(chan tgFile, d.config.Thread)
 
-		err = d.startDownloads()
-		if err != nil {
-			return err
-		}
+		d.Fork()
+		go d.startDownloads(ch)
+
+		d.Fork()
+		go func() {
+			defer d.Done()
+			for entity := range ch {
+				d.Fork()
+				go d.DownloadFile(&entity)
+			}
+		}()
+
+		d.Join()
 		return nil
 	}
 	if err := d.client.Run(d.context, f); err != nil {
-		panic(err)
+		return err
 	}
 	return nil
 }
@@ -157,7 +168,9 @@ func (d *downloader) login() error {
 	return nil
 }
 
-func (d *downloader) startDownloads() error {
+func (d *downloader) startDownloads(ch chan tgFile) {
+	defer d.Done()
+	defer close(ch)
 
 	client := d.client
 	api := client.API()
@@ -208,7 +221,7 @@ func (d *downloader) startDownloads() error {
 		messages := history.(*tg.MessagesChannelMessages)
 		for i := range messages.Messages {
 			message := messages.Messages[len(messages.Messages)-i-1]
-			entity, ok := toFile(message)
+			entity, ok := toFile(message, saveDir)
 
 			if !ok {
 				log.Warnf("[%d/%d] No downloadable files found, this resource could be banned.", message.GetID(), last)
@@ -220,18 +233,16 @@ func (d *downloader) startDownloads() error {
 				continue
 			}
 
-			saveFilePath := path.Join(saveDir, rename.EscapeFilename(strconv.Itoa(entity.id)+"_"+entity.filename))
-			err := d.downloadFile(saveFilePath, entity)
-			if err != nil {
-				return err
-			}
+			//err := d.downloadFile(entity)
+			//if err != nil {
+			//	return err
+			//}
 			d.saveCurrentBookId(entity.id, last)
+			ch <- *entity
 		}
-
 	}
 
 	// Return to close client connection and free up resources.
-	return nil
 }
 
 func (d *downloader) saveCurrentBookId(current int, last int) {
@@ -243,10 +254,12 @@ func (d *downloader) saveCurrentBookId(current int, last int) {
 	}
 }
 
-func (d *downloader) downloadFile(saveFilePath string, entity *tgFile) error {
-	writer, err := os.Create(saveFilePath)
+func (d *downloader) DownloadFile(entity *tgFile) {
+	defer d.Done()
+
+	writer, err := os.Create(entity.savePath)
 	if err != nil {
-		return err
+		log.Fatal(err)
 	}
 	defer func() { _ = writer.Close() }()
 
@@ -262,20 +275,22 @@ func (d *downloader) downloadFile(saveFilePath string, entity *tgFile) error {
 			Precise:      false,
 		})
 		if err != nil {
-			panic(err)
+			log.Fatal(err)
 		}
 		resp := getFile.(*tg.UploadFile)
 		// Write file content
 		_, err = io.Copy(io.MultiWriter(writer, bar), bytes.NewReader(resp.Bytes))
 		if err != nil {
-			return err
+			log.Fatal(err)
 		}
-
 	}
-	return nil
+
+	//for entity := range ch {
+	//
+	//}
 }
 
-func toFile(message tg.MessageClass) (*tgFile, bool) {
+func toFile(message tg.MessageClass, dir string) (*tgFile, bool) {
 	if message == nil {
 		return nil, false
 	}
@@ -302,12 +317,14 @@ func toFile(message tg.MessageClass) (*tgFile, bool) {
 		return nil, false
 	}
 	format := spider.Extension(fileName)
+	saveFilePath := path.Join(dir, rename.EscapeFilename(strconv.Itoa(msg.ID)+"_"+fileName))
 	return &tgFile{
 		id:           msg.ID,
 		filename:     fileName,
 		format:       format,
 		fileSize:     document.Size,
 		documentFile: document.AsInputDocumentFileLocation(),
+		savePath:     saveFilePath,
 	}, true
 }
 
@@ -324,8 +341,7 @@ func (d *downloader) Fork() {
 	d.wait.Add(1)
 }
 
-// Download would start startDownloads books from given website.
-func (d *downloader) Download() {
+func (d *downloader) Done() {
 	d.wait.Done()
 }
 
