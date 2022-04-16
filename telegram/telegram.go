@@ -2,6 +2,7 @@ package telegram
 
 import (
 	"context"
+	"errors"
 	"github.com/bibliolater/bookhunter/pkg/progress"
 	"github.com/bibliolater/bookhunter/pkg/rename"
 	"github.com/gotd/contrib/middleware/floodwait"
@@ -166,7 +167,10 @@ func (d *downloader) login() error {
 	if err := d.client.Auth().IfNecessary(d.context, flow); err != nil {
 		return err
 	}
-
+	status, _ := d.client.Auth().Status(d.context)
+	if !status.Authorized {
+		return errors.New("login fail, Please use '--reLogin' login again")
+	}
 	log.Info("Login Success")
 	return nil
 }
