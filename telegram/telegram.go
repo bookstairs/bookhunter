@@ -1,20 +1,24 @@
 package telegram
 
 import (
-	"bytes"
 	"context"
 	"github.com/bibliolater/bookhunter/pkg/progress"
 	"github.com/bibliolater/bookhunter/pkg/rename"
+	"github.com/gotd/contrib/middleware/floodwait"
+	"github.com/gotd/contrib/middleware/ratelimit"
 	"github.com/gotd/td/session"
 	"github.com/gotd/td/telegram"
 	"github.com/gotd/td/telegram/auth"
+	downloader2 "github.com/gotd/td/telegram/downloader"
 	"github.com/gotd/td/tg"
+	"golang.org/x/time/rate"
 	"io"
 	"os"
 	"path"
 	"strconv"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/bibliolater/bookhunter/pkg/log"
 	"github.com/bibliolater/bookhunter/pkg/spider"
@@ -56,7 +60,7 @@ type tgFile struct {
 	format       string
 	fileSize     int
 	documentFile *tg.InputDocumentFileLocation
-	savePath     string
+	filePath     string
 }
 
 func NewDownloader(config *spider.Config) *downloader {
@@ -72,9 +76,12 @@ func NewDownloader(config *spider.Config) *downloader {
 		SessionStorage: &session.FileStorage{
 			Path: path.Join(config.DownloadPath, SessionPath),
 		},
+		Middlewares: []telegram.Middleware{
+			floodwait.NewSimpleWaiter().WithMaxRetries(10),
+			ratelimit.New(rate.Every(100*time.Millisecond), 5),
+		},
 	})
 	ChannelId = strings.TrimPrefix(ChannelId, "https://t.me/")
-
 	return &downloader{
 		channelId:    ChannelId,
 		config:       config,
@@ -117,11 +124,7 @@ func (d *downloader) latestBookID(info *tg.Channel) (int, error) {
 		if tmp == nil {
 			continue
 		}
-		msg, ok := tmp.(*tg.Message)
-		if !ok {
-			continue
-		}
-		lastID = msg.ID
+		lastID = tmp.GetID()
 	}
 	return lastID, nil
 }
@@ -132,20 +135,20 @@ func (d *downloader) Exec() error {
 		if err != nil {
 			return err
 		}
-		ch := make(chan tgFile, d.config.Thread)
+		ch := make(chan tgFile, LoadMessageSize)
 
 		d.Fork()
 		go d.startDownloads(ch)
 
-		d.Fork()
-		go func() {
-			defer d.Done()
-			for entity := range ch {
-				d.Fork()
-				go d.DownloadFile(&entity)
-			}
-		}()
-
+		for i := 0; i < d.config.Thread; i++ {
+			d.Fork()
+			go func() {
+				defer d.Done()
+				for item := range ch {
+					d.DownloadFile(&item)
+				}
+			}()
+		}
 		d.Join()
 		return nil
 	}
@@ -199,6 +202,34 @@ func (d *downloader) startDownloads(ch chan tgFile) {
 		}
 	}
 
+	//err = query.Messages(d.client.API()).Search(&tg.InputPeerChannel{
+	//	ChannelID:  channelInfo.ID,
+	//	AccessHash: channelInfo.AccessHash,
+	//}).OffsetID(d.config.InitialBookID).BatchSize(20).ForEach(d.context, func(ctx context.Context, elem messages.Elem) error {
+	//	message := elem.Msg.(*tg.Message)
+	//	entity, ok := d.toFile(message, saveDir)
+	//	if !ok {
+	//		log.Warnf("[%d/%d] No downloadable files found, this resource could be banned.", message.GetID(), last)
+	//		return nil
+	//	}
+	//	if !d.formatMatcher(entity.format) {
+	//		log.Warnf("[%d/%d] No match file format, this resource could be banned.", message.GetID(), last)
+	//		// Skip this format.
+	//		return nil
+	//	}
+	//
+	//	//err := d.downloadFile(entity)
+	//	//if err != nil {
+	//	//	return err
+	//	//}
+	//	d.saveCurrentBookId(entity.id, last)
+	//	ch <- *entity
+	//	return nil
+	//})
+	//if err != nil {
+	//	return
+	//}
+
 	// Shards that generate query messages
 	idParts := generatePart(d.config.InitialBookID, last-d.config.InitialBookID, 20)
 
@@ -221,7 +252,7 @@ func (d *downloader) startDownloads(ch chan tgFile) {
 		messages := history.(*tg.MessagesChannelMessages)
 		for i := range messages.Messages {
 			message := messages.Messages[len(messages.Messages)-i-1]
-			entity, ok := toFile(message, saveDir)
+			entity, ok := d.toFile(message, saveDir)
 
 			if !ok {
 				log.Warnf("[%d/%d] No downloadable files found, this resource could be banned.", message.GetID(), last)
@@ -255,42 +286,35 @@ func (d *downloader) saveCurrentBookId(current int, last int) {
 }
 
 func (d *downloader) DownloadFile(entity *tgFile) {
-	defer d.Done()
 
-	writer, err := os.Create(entity.savePath)
+	tool := downloader2.NewDownloader()
+
+	// Remove the exist file.
+	if _, err := os.Stat(entity.filePath); err == nil {
+		if err := os.Remove(entity.filePath); err != nil {
+			log.Fatal(err)
+		}
+	}
+	writer, err := os.Create(entity.filePath)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("create file err [%s]  %s", entity.filePath, err)
 	}
 	defer func() { _ = writer.Close() }()
 
-	fileParts := generatePart(0, entity.fileSize, ChunkSize)
+	thread := 1
+	if entity.fileSize/(512*1024) > d.config.Thread*4 {
+		thread = d.config.Thread
+	}
 	// Add startDownloads progress
 	bar := log.NewProgressBar(int64(entity.id), int64(LastId), entity.format+" "+entity.filename, int64(entity.fileSize))
-	for _, filePart := range fileParts {
-		getFile, err := d.client.API().UploadGetFile(d.context, &tg.UploadGetFileRequest{
-			Location:     entity.documentFile,
-			Limit:        filePart.Limit,
-			Offset:       filePart.Offset,
-			CDNSupported: false,
-			Precise:      false,
-		})
-		if err != nil {
-			log.Fatal(err)
-		}
-		resp := getFile.(*tg.UploadFile)
-		// Write file content
-		_, err = io.Copy(io.MultiWriter(writer, bar), bytes.NewReader(resp.Bytes))
-		if err != nil {
-			log.Fatal(err)
-		}
-	}
 
-	//for entity := range ch {
-	//
-	//}
+	_, err2 := tool.Download(d.client.API(), entity.documentFile).WithThreads(thread).Stream(d.context, io.MultiWriter(writer, bar))
+	if err2 != nil {
+		log.Fatal(err)
+	}
 }
 
-func toFile(message tg.MessageClass, dir string) (*tgFile, bool) {
+func (d *downloader) toFile(message tg.MessageClass, dir string) (*tgFile, bool) {
 	if message == nil {
 		return nil, false
 	}
@@ -317,14 +341,18 @@ func toFile(message tg.MessageClass, dir string) (*tgFile, bool) {
 		return nil, false
 	}
 	format := spider.Extension(fileName)
-	saveFilePath := path.Join(dir, rename.EscapeFilename(strconv.Itoa(msg.ID)+"_"+fileName))
+	outFilename := strconv.FormatInt(int64(msg.ID), 10) + "." + strings.ToLower(format)
+	if !d.rename {
+		outFilename = strconv.Itoa(msg.GetID()) + "_" + fileName
+	}
+	saveFilePath := path.Join(dir, rename.EscapeFilename(outFilename))
 	return &tgFile{
 		id:           msg.ID,
 		filename:     fileName,
 		format:       format,
 		fileSize:     document.Size,
 		documentFile: document.AsInputDocumentFileLocation(),
-		savePath:     saveFilePath,
+		filePath:     saveFilePath,
 	}, true
 }
 

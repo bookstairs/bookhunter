@@ -49,5 +49,5 @@ func init() {
 
 	// Set common download config arguments.
 	spider.BindDownloadArgs(telegramCmd, d)
-	telegramCmd.Flags().IntVarP(&c.Thread, "thread", "t", c.Thread, "The number of download threads.")
+	telegramCmd.Flags().IntVarP(&d.Thread, "thread", "t", d.Thread, "The number of download threads.")
 }
