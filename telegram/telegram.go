@@ -68,7 +68,7 @@ func NewDownloader(config *spider.Config) *tgDownloader {
 	if ReLogin {
 		err := os.Remove(path.Join(config.DownloadPath, SessionPath))
 		if err != nil {
-			panic(nil)
+			log.Fatal(err)
 		}
 	}
 
@@ -184,7 +184,7 @@ func (d *tgDownloader) startDownloads(ch chan tgFile) {
 
 	resolveUsername, err := api.ContactsResolveUsername(ctx, ChannelId)
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 	channelInfo := resolveUsername.Chats[0].(*tg.Channel)
 
@@ -221,7 +221,7 @@ func (d *tgDownloader) startDownloads(ch chan tgFile) {
 			AddOffset: -part.Limit,
 		})
 		if err != nil {
-			panic(err)
+			log.Fatal(err)
 		}
 
 		messages := history.(*tg.MessagesChannelMessages)

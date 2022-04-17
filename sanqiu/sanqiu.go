@@ -12,12 +12,11 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/bibliolater/bookhunter/pkg/rename"
-
 	"github.com/PuerkitoBio/goquery"
 
 	"github.com/bibliolater/bookhunter/pkg/log"
 	"github.com/bibliolater/bookhunter/pkg/progress"
+	"github.com/bibliolater/bookhunter/pkg/rename"
 	"github.com/bibliolater/bookhunter/pkg/spider"
 )
 
