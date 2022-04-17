@@ -5,11 +5,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"os"
+	"strings"
+
 	"github.com/gotd/td/telegram/auth"
 	"github.com/gotd/td/tg"
 	"golang.org/x/crypto/ssh/terminal"
-	"os"
-	"strings"
 )
 
 // noSignUp can be embedded to prevent signing up.
@@ -23,10 +24,9 @@ func (c noSignUp) AcceptTermsOfService(ctx context.Context, tos tg.HelpTermsOfSe
 	return &auth.SignUpRequired{TermsOfService: tos}
 }
 
-// termAuth implements authentication via terminal.
+// TermAuth implements authentication via terminal.
 type TermAuth struct {
 	noSignUp
-
 	phone string
 }
 

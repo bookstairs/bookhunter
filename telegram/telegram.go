@@ -3,16 +3,6 @@ package telegram
 import (
 	"context"
 	"errors"
-	"github.com/bibliolater/bookhunter/pkg/progress"
-	"github.com/bibliolater/bookhunter/pkg/rename"
-	"github.com/gotd/contrib/middleware/floodwait"
-	"github.com/gotd/contrib/middleware/ratelimit"
-	"github.com/gotd/td/session"
-	"github.com/gotd/td/telegram"
-	"github.com/gotd/td/telegram/auth"
-	downloader2 "github.com/gotd/td/telegram/downloader"
-	"github.com/gotd/td/tg"
-	"golang.org/x/time/rate"
 	"io"
 	"os"
 	"path"
@@ -20,6 +10,17 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/bibliolater/bookhunter/pkg/progress"
+	"github.com/bibliolater/bookhunter/pkg/rename"
+	"github.com/gotd/contrib/middleware/floodwait"
+	"github.com/gotd/contrib/middleware/ratelimit"
+	"github.com/gotd/td/session"
+	"github.com/gotd/td/telegram"
+	"github.com/gotd/td/telegram/auth"
+	tgdownloader "github.com/gotd/td/telegram/downloader"
+	"github.com/gotd/td/tg"
+	"golang.org/x/time/rate"
 
 	"github.com/bibliolater/bookhunter/pkg/log"
 	"github.com/bibliolater/bookhunter/pkg/spider"
@@ -64,7 +65,6 @@ type tgFile struct {
 }
 
 func NewDownloader(config *spider.Config) *downloader {
-
 	if ReLogin {
 		err := os.Remove(path.Join(config.DownloadPath, SessionPath))
 		if err != nil {
@@ -205,34 +205,6 @@ func (d *downloader) startDownloads(ch chan tgFile) {
 		}
 	}
 
-	//err = query.Messages(d.client.API()).Search(&tg.InputPeerChannel{
-	//	ChannelID:  channelInfo.ID,
-	//	AccessHash: channelInfo.AccessHash,
-	//}).OffsetID(d.config.InitialBookID).BatchSize(20).ForEach(d.context, func(ctx context.Context, elem messages.Elem) error {
-	//	message := elem.Msg.(*tg.Message)
-	//	entity, ok := d.toFile(message, saveDir)
-	//	if !ok {
-	//		log.Warnf("[%d/%d] No downloadable files found, this resource could be banned.", message.GetID(), last)
-	//		return nil
-	//	}
-	//	if !d.formatMatcher(entity.format) {
-	//		log.Warnf("[%d/%d] No match file format, this resource could be banned.", message.GetID(), last)
-	//		// Skip this format.
-	//		return nil
-	//	}
-	//
-	//	//err := d.downloadFile(entity)
-	//	//if err != nil {
-	//	//	return err
-	//	//}
-	//	d.saveCurrentBookId(entity.id, last)
-	//	ch <- *entity
-	//	return nil
-	//})
-	//if err != nil {
-	//	return
-	//}
-
 	// Shards that generate query messages
 	idParts := generatePart(d.config.InitialBookID, last-d.config.InitialBookID, 20)
 
@@ -266,17 +238,11 @@ func (d *downloader) startDownloads(ch chan tgFile) {
 				// Skip this format.
 				continue
 			}
-
-			//err := d.downloadFile(entity)
-			//if err != nil {
-			//	return err
-			//}
 			d.saveCurrentBookId(entity.id, last)
 			ch <- *entity
 		}
 	}
 
-	// Return to close client connection and free up resources.
 }
 
 func (d *downloader) saveCurrentBookId(current int, last int) {
@@ -290,7 +256,7 @@ func (d *downloader) saveCurrentBookId(current int, last int) {
 
 func (d *downloader) DownloadFile(entity *tgFile) {
 
-	tool := downloader2.NewDownloader()
+	tool := tgdownloader.NewDownloader()
 
 	// Remove the exist file.
 	if _, err := os.Stat(entity.filePath); err == nil {
@@ -398,7 +364,6 @@ func generatePart(start int, length int, step int) []filePart {
 			jobs[i].Offset = jobs[i-1].Offset + jobs[i-1].Limit
 		}
 		jobs[i].Limit = step
-		//log.Infof("part %d --> %d", jobs[i].Offset, jobs[i].Offset+jobs[i].Limit)
 	}
 	return jobs
 }

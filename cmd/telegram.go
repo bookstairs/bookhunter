@@ -24,7 +24,7 @@ var telegramCmd = &cobra.Command{
 
 		err := downloader.Exec()
 		if err != nil {
-			panic(err)
+			log.Fatal(err)
 		}
 		// Finished all the tasks.
 		log.Info("Successfully download all the books.")
