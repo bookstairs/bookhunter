@@ -46,7 +46,7 @@ Flags:
 ```
 
 Example command :
-`/bookhunter telegram --appId 12345 --appHash xxxxx -k https://t.me/MothLib`
+`bookhunter telegram --appId 12345 --appHash xxxxx -k https://t.me/MothLib`
 
 How to get `appId` and `appHash` please refer to  [Creating your Telegram Application](https://core.telegram.org/api/obtaining_api_id)
 
