@@ -11,18 +11,18 @@ import (
 	"sync"
 	"time"
 
-	"github.com/bibliolater/bookhunter/pkg/progress"
-	"github.com/bibliolater/bookhunter/pkg/rename"
 	"github.com/gotd/contrib/middleware/floodwait"
 	"github.com/gotd/contrib/middleware/ratelimit"
 	"github.com/gotd/td/session"
 	"github.com/gotd/td/telegram"
 	"github.com/gotd/td/telegram/auth"
-	tgdownloader "github.com/gotd/td/telegram/downloader"
+	"github.com/gotd/td/telegram/downloader"
 	"github.com/gotd/td/tg"
 	"golang.org/x/time/rate"
 
 	"github.com/bibliolater/bookhunter/pkg/log"
+	"github.com/bibliolater/bookhunter/pkg/progress"
+	"github.com/bibliolater/bookhunter/pkg/rename"
 	"github.com/bibliolater/bookhunter/pkg/spider"
 )
 
@@ -30,14 +30,14 @@ var (
 	// ChannelId for telegram.
 	ChannelId       = "https://t.me/haoshufenxiang"
 	SessionPath     = ".tg-session"
-	ReLogin         bool
-	AppID           int
-	AppHash         string
+	ReLogin         = false
+	AppID           = 0
+	AppHash         = ""
 	LoadMessageSize = 20
-	LastId          int
+	LastId          = 0
 )
 
-type downloader struct {
+type tgDownloader struct {
 	config       *spider.Config
 	client       *telegram.Client
 	context      context.Context
@@ -64,7 +64,7 @@ type tgFile struct {
 	filePath     string
 }
 
-func NewDownloader(config *spider.Config) *downloader {
+func NewDownloader(config *spider.Config) *tgDownloader {
 	if ReLogin {
 		err := os.Remove(path.Join(config.DownloadPath, SessionPath))
 		if err != nil {
@@ -82,7 +82,7 @@ func NewDownloader(config *spider.Config) *downloader {
 		},
 	})
 	ChannelId = strings.TrimPrefix(ChannelId, "https://t.me/")
-	return &downloader{
+	return &tgDownloader{
 		channelId:    ChannelId,
 		config:       config,
 		client:       client,
@@ -96,7 +96,7 @@ func NewDownloader(config *spider.Config) *downloader {
 }
 
 // latestBookID will return the last available book ID.
-func (d *downloader) latestBookID(info *tg.Channel) (int, error) {
+func (d *tgDownloader) latestBookID(info *tg.Channel) (int, error) {
 	a := make([]tg.InputChannelClass, 1)
 	a[0] = &tg.InputChannel{
 		ChannelID:  info.ID,
@@ -129,7 +129,7 @@ func (d *downloader) latestBookID(info *tg.Channel) (int, error) {
 	return lastID, nil
 }
 
-func (d *downloader) Exec() error {
+func (d *tgDownloader) Exec() error {
 	f := func(ctx context.Context) error {
 		err := d.login()
 		if err != nil {
@@ -158,7 +158,7 @@ func (d *downloader) Exec() error {
 	return nil
 }
 
-func (d *downloader) login() error {
+func (d *tgDownloader) login() error {
 	flow := auth.NewFlow(
 		&TermAuth{},
 		auth.SendCodeOptions{},
@@ -174,7 +174,7 @@ func (d *downloader) login() error {
 	return nil
 }
 
-func (d *downloader) startDownloads(ch chan tgFile) {
+func (d *tgDownloader) startDownloads(ch chan tgFile) {
 	defer d.Done()
 	defer close(ch)
 
@@ -242,10 +242,9 @@ func (d *downloader) startDownloads(ch chan tgFile) {
 			ch <- *entity
 		}
 	}
-
 }
 
-func (d *downloader) saveCurrentBookId(saveDir string, current int, last int) {
+func (d *tgDownloader) saveCurrentBookId(saveDir string, current, last int) {
 	// Create book storage.
 	storageFile := path.Join(saveDir, d.config.ProgressFile)
 	_, err := progress.NewProgress(int64(current), int64(last), storageFile)
@@ -254,9 +253,8 @@ func (d *downloader) saveCurrentBookId(saveDir string, current int, last int) {
 	}
 }
 
-func (d *downloader) DownloadFile(entity *tgFile) {
-
-	tool := tgdownloader.NewDownloader()
+func (d *tgDownloader) DownloadFile(entity *tgFile) {
+	tool := downloader.NewDownloader()
 
 	// Remove the exist file.
 	if _, err := os.Stat(entity.filePath); err == nil {
@@ -266,7 +264,7 @@ func (d *downloader) DownloadFile(entity *tgFile) {
 	}
 	writer, err := os.Create(entity.filePath)
 	if err != nil {
-		log.Fatal("create file err [%s]  %s", entity.filePath, err)
+		log.Fatalf("create file err [%s]  %s", entity.filePath, err)
 	}
 	defer func() { _ = writer.Close() }()
 
@@ -283,7 +281,7 @@ func (d *downloader) DownloadFile(entity *tgFile) {
 	}
 }
 
-func (d *downloader) toFile(message tg.MessageClass, dir string) (*tgFile, bool) {
+func (d *tgDownloader) toFile(message tg.MessageClass, dir string) (*tgFile, bool) {
 	if message == nil {
 		return nil, false
 	}
@@ -306,7 +304,7 @@ func (d *downloader) toFile(message tg.MessageClass, dir string) (*tgFile, bool)
 			fileName = x.FileName
 		}
 	}
-	if len(fileName) == 0 {
+	if fileName == "" {
 		return nil, false
 	}
 	format := spider.Extension(fileName)
@@ -325,7 +323,7 @@ func (d *downloader) toFile(message tg.MessageClass, dir string) (*tgFile, bool)
 	}, true
 }
 
-func (d *downloader) formatMatcher(fileName string) bool {
+func (d *tgDownloader) formatMatcher(fileName string) bool {
 	for _, f := range d.config.Formats {
 		if strings.HasSuffix(fileName, strings.ToLower(f)) {
 			return true
@@ -334,25 +332,25 @@ func (d *downloader) formatMatcher(fileName string) bool {
 	return false
 }
 
-func (d *downloader) Fork() {
+func (d *tgDownloader) Fork() {
 	d.wait.Add(1)
 }
 
-func (d *downloader) Done() {
+func (d *tgDownloader) Done() {
 	d.wait.Done()
 }
 
-func (d *downloader) Join() {
+func (d *tgDownloader) Join() {
 	d.wait.Wait()
 }
 
-func generatePart(start int, length int, step int) []filePart {
+func generatePart(start, length, step int) []filePart {
 	eachSize := length / step
 	if eachSize == 0 {
 		eachSize = 1
 	}
 	if length%step > 0 {
-		eachSize = eachSize + 1
+		eachSize++
 	}
 	jobs := make([]filePart, eachSize)
 
@@ -368,8 +366,8 @@ func generatePart(start int, length int, step int) []filePart {
 	return jobs
 }
 
-func IsDir(path string) bool {
-	s, err := os.Stat(path)
+func IsDir(filePath string) bool {
+	s, err := os.Stat(filePath)
 	if err != nil {
 		return false
 	}
