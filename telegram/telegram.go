@@ -238,16 +238,16 @@ func (d *downloader) startDownloads(ch chan tgFile) {
 				// Skip this format.
 				continue
 			}
-			d.saveCurrentBookId(entity.id, last)
+			d.saveCurrentBookId(saveDir, entity.id, last)
 			ch <- *entity
 		}
 	}
 
 }
 
-func (d *downloader) saveCurrentBookId(current int, last int) {
+func (d *downloader) saveCurrentBookId(saveDir string, current int, last int) {
 	// Create book storage.
-	storageFile := path.Join(d.config.DownloadPath, d.config.ProgressFile)
+	storageFile := path.Join(saveDir, d.config.ProgressFile)
 	_, err := progress.NewProgress(int64(current), int64(last), storageFile)
 	if err != nil {
 		log.Fatal(err)
