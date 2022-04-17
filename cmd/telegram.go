@@ -39,9 +39,9 @@ func init() {
 	telegramCmd.Flags().BoolVar(&telegram.ReLogin, "reLogin", telegram.ReLogin,
 		"force re-login.")
 	telegramCmd.Flags().IntVar(&telegram.AppID, "appId", telegram.AppID,
-		"The appID for telegram.")
+		"The appID for telegram. How to get `appId` please refer to https://core.telegram.org/api/obtaining_api_id")
 	telegramCmd.Flags().StringVar(&telegram.AppHash, "appHash", telegram.AppHash,
-		"The appHash for telegram.")
+		"The appHash for telegram. How to get `appHash` please refer to https://core.telegram.org/api/obtaining_api_id")
 	telegramCmd.Flags().IntVar(&telegram.LoadMessageSize, "loadMessageSize", telegram.LoadMessageSize,
 		"The loadMessageSize is used to set the size of the number of messages obtained by requesting telegram API. 0 < loadMessageSize < 100")
 

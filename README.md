@@ -23,7 +23,32 @@ TODO
 
 ### Download books from my Telegram groups.
 
-TODO
+```
+Usage:
+  bookhunter telegram [flags]
+
+Flags:
+      --appHash string        The appHash for telegram.
+      --appId int             The appID for telegram.
+  -k, --channelId string      The channelId for telegram. You must set value. (default "https://t.me/haoshufenxiang")
+  -d, --download string       The book directory you want to use, default would be current working directory. (default "/Users/zhaojianyun/Developer/project/github/bookhunter")
+  -f, --format strings        The file formats you want to download. (default [EPUB,MOBI,PDF])
+  -h, --help                  help for telegram
+  -i, --initial int           The book id you want to start download. It should exceed 0. (default 1)
+      --loadMessageSize int   The loadMessageSize is used to set the size of the number of messages obtained by requesting telegram API. 0 < loadMessageSize < 100 (default 20)
+  -g, --progress string       The download progress file name you want to use, it would be saved under the download directory. (default "progress")
+      --reLogin               force re-login.
+  -n, --rename                Rename the book file by book ID.
+  -r, --retry int             The max retry times for timeout download request. (default 5)
+  -s, --sessionPath string    The session file for telegram. (default ".tg-session")
+  -t, --thread int            The number of download threads. (default 1)
+  -o, --timeout duration      The max pending time for download request. (default 10m0s)
+```
+
+Example command :
+`/bookhunter telegram --appId 12345 --appHash xxxxx -k https://t.me/MothLib`
+
+How to get `appId` and `appHash` please refer to  [Creating your Telegram Application](https://core.telegram.org/api/obtaining_api_id)
 
 ## Install
 
