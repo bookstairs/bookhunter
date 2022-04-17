@@ -77,7 +77,7 @@ func NewDownloader(config *spider.Config) *downloader {
 			Path: path.Join(config.DownloadPath, SessionPath),
 		},
 		Middlewares: []telegram.Middleware{
-			floodwait.NewSimpleWaiter().WithMaxRetries(10),
+			floodwait.NewSimpleWaiter().WithMaxRetries(uint(config.Retry)),
 			ratelimit.New(rate.Every(100*time.Millisecond), 5),
 		},
 	})
