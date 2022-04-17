@@ -32,18 +32,19 @@ var telegramCmd = &cobra.Command{
 }
 
 func init() {
-	telegramCmd.Flags().StringVarP(&telegram.ChannelId, "channelId", "k", telegram.ChannelId,
-		"The channelId for telegram. You must set value.")
-	telegramCmd.Flags().StringVarP(&telegram.SessionPath, "sessionPath", "s", telegram.SessionPath,
-		"The session file for telegram.")
-	telegramCmd.Flags().BoolVar(&telegram.ReLogin, "reLogin", telegram.ReLogin,
-		"force re-login.")
-	telegramCmd.Flags().IntVar(&telegram.AppID, "appId", telegram.AppID,
+	telegramCmd.Flags().StringVarP(&telegram.ChannelId, "channelId", "k", "", "The channelId for telegram.")
+	telegramCmd.Flags().StringVarP(&telegram.SessionPath, "sessionPath", "s", telegram.SessionPath, "The session file for telegram.")
+	telegramCmd.Flags().BoolVar(&telegram.ReLogin, "reLogin", telegram.ReLogin, "Force re-login.")
+	telegramCmd.Flags().IntVar(&telegram.AppID, "appId", 0,
 		"The appID for telegram. How to get `appId` please refer to https://core.telegram.org/api/obtaining_api_id")
-	telegramCmd.Flags().StringVar(&telegram.AppHash, "appHash", telegram.AppHash,
+	telegramCmd.Flags().StringVar(&telegram.AppHash, "appHash", "",
 		"The appHash for telegram. How to get `appHash` please refer to https://core.telegram.org/api/obtaining_api_id")
 	telegramCmd.Flags().IntVar(&telegram.LoadMessageSize, "loadMessageSize", telegram.LoadMessageSize,
 		"The loadMessageSize is used to set the size of the number of messages obtained by requesting telegram API. 0 < loadMessageSize < 100")
+
+	_ = telegramCmd.MarkFlagRequired("channelId")
+	_ = telegramCmd.MarkFlagRequired("appId")
+	_ = telegramCmd.MarkFlagRequired("appHash")
 
 	// Set common download config arguments.
 	spider.BindDownloadArgs(telegramCmd, d)
