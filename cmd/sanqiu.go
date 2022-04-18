@@ -49,7 +49,7 @@ var sanqiuCmd = &cobra.Command{
 }
 
 func init() {
-	sanqiuCmd.Flags().StringVarP(&c.Website, "website", "w", sanqiu.SanqiuWebsite,
+	sanqiuCmd.Flags().StringVarP(&c.Website, "website", "w", sanqiu.DefaultWebsite,
 		"The website for sanqiu. You don't need to override the default url.")
 
 	// Set common download config arguments.
