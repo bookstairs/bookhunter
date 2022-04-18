@@ -28,14 +28,10 @@ var (
 )
 
 type downloader struct {
-	config       *spider.Config
-	progress     *progress.Progress
-	client       *spider.Client
-	retry        int
-	downloadPath string
-	formats      []string
-	rename       bool
-	wait         *sync.WaitGroup
+	config   *spider.Config
+	progress *progress.Progress
+	client   *spider.Client
+	wait     *sync.WaitGroup
 }
 
 func NewDownloader(config *spider.Config) *downloader {
@@ -64,14 +60,10 @@ func NewDownloader(config *spider.Config) *downloader {
 	}
 
 	return &downloader{
-		config:       config,
-		progress:     p,
-		client:       client,
-		retry:        config.Retry,
-		downloadPath: config.DownloadPath,
-		formats:      config.Formats,
-		rename:       config.Rename,
-		wait:         new(sync.WaitGroup),
+		config:   config,
+		progress: p,
+		client:   client,
+		wait:     new(sync.WaitGroup),
 	}
 }
 
@@ -108,12 +100,21 @@ func latestBookID(client *spider.Client, config *spider.Config) (int64, error) {
 	return int64(lastID), nil
 }
 
+// Fork a running instance.
 func (d *downloader) Fork() {
 	d.wait.Add(1)
+	go d.download()
 }
 
-// Download would start download books from given website.
-func (d *downloader) Download() {
+// Join will wait all the running instance be finished.
+func (d *downloader) Join() {
+	d.wait.Wait()
+}
+
+// download would start download books from given website.
+func (d *downloader) download() {
+	defer d.wait.Done()
+
 	bookID := d.progress.AcquireBookID()
 	log.Infof("Start to download book from %d.", bookID)
 
@@ -129,7 +130,7 @@ func (d *downloader) Download() {
 
 		// Download books from telecom
 		if link, ok := metadata.Links[TELECOM]; ok {
-			links, err := spider.ResolveTelecom(d.client, link.Url, link.Code, d.formats...)
+			links, err := spider.ResolveTelecom(d.client, link.Url, link.Code, d.config.Formats...)
 			if err != nil {
 				log.Fatal(err)
 			}
@@ -153,12 +154,6 @@ func (d *downloader) Download() {
 		// Finished the book download.
 		d.downloadedBook(bookID)
 	}
-
-	d.wait.Done()
-}
-
-func (d *downloader) Join() {
-	d.wait.Wait()
 }
 
 // downloadBook would download the book to saving path.
@@ -172,7 +167,7 @@ func (d *downloader) downloadBook(meta *BookMeta, link string) error {
 	// Generate file name.
 	format := spider.Extension(link)
 	filename := strconv.FormatInt(meta.Id, 10) + "." + strings.ToLower(format)
-	if !d.rename {
+	if !d.config.Rename {
 		name := spider.Filename(resp)
 		if name != "" {
 			filename = name
@@ -183,7 +178,7 @@ func (d *downloader) downloadBook(meta *BookMeta, link string) error {
 	filename = rename.EscapeFilename(filename)
 
 	// Generate the file path.
-	file := filepath.Join(d.downloadPath, filename)
+	file := filepath.Join(d.config.DownloadPath, filename)
 
 	// Remove the exist file.
 	if _, err := os.Stat(file); err == nil {

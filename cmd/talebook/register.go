@@ -49,7 +49,7 @@ func init() {
 // register will create account on given website
 func register() {
 	// Print download configuration.
-	log.PrintTable("Register Config Info", table.Row{"Config Key", "Config Value"}, &regConf)
+	log.PrintTable("Register Config Info", table.Row{"Config Key", "Config Value"}, &regConf, true)
 
 	// Create http client.
 	config := spider.NewConfig()

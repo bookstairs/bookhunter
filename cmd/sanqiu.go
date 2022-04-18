@@ -28,16 +28,14 @@ var sanqiuCmd = &cobra.Command{
 		}
 
 		// Print download configuration.
-		log.PrintTable("Download Config Info", table.Row{"Config Key", "Config Value"}, c)
+		log.PrintTable("Download Config Info", table.Row{"Config Key", "Config Value"}, c, false)
 
 		// Create the downloader.
 		downloader := sanqiu.NewDownloader(c)
 
 		for i := 0; i < c.Thread; i++ {
-			// Create a thread.
+			// Create a thread and download books in this thread.
 			downloader.Fork()
-			// Download books in this thread.
-			go downloader.Download()
 		}
 
 		// Wait all the thread have finished.

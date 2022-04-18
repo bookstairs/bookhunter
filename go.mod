@@ -13,7 +13,6 @@ require (
 	github.com/schollz/progressbar/v3 v3.8.6
 	github.com/spf13/cobra v1.4.0
 	golang.org/x/crypto v0.0.0-20220411220226-7b82a4e95df4
-	golang.org/x/time v0.0.0-20220411224347-583f2d630306
 )
 
 require (

@@ -1,6 +1,9 @@
 package cmd
 
 import (
+	"strings"
+
+	"github.com/jedib0t/go-pretty/v6/table"
 	"github.com/spf13/cobra"
 
 	"github.com/bibliolater/bookhunter/pkg/log"
@@ -9,7 +12,7 @@ import (
 )
 
 // Used for downloading books from telegram channel .
-var d = spider.NewConfig()
+var tc = telegram.NewConfig()
 
 // telegramCmd used for download books from telegram channel
 var telegramCmd = &cobra.Command{
@@ -17,36 +20,51 @@ var telegramCmd = &cobra.Command{
 	Short: "A tool for downloading books from telegram channel",
 	Run: func(cmd *cobra.Command, args []string) {
 		// Validate config
-		spider.ValidateDownloadConfig(d)
+		spider.ValidateDownloadConfig(tc.Config)
 
-		// Create the downloader
-		downloader := telegram.NewDownloader(d)
+		// Remove prefix.
+		tc.ChannelID = strings.TrimPrefix(tc.ChannelID, "https://t.me/")
 
-		err := downloader.Exec()
-		if err != nil {
-			log.Fatal(err)
+		// Add global zone in phone number.
+		tc.Mobile = telegram.AddCountryCode(tc.Mobile)
+
+		// Print download configuration.
+		log.PrintTable("Download Config Info", table.Row{"Config Key", "Config Value"}, tc, false)
+
+		// Create the downloader and download books.
+		downloader := telegram.NewDownloader(tc)
+
+		for i := 0; i < c.Thread; i++ {
+			// Create a thread and download books in this thread.
+			downloader.Fork()
 		}
+
+		// Wait all the thread have finished.
+		downloader.Join()
+
 		// Finished all the tasks.
-		log.Info("Successfully download all the books.")
+		log.Info("Successfully download all the telegram books.")
 	},
 }
 
 func init() {
-	telegramCmd.Flags().StringVarP(&telegram.ChannelID, "channelId", "k", "", "The channelId for telegram.")
-	telegramCmd.Flags().StringVarP(&telegram.SessionPath, "sessionPath", "s", telegram.SessionPath, "The session file for telegram.")
-	telegramCmd.Flags().BoolVar(&telegram.ReLogin, "reLogin", telegram.ReLogin, "Force re-login.")
-	telegramCmd.Flags().IntVar(&telegram.AppID, "appId", 0,
-		"The appID for telegram. How to get `appId` please refer to https://core.telegram.org/api/obtaining_api_id")
-	telegramCmd.Flags().StringVar(&telegram.AppHash, "appHash", "",
-		"The appHash for telegram. How to get `appHash` please refer to https://core.telegram.org/api/obtaining_api_id")
-	telegramCmd.Flags().IntVar(&telegram.LoadMessageSize, "loadMessageSize", telegram.LoadMessageSize,
-		"The loadMessageSize is used to set the size of the number of messages obtained by requesting telegram API. 0 < loadMessageSize < 100")
-
-	_ = telegramCmd.MarkFlagRequired("channelId")
-	_ = telegramCmd.MarkFlagRequired("appId")
-	_ = telegramCmd.MarkFlagRequired("appHash")
+	telegramCmd.Flags().StringVarP(&tc.ChannelID, "channelID", "k", "", "The channelId for telegram.")
+	telegramCmd.Flags().StringVarP(&tc.Mobile, "mobile", "b", "", "The mobile number for your telegram account, default (+86).")
+	telegramCmd.Flags().BoolVar(&tc.Refresh, "refresh", tc.Refresh, "Refresh the login session.")
+	telegramCmd.Flags().IntVar(&tc.AppID, "appID", 0,
+		"The appID for telegram. How to get `appID` please refer to https://core.telegram.org/api/obtaining_api_id.")
+	telegramCmd.Flags().StringVar(&tc.AppHash, "appHash", "",
+		"The appHash for telegram. How to get `appHash` please refer to https://core.telegram.org/api/obtaining_api_id.")
+	telegramCmd.Flags().StringVarP(&tc.CookieFile, "sessionPath", "s", tc.CookieFile, "The session file for telegram.")
 
 	// Set common download config arguments.
-	spider.BindDownloadArgs(telegramCmd, d)
-	telegramCmd.Flags().IntVarP(&d.Thread, "thread", "t", d.Thread, "The number of download threads.")
+	spider.BindDownloadArgs(telegramCmd, tc.Config)
+
+	// Support multiple thread download.
+	telegramCmd.Flags().IntVarP(&tc.Thread, "thread", "t", tc.Thread, "The number of download threads.")
+
+	// Bind the required arguments
+	_ = telegramCmd.MarkFlagRequired("channelID")
+	_ = telegramCmd.MarkFlagRequired("appID")
+	_ = telegramCmd.MarkFlagRequired("appHash")
 }

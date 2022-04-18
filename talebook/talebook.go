@@ -20,13 +20,9 @@ var ErrNeedSignin = errors.New("need user account to download books")
 
 // downloadWorker is the download instance.
 type downloadWorker struct {
-	website      string
-	progress     *progress.Progress
-	client       *spider.Client
-	retry        int
-	downloadPath string
-	formats      []string
-	rename       bool
+	progress *progress.Progress
+	client   *spider.Client
+	config   *spider.Config
 }
 
 // NewDownloader will create the download instance.
@@ -71,13 +67,9 @@ func NewDownloader(c *spider.Config) *downloadWorker {
 
 	// Create download worker
 	return &downloadWorker{
-		website:      c.Website,
-		progress:     p,
-		client:       client,
-		retry:        c.Retry,
-		downloadPath: c.DownloadPath,
-		formats:      c.Formats,
-		rename:       c.Rename,
+		progress: p,
+		client:   client,
+		config:   c,
 	}
 }
 
@@ -160,18 +152,13 @@ func (worker *downloadWorker) Download() {
 	for ; bookID != progress.NoBookToDownload; bookID = worker.progress.AcquireBookID() {
 		// Acquire book info.
 		var info *BookResponse
-		for i := 0; i < worker.retry; i++ {
+		err := worker.client.Retry(func() error {
 			var err error
-
 			info, err = worker.queryBookInfo(bookID)
-			if err == nil {
-				break
-			}
-
-			// Log the error after last try.
-			if i == worker.retry-1 {
-				log.Fatal(err)
-			}
+			return err
+		})
+		if err != nil {
+			log.Fatal(err)
 		}
 
 		if info == nil {
@@ -182,14 +169,11 @@ func (worker *downloadWorker) Download() {
 
 		// Find formats to download.
 		for _, file := range info.Book.Files {
-			for i := 0; i < worker.retry; i++ {
-				err := worker.client.Retry(func() error {
-					return worker.downloadBook(bookID, info.Book.Title, file.Format, file.Href)
-				})
-
-				if err != nil {
-					log.Fatal(err)
-				}
+			err := worker.client.Retry(func() error {
+				return worker.downloadBook(bookID, info.Book.Title, file.Format, file.Href)
+			})
+			if err != nil {
+				log.Fatal(err)
 			}
 		}
 
@@ -199,7 +183,7 @@ func (worker *downloadWorker) Download() {
 
 // queryBookInfo will find the required book information.
 func (worker *downloadWorker) queryBookInfo(bookID int64) (*BookResponse, error) {
-	site := spider.GenerateUrl(worker.website, "/api/book", strconv.FormatInt(bookID, 10))
+	site := spider.GenerateUrl(worker.config.Website, "/api/book", strconv.FormatInt(bookID, 10))
 
 	resp, err := worker.client.Get(site, "")
 	if err != nil {
@@ -225,7 +209,7 @@ func (worker *downloadWorker) queryBookInfo(bookID int64) (*BookResponse, error)
 // downloadBook will download the book file from
 func (worker *downloadWorker) downloadBook(bookID int64, title, format, href string) error {
 	valid := false
-	for _, f := range worker.formats {
+	for _, f := range worker.config.Formats {
 		if f == format {
 			valid = true
 			break
@@ -243,7 +227,7 @@ func (worker *downloadWorker) downloadBook(bookID int64, title, format, href str
 		// Backward API support.
 		site = href
 	} else {
-		site = spider.GenerateUrl(worker.website, href)
+		site = spider.GenerateUrl(worker.config.Website, href)
 	}
 
 	resp, err := worker.client.Get(site, "")
@@ -255,7 +239,7 @@ func (worker *downloadWorker) downloadBook(bookID int64, title, format, href str
 	// Generate file name.
 	filename := strconv.FormatInt(bookID, 10) + "." + strings.ToLower(format)
 	// Use readable name.
-	if !worker.rename {
+	if !worker.config.Rename {
 		name := spider.Filename(resp)
 		if name == "" {
 			filename = title + "." + strings.ToLower(format)
@@ -268,7 +252,7 @@ func (worker *downloadWorker) downloadBook(bookID int64, title, format, href str
 	filename = rename.EscapeFilename(filename)
 
 	// Generate the file path.
-	file := filepath.Join(worker.downloadPath, filename)
+	file := filepath.Join(worker.config.DownloadPath, filename)
 
 	// Remove the exist file.
 	if _, err := os.Stat(file); err == nil {
