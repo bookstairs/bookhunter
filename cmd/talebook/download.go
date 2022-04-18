@@ -21,7 +21,7 @@ var DownloadCmd = &cobra.Command{
 		spider.ValidateDownloadConfig(downloadConfig)
 
 		// Print download configuration.
-		log.PrintTable("Download Config Info", table.Row{"Config Key", "Config Value"}, downloadConfig)
+		log.PrintTable("Download Config Info", table.Row{"Config Key", "Config Value"}, downloadConfig, true)
 
 		// Create the downloader
 		downloader := talebook.NewDownloader(downloadConfig)

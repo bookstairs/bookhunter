@@ -28,7 +28,7 @@ var sanqiuCmd = &cobra.Command{
 		}
 
 		// Print download configuration.
-		log.PrintTable("Download Config Info", table.Row{"Config Key", "Config Value"}, c)
+		log.PrintTable("Download Config Info", table.Row{"Config Key", "Config Value"}, c, false)
 
 		// Create the downloader.
 		downloader := sanqiu.NewDownloader(c)

@@ -37,7 +37,7 @@ var versionCmd = &cobra.Command{
 	Use:   "version",
 	Short: "Return the bookhunter version info",
 	Run: func(cmd *cobra.Command, args []string) {
-		log.PrintTable("bookhunter version info", nil, &versionInfo)
+		log.PrintTable("bookhunter version info", nil, &versionInfo, true)
 	},
 }
 
