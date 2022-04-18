@@ -6,7 +6,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/jedib0t/go-pretty/v6/table"
 	"github.com/spf13/cobra"
 
 	"github.com/bibliolater/bookhunter/pkg/log"
@@ -93,7 +92,4 @@ func ValidateDownloadConfig(config *Config) {
 	if config.Thread < 1 {
 		log.Fatal(ErrThreadCounts)
 	}
-
-	// Print download configuration.
-	log.PrintTable("Download Config Info", table.Row{"Config Key", "Config Value"}, config)
 }

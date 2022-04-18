@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"github.com/jedib0t/go-pretty/v6/table"
 	"github.com/spf13/cobra"
 
 	"github.com/bibliolater/bookhunter/pkg/log"
@@ -26,6 +27,9 @@ var sanqiuCmd = &cobra.Command{
 			c.InitialBookID = lowestBookID
 		}
 
+		// Print download configuration.
+		log.PrintTable("Download Config Info", table.Row{"Config Key", "Config Value"}, c)
+
 		// Create the downloader.
 		downloader := sanqiu.NewDownloader(c)
 
@@ -45,7 +49,7 @@ var sanqiuCmd = &cobra.Command{
 }
 
 func init() {
-	sanqiuCmd.Flags().StringVarP(&sanqiu.Website, "website", "w", sanqiu.Website,
+	sanqiuCmd.Flags().StringVarP(&c.Website, "website", "w", sanqiu.SanqiuWebsite,
 		"The website for sanqiu. You don't need to override the default url.")
 
 	// Set common download config arguments.

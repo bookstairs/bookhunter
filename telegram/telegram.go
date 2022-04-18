@@ -27,8 +27,8 @@ import (
 )
 
 var (
-	// ChannelId for telegram.
-	ChannelId       = "https://t.me/haoshufenxiang"
+	// ChannelID for telegram.
+	ChannelID       = ""
 	SessionPath     = ".tg-session"
 	ReLogin         = false
 	AppID           = 0
@@ -81,9 +81,9 @@ func NewDownloader(config *spider.Config) *tgDownloader {
 			ratelimit.New(rate.Every(100*time.Millisecond), 5),
 		},
 	})
-	ChannelId = strings.TrimPrefix(ChannelId, "https://t.me/")
+	ChannelID = strings.TrimPrefix(ChannelID, "https://t.me/")
 	return &tgDownloader{
-		channelId:    ChannelId,
+		channelId:    ChannelID,
 		config:       config,
 		client:       client,
 		context:      context.Background(),
@@ -182,7 +182,7 @@ func (d *tgDownloader) startDownloads(ch chan tgFile) {
 	api := client.API()
 	ctx := d.context
 
-	resolveUsername, err := api.ContactsResolveUsername(ctx, ChannelId)
+	resolveUsername, err := api.ContactsResolveUsername(ctx, ChannelID)
 	if err != nil {
 		log.Fatal(err)
 	}

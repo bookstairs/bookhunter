@@ -59,7 +59,7 @@ linters:
     - goimports
     - goprintffuncname
     - gosec
-    - gosimple
+    # - gosimple
     - govet
     - ineffassign
     - lll
@@ -67,13 +67,13 @@ linters:
     - nakedret
     # - noctx
     - nolintlint
-    - staticcheck
+    # - staticcheck
     # - structcheck
     # - stylecheck
     - typecheck
     - unconvert
     # - unparam
-    - unused
+    # - unused
     - varcheck
     - whitespace
 

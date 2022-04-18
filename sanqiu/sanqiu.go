@@ -20,9 +20,10 @@ import (
 	"github.com/bibliolater/bookhunter/pkg/spider"
 )
 
+// DefaultWebsite is the website for sanqiu book.
+const DefaultWebsite = "https://www.sanqiu.cc"
+
 var (
-	// The Website for sanqiu.
-	Website  = "https://www.sanqiu.cc"
 	bookIDRe = regexp.MustCompile(".*?/(\\d+?).html")
 )
 
@@ -49,7 +50,7 @@ func NewDownloader(config *spider.Config) *downloader {
 	})
 
 	// Get last book ID
-	last, err := latestBookID(client)
+	last, err := latestBookID(client, config)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -75,8 +76,8 @@ func NewDownloader(config *spider.Config) *downloader {
 }
 
 // latestBookID will return the last available book ID.
-func latestBookID(client *spider.Client) (int64, error) {
-	resp, err := client.Get(Website, "")
+func latestBookID(client *spider.Client, config *spider.Config) (int64, error) {
+	resp, err := client.Get(config.Website, "")
 	if err != nil {
 		return 0, err
 	}

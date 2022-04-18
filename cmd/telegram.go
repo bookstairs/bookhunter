@@ -32,7 +32,7 @@ var telegramCmd = &cobra.Command{
 }
 
 func init() {
-	telegramCmd.Flags().StringVarP(&telegram.ChannelId, "channelId", "k", "", "The channelId for telegram.")
+	telegramCmd.Flags().StringVarP(&telegram.ChannelID, "channelId", "k", "", "The channelId for telegram.")
 	telegramCmd.Flags().StringVarP(&telegram.SessionPath, "sessionPath", "s", telegram.SessionPath, "The session file for telegram.")
 	telegramCmd.Flags().BoolVar(&telegram.ReLogin, "reLogin", telegram.ReLogin, "Force re-login.")
 	telegramCmd.Flags().IntVar(&telegram.AppID, "appId", 0,

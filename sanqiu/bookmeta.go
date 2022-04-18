@@ -45,8 +45,8 @@ type BookLink struct {
 
 // bookMetadata will find all the available books.
 func (d *downloader) bookMetadata(bookID int64) *BookMeta {
-	page := spider.GenerateUrl(Website, "/download.php?id="+strconv.FormatInt(bookID, 10))
-	referer := spider.GenerateUrl(Website, "/"+strconv.FormatInt(bookID, 10)+".html")
+	page := spider.GenerateUrl(d.config.Website, "/download.php?id="+strconv.FormatInt(bookID, 10))
+	referer := spider.GenerateUrl(d.config.Website, "/"+strconv.FormatInt(bookID, 10)+".html")
 
 	resp, err := d.client.Get(page, referer)
 	if err != nil {

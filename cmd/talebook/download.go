@@ -1,6 +1,7 @@
 package talebook
 
 import (
+	"github.com/jedib0t/go-pretty/v6/table"
 	"github.com/spf13/cobra"
 
 	"github.com/bibliolater/bookhunter/pkg/log"
@@ -18,6 +19,9 @@ var DownloadCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		// Validate config
 		spider.ValidateDownloadConfig(downloadConfig)
+
+		// Print download configuration.
+		log.PrintTable("Download Config Info", table.Row{"Config Key", "Config Value"}, downloadConfig)
 
 		// Create the downloader
 		downloader := talebook.NewDownloader(downloadConfig)
