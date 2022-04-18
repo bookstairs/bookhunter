@@ -3,6 +3,12 @@
 Downloading books from [talebook](https://github.com/talebook/talebook), [www.sanqiu.cc](https://www.sanqiu.cc/)
 This is totally rewrite fork compare to its [original version](https://github.com/hellojukay/dl-talebook).
 
+## Development
+
+1. [Go Releaser](https://github.com/goreleaser/goreleaser) is used for releasing and local building
+2. [golangci-lint](https://github.com/golangci/golangci-lint) is used for code style.
+3. [goimports-reviser](https://github.com/incu6us/goimports-reviser) is used for sorting imports.
+
 ## Feature
 
 ### Download books from Talebook
