@@ -8,6 +8,8 @@ import (
 	"github.com/gotd/contrib/middleware/floodwait"
 	"github.com/gotd/td/session"
 	"github.com/gotd/td/telegram"
+	"github.com/gotd/td/telegram/dcs"
+	"golang.org/x/net/proxy"
 
 	"github.com/bibliolater/bookhunter/pkg/log"
 )
@@ -41,6 +43,7 @@ func (e *executor) Execute(f func(context.Context, *telegram.Client) error) erro
 		e.config.AppID,
 		e.config.AppHash,
 		telegram.Options{
+			Resolver:       dcs.Plain(dcs.PlainOptions{Dial: proxy.Dial}),
 			SessionStorage: &session.FileStorage{Path: e.sessionPath},
 			Middlewares: []telegram.Middleware{
 				floodwait.NewSimpleWaiter().WithMaxRetries(uint(e.config.Retry)),
