@@ -38,13 +38,11 @@ func printField(t table.Writer, cv reflect.Value, allowZeroValue bool) {
 
 		if v.Kind() == reflect.Struct {
 			printField(t, v, allowZeroValue)
-		} else {
+		} else if allowZeroValue || !v.IsZero() {
 			// Print the field which doesn't have the zero value.
-			if allowZeroValue || !v.IsZero() {
-				field := cv.Type().Field(i)
-				value := v.Interface()
-				t.AppendRow(table.Row{field.Name, value})
-			}
+			field := cv.Type().Field(i)
+			value := v.Interface()
+			t.AppendRow(table.Row{field.Name, value})
 		}
 	}
 }
