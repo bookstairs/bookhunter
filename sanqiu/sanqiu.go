@@ -28,14 +28,10 @@ var (
 )
 
 type downloader struct {
-	config       *spider.Config
-	progress     *progress.Progress
-	client       *spider.Client
-	retry        int
-	downloadPath string
-	formats      []string
-	rename       bool
-	wait         *sync.WaitGroup
+	config   *spider.Config
+	progress *progress.Progress
+	client   *spider.Client
+	wait     *sync.WaitGroup
 }
 
 func NewDownloader(config *spider.Config) *downloader {
@@ -64,14 +60,10 @@ func NewDownloader(config *spider.Config) *downloader {
 	}
 
 	return &downloader{
-		config:       config,
-		progress:     p,
-		client:       client,
-		retry:        config.Retry,
-		downloadPath: config.DownloadPath,
-		formats:      config.Formats,
-		rename:       config.Rename,
-		wait:         new(sync.WaitGroup),
+		config:   config,
+		progress: p,
+		client:   client,
+		wait:     new(sync.WaitGroup),
 	}
 }
 
@@ -129,7 +121,7 @@ func (d *downloader) Download() {
 
 		// Download books from telecom
 		if link, ok := metadata.Links[TELECOM]; ok {
-			links, err := spider.ResolveTelecom(d.client, link.Url, link.Code, d.formats...)
+			links, err := spider.ResolveTelecom(d.client, link.Url, link.Code, d.config.Formats...)
 			if err != nil {
 				log.Fatal(err)
 			}
@@ -172,7 +164,7 @@ func (d *downloader) downloadBook(meta *BookMeta, link string) error {
 	// Generate file name.
 	format := spider.Extension(link)
 	filename := strconv.FormatInt(meta.Id, 10) + "." + strings.ToLower(format)
-	if !d.rename {
+	if !d.config.Rename {
 		name := spider.Filename(resp)
 		if name != "" {
 			filename = name
@@ -183,7 +175,7 @@ func (d *downloader) downloadBook(meta *BookMeta, link string) error {
 	filename = rename.EscapeFilename(filename)
 
 	// Generate the file path.
-	file := filepath.Join(d.downloadPath, filename)
+	file := filepath.Join(d.config.DownloadPath, filename)
 
 	// Remove the exist file.
 	if _, err := os.Stat(file); err == nil {
