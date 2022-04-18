@@ -18,20 +18,33 @@ func PrintTable(title string, head table.Row, data any, allowZeroValue bool) {
 
 	// Reflect from ptr to instance.
 	cv := reflect.ValueOf(data)
+	printField(t, cv, allowZeroValue)
+
+	t.Render()
+}
+
+func printField(t table.Writer, cv reflect.Value, allowZeroValue bool) {
 	for cv.Kind() == reflect.Ptr || cv.Kind() == reflect.Interface {
 		cv = cv.Elem()
 	}
 
 	// Print the struct.
 	for i := 0; i < cv.NumField(); i++ {
-		field := cv.Type().Field(i)
-		value := cv.Field(i).Interface()
+		v := cv.Field(i)
 
-		// Print the field which doesn't have the zero value.
-		if allowZeroValue || reflect.Zero(field.Type) != value {
-			t.AppendRow(table.Row{field.Name, value})
+		for v.Kind() == reflect.Ptr || v.Kind() == reflect.Interface {
+			v = v.Elem()
+		}
+
+		if v.Kind() == reflect.Struct {
+			printField(t, v, allowZeroValue)
+		} else {
+			// Print the field which doesn't have the zero value.
+			if allowZeroValue || !v.IsZero() {
+				field := cv.Type().Field(i)
+				value := v.Interface()
+				t.AppendRow(table.Row{field.Name, value})
+			}
 		}
 	}
-
-	t.Render()
 }

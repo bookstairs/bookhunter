@@ -34,10 +34,8 @@ var sanqiuCmd = &cobra.Command{
 		downloader := sanqiu.NewDownloader(c)
 
 		for i := 0; i < c.Thread; i++ {
-			// Create a thread.
+			// Create a thread and download books in this thread.
 			downloader.Fork()
-			// Download books in this thread.
-			go downloader.Download()
 		}
 
 		// Wait all the thread have finished.

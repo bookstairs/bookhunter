@@ -100,12 +100,21 @@ func latestBookID(client *spider.Client, config *spider.Config) (int64, error) {
 	return int64(lastID), nil
 }
 
+// Fork a running instance.
 func (d *downloader) Fork() {
 	d.wait.Add(1)
+	go d.download()
 }
 
-// Download would start download books from given website.
-func (d *downloader) Download() {
+// Join will wait all the running instance be finished.
+func (d *downloader) Join() {
+	d.wait.Wait()
+}
+
+// download would start download books from given website.
+func (d *downloader) download() {
+	defer d.wait.Done()
+
 	bookID := d.progress.AcquireBookID()
 	log.Infof("Start to download book from %d.", bookID)
 
@@ -145,12 +154,6 @@ func (d *downloader) Download() {
 		// Finished the book download.
 		d.downloadedBook(bookID)
 	}
-
-	d.wait.Done()
-}
-
-func (d *downloader) Join() {
-	d.wait.Wait()
 }
 
 // downloadBook would download the book to saving path.
