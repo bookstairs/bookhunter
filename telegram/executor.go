@@ -3,7 +3,6 @@ package telegram
 import (
 	"context"
 	"os"
-	"path"
 	"time"
 
 	"github.com/gotd/contrib/middleware/floodwait"
@@ -24,18 +23,16 @@ type executor struct {
 
 // NewExecutor will create a wrapper for executing client.
 func NewExecutor(config *Config) *executor {
-	sessionPath := path.Join(config.DownloadPath, config.CookieFile)
-
 	// Remove session file for forcing login.
 	if config.Refresh {
-		err := os.Remove(sessionPath)
+		err := os.Remove(config.CookieFile)
 		if err != nil {
 			log.Fatal(err)
 		}
 	}
 
 	return &executor{
-		sessionPath: sessionPath,
+		sessionPath: config.CookieFile,
 		config:      config,
 	}
 }
