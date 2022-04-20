@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/bibliolater/bookhunter/pkg/log"
 	"strings"
 
 	"github.com/gotd/td/telegram"
@@ -39,11 +40,11 @@ func channelInfo(ctx context.Context, client *telegram.Client, config *Config) (
 
 // Query access hash for private channel.
 func privateChannelInfo(ctx context.Context, client *telegram.Client, hash string) (channelID int64, accessHash int64, err error) {
-
 	invite, err := client.API().MessagesCheckChatInvite(ctx, hash)
 	if err != nil {
 		return
 	}
+
 	switch v := invite.(type) {
 	case *tg.ChatInviteAlready:
 		if channel, ok := v.GetChat().(*tg.Channel); ok {
@@ -53,6 +54,7 @@ func privateChannelInfo(ctx context.Context, client *telegram.Client, hash strin
 		}
 		break
 	case *tg.ChatInvite:
+		log.Warn("You haven't join this private channel, plz join it manually.")
 		break
 	case *tg.ChatInvitePeek:
 		if channel, ok := v.GetChat().(*tg.Channel); ok {
