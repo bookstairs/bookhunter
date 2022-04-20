@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"strconv"
+	"strings"
 
 	"github.com/gotd/td/telegram"
 	"github.com/gotd/td/tg"
@@ -15,10 +15,8 @@ func channelInfo(ctx context.Context, client *telegram.Client, config *Config) (
 	var channelID int64
 	var accessHash int64
 	var err error
-
-	if id, e := strconv.ParseInt(config.ChannelID, 10, 64); e == nil {
-		channelID = id
-		accessHash, err = privateChannelInfo(ctx, client, id)
+	if strings.HasPrefix(config.ChannelID, "joinchat/") {
+		channelID, accessHash, err = privateChannelInfo(ctx, client, strings.TrimPrefix(config.ChannelID, "joinchat/"))
 	} else {
 		channelID, accessHash, err = publicChannelInfo(ctx, client, config.ChannelID)
 	}
@@ -40,21 +38,32 @@ func channelInfo(ctx context.Context, client *telegram.Client, config *Config) (
 }
 
 // Query access hash for private channel.
-func privateChannelInfo(ctx context.Context, client *telegram.Client, channelID int64) (accessHash int64, err error) {
-	c, err := client.API().ContactsGetContacts(ctx, channelID)
+func privateChannelInfo(ctx context.Context, client *telegram.Client, hash string) (channelID int64, accessHash int64, err error) {
+
+	invite, err := client.API().MessagesCheckChatInvite(ctx, hash)
 	if err != nil {
 		return
 	}
-
-	if contacts, ok := c.(*tg.ContactsContacts); ok {
-		for _, u := range contacts.Users {
-			if user, ok := u.(*tg.User); ok {
-				accessHash = user.AccessHash
-				return
-			}
+	switch v := invite.(type) {
+	case *tg.ChatInviteAlready:
+		if channel, ok := v.GetChat().(*tg.Channel); ok {
+			channelID = channel.ID
+			accessHash = channel.AccessHash
+			return
 		}
+		break
+	case *tg.ChatInvite:
+		break
+	case *tg.ChatInvitePeek:
+		if channel, ok := v.GetChat().(*tg.Channel); ok {
+			channelID = channel.ID
+			accessHash = channel.AccessHash
+			return
+		}
+		break
+	default:
+		break
 	}
-
 	err = errors.New("couldn't find access hash")
 	return
 }
