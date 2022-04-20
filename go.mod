@@ -13,6 +13,8 @@ require (
 	github.com/schollz/progressbar/v3 v3.8.6
 	github.com/spf13/cobra v1.4.0
 	golang.org/x/crypto v0.0.0-20220411220226-7b82a4e95df4
+	golang.org/x/net v0.0.0-20220412020605-290c469a71a5
+	golang.org/x/time v0.0.0-20210220033141-f8bda1e9f3ba
 )
 
 require (
@@ -33,7 +35,6 @@ require (
 	go.uber.org/atomic v1.9.0 // indirect
 	go.uber.org/multierr v1.8.0 // indirect
 	go.uber.org/zap v1.21.0 // indirect
-	golang.org/x/net v0.0.0-20220412020605-290c469a71a5 // indirect
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c // indirect
 	golang.org/x/sys v0.0.0-20220412211240-33da011f77ad // indirect
 	golang.org/x/term v0.0.0-20220411215600-e5f449aeb171 // indirect

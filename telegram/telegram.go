@@ -39,6 +39,7 @@ type tgDownloader struct {
 	channel  *tgChannelInfo
 	executor *executor
 	progress *progress.Progress
+	bookIDs  chan int64
 	wait     *sync.WaitGroup
 }
 
@@ -53,15 +54,22 @@ func NewDownloader(config *Config) *tgDownloader {
 	executor := NewExecutor(config)
 
 	// Get last book ID
-	var channel *tgChannelInfo
-	err := executor.Execute(func(ctx context.Context, client *telegram.Client) error {
+	go func() {
+		err := executor.Execute()
+		if err != nil {
+			log.Fatalf("Couldn't find channel info. %v", err)
+		}
+	}()
+	ch := make(chan *tgChannelInfo)
+	f := func(ctx context.Context, client *telegram.Client) error {
 		var err error
-		channel, err = channelInfo(ctx, client, config)
+		result, err := channelInfo(ctx, client, config)
+		ch <- result
 		return err
-	})
-	if err != nil {
-		log.Fatalf("Couldn't find channel info. %v", err)
 	}
+	executor.taskCh <- f
+	channel := <-ch
+	close(ch)
 	log.Infof("Find the last message ID: %d", channel.lastMsgID)
 
 	// Create book storage.
@@ -70,13 +78,14 @@ func NewDownloader(config *Config) *tgDownloader {
 	if err != nil {
 		log.Fatal(err)
 	}
-
+	wait := new(sync.WaitGroup)
 	return &tgDownloader{
 		config:   config,
 		channel:  channel,
 		executor: executor,
 		progress: p,
-		wait:     new(sync.WaitGroup),
+		bookIDs:  p.GetBookIDs(wait),
+		wait:     wait,
 	}
 }
 
@@ -84,10 +93,12 @@ func NewDownloader(config *Config) *tgDownloader {
 func (d *tgDownloader) Fork() {
 	d.wait.Add(1)
 	go func() {
-		_ = d.executor.Execute(func(ctx context.Context, client *telegram.Client) error {
+		defer d.wait.Done()
+		f := func(ctx context.Context, client *telegram.Client) error {
 			d.download(ctx, client)
 			return nil
-		})
+		}
+		d.executor.taskCh <- f
 	}()
 }
 

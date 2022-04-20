@@ -14,7 +14,6 @@ import (
 	"github.com/gotd/td/tg"
 
 	"github.com/bibliolater/bookhunter/pkg/log"
-	"github.com/bibliolater/bookhunter/pkg/progress"
 	"github.com/bibliolater/bookhunter/pkg/rename"
 	"github.com/bibliolater/bookhunter/pkg/spider"
 )
@@ -36,10 +35,7 @@ func (d *tgDownloader) download(ctx context.Context, client *telegram.Client) {
 	channel := d.channel
 	api := client.API()
 
-	msgID := d.progress.AcquireBookID()
-	log.Infof("Start to download book from %d.", msgID)
-
-	for ; msgID != progress.NoBookToDownload; msgID = d.progress.AcquireBookID() {
+	for msgID := range d.bookIDs {
 		history, err := api.MessagesSearch(ctx, &tg.MessagesSearchRequest{
 			Peer: &tg.InputPeerChannel{
 				ChannelID:  channel.id,

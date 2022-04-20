@@ -3,6 +3,7 @@ package progress
 import (
 	"errors"
 	"fmt"
+	"github.com/bibliolater/bookhunter/pkg/log"
 	"os"
 	"sync"
 
@@ -104,6 +105,21 @@ func loadStorage(file *os.File) (*bitset.BitSet, error) {
 	}
 
 	return set, nil
+}
+
+func (storage *Progress) GetBookIDs(sync *sync.WaitGroup) chan int64 {
+	int64s := make(chan int64, 100)
+	sync.Add(1)
+	go func() {
+		defer sync.Done()
+		bookID := storage.AcquireBookID()
+		log.Infof("Start to download book from %d.", bookID)
+		for ; bookID != NoBookToDownload; bookID = storage.AcquireBookID() {
+			int64s <- bookID
+		}
+		close(int64s)
+	}()
+	return int64s
 }
 
 // AcquireBookID would find the book id from assign array.

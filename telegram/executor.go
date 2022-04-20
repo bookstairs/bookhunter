@@ -3,6 +3,7 @@ package telegram
 import (
 	"context"
 	"os"
+	"os/signal"
 	"time"
 
 	"github.com/gotd/contrib/middleware/floodwait"
@@ -19,6 +20,9 @@ import (
 type executor struct {
 	sessionPath string
 	config      *Config
+	context     context.Context
+	cancel      context.CancelFunc
+	taskCh      chan func(context.Context, *telegram.Client) error
 }
 
 // NewExecutor will create a wrapper for executing client.
@@ -30,14 +34,17 @@ func NewExecutor(config *Config) *executor {
 			log.Fatal(err)
 		}
 	}
-
+	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt)
 	return &executor{
 		sessionPath: config.CookieFile,
 		config:      config,
+		context:     ctx,
+		cancel:      cancel,
+		taskCh:      make(chan func(context.Context, *telegram.Client) error, 10),
 	}
 }
 
-func (e *executor) Execute(f func(context.Context, *telegram.Client) error) error {
+func (e *executor) Execute() error {
 	// The backend client.
 	client := telegram.NewClient(
 		e.config.AppID,
@@ -52,14 +59,19 @@ func (e *executor) Execute(f func(context.Context, *telegram.Client) error) erro
 		},
 	)
 
-	ctx := context.Background()
-	return client.Run(ctx, func(ctx context.Context) error {
+	return client.Run(e.context, func(ctx context.Context) error {
 		// Login the telegram account.
 		err := login(ctx, client, e.config)
 		if err != nil {
 			return err
 		}
 
-		return f(ctx, client)
+		for task := range e.taskCh {
+			err := task(ctx, client)
+			if err != nil {
+				log.Fatal(err)
+			}
+		}
+		return nil
 	})
 }
