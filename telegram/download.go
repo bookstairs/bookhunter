@@ -30,10 +30,10 @@ type tgFile struct {
 
 // download would start download books from given telegram channel.
 func (d *tgDownloader) download(ctx context.Context, client *telegram.Client) {
-	defer d.wait.Done()
 
 	channel := d.channel
 	api := client.API()
+	tool := downloader.NewDownloader()
 
 	for msgID := range d.bookIDs {
 		history, err := api.MessagesSearch(ctx, &tg.MessagesSearchRequest{
@@ -66,7 +66,7 @@ func (d *tgDownloader) download(ctx context.Context, client *telegram.Client) {
 				continue
 			}
 
-			d.downloadFile(ctx, client, file)
+			d.downloadFile(ctx, client, tool, file)
 		}
 
 		if err := d.progress.SaveBookID(msgID); err != nil {
@@ -120,8 +120,8 @@ func (d *tgDownloader) parseFile(message tg.MessageClass) (*tgFile, bool) {
 	}, true
 }
 
-func (d *tgDownloader) downloadFile(ctx context.Context, client *telegram.Client, file *tgFile) {
-	tool := downloader.NewDownloader()
+func (d *tgDownloader) downloadFile(ctx context.Context, client *telegram.Client, tool *downloader.Downloader, file *tgFile) {
+	//tool := downloader.NewDownloader()
 
 	// Remove the exist file.
 	if _, err := os.Stat(file.dest); err == nil {

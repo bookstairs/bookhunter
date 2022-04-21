@@ -34,7 +34,7 @@ var telegramCmd = &cobra.Command{
 		// Create the downloader and download books.
 		downloader := telegram.NewDownloader(tc)
 
-		for i := 0; i < c.Thread; i++ {
+		for i := 0; i < tc.Thread; i++ {
 			// Create a thread and download books in this thread.
 			downloader.Fork()
 		}

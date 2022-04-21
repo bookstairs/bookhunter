@@ -52,9 +52,12 @@ type tgChannelInfo struct {
 // NewDownloader create a telegram downloader.
 func NewDownloader(config *Config) *tgDownloader {
 	executor := NewExecutor(config)
+	wait := new(sync.WaitGroup)
 
 	// Get last book ID
+	wait.Add(1)
 	go func() {
+		defer wait.Done()
 		err := executor.Execute()
 		if err != nil {
 			log.Fatalf("Couldn't find channel info. %v", err)
@@ -78,7 +81,6 @@ func NewDownloader(config *Config) *tgDownloader {
 	if err != nil {
 		log.Fatal(err)
 	}
-	wait := new(sync.WaitGroup)
 	return &tgDownloader{
 		config:   config,
 		channel:  channel,
@@ -91,18 +93,15 @@ func NewDownloader(config *Config) *tgDownloader {
 
 // Fork a running instance.
 func (d *tgDownloader) Fork() {
-	d.wait.Add(1)
-	go func() {
-		defer d.wait.Done()
-		f := func(ctx context.Context, client *telegram.Client) error {
-			d.download(ctx, client)
-			return nil
-		}
-		d.executor.taskCh <- f
-	}()
+	f := func(ctx context.Context, client *telegram.Client) error {
+		d.download(ctx, client)
+		return nil
+	}
+	d.executor.taskCh <- f
 }
 
 // Join will wait all the running instance be finished.
 func (d *tgDownloader) Join() {
+	close(d.executor.taskCh)
 	d.wait.Wait()
 }

@@ -2,6 +2,7 @@ package telegram
 
 import (
 	"context"
+	"golang.org/x/sync/errgroup"
 	"os"
 	"os/signal"
 	"time"
@@ -50,6 +51,7 @@ func (e *executor) Execute() error {
 		e.config.AppID,
 		e.config.AppHash,
 		telegram.Options{
+			DC:             5,
 			Resolver:       dcs.Plain(dcs.PlainOptions{Dial: proxy.Dial}),
 			SessionStorage: &session.FileStorage{Path: e.sessionPath},
 			Middlewares: []telegram.Middleware{
@@ -66,12 +68,23 @@ func (e *executor) Execute() error {
 			return err
 		}
 
-		for task := range e.taskCh {
-			err := task(ctx, client)
-			if err != nil {
-				log.Fatal(err)
-			}
+		g, ctx := errgroup.WithContext(ctx)
+		for i := 0; i < e.config.Thread; i++ {
+			g.Go(func() error {
+				for task := range e.taskCh {
+					err := task(ctx, client)
+					if err != nil {
+						log.Fatal("xxx  %s", err)
+					}
+				}
+				return nil
+			})
 		}
+
+		if err := g.Wait(); err != nil {
+			return err
+		}
+		log.Info("Finished OK")
 		return nil
 	})
 }
