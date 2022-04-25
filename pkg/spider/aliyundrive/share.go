@@ -1,7 +1,7 @@
 package aliyundrive
 
 import (
-	"log"
+	"github.com/bibliolater/bookhunter/pkg/log"
 )
 
 func (ali AliYunDrive) GetAnonymousShare(shareId string) (*GetShareInfoResponse, error) {

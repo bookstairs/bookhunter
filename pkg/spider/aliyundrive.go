@@ -63,7 +63,6 @@ func NewAliYunDrive(c *Client, aliConfig *AliYunConfig) *aliyundrive.AliYunDrive
 
 	client.SetTimeout(c.config.Timeout)
 	client.SetRetryCount(c.config.Retry)
-	//client.SetLogger(resty)
 	client.SetDisableWarn(true)
 	client.SetDebug(c.config.Debug)
 	client.SetPreRequestHook(aliyundrive.HcHook)
