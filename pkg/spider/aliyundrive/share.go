@@ -22,7 +22,7 @@ func (ali AliYunDrive) GetShare(shareId string, shareToken string) (data chan *B
 	result := make(chan *BaseShareFile, 100)
 
 	go func() {
-		err = ali.getFileList(shareToken, shareId, "root", result)
+		err = ali.fileList(shareToken, shareId, result)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -45,11 +45,13 @@ func (ali AliYunDrive) GetShredToken(shareId string, sharePwd string) (*GetShare
 	return response, nil
 }
 
-func (ali AliYunDrive) getFileList(shareToken string, shareId string, parentFileId string, result chan *BaseShareFile) error {
-	return ali.getFileListWithMarker(shareToken, shareId, parentFileId, "", result)
+func (ali AliYunDrive) fileList(shareToken string, shareId string, result chan *BaseShareFile) error {
+	return ali.fileListByMarker(shareToken, shareId, "root", "", result)
 }
 
-func (ali AliYunDrive) getFileListWithMarker(shareToken string, shareId string, parentFileId string, marker string, result chan *BaseShareFile) error {
+func (ali AliYunDrive) fileListByMarker(shareToken string, shareId string, parentFileId string,
+	marker string, result chan *BaseShareFile) error {
+
 	downloadResp, err := ali.Client.R().
 		SetAuthToken(ali.GetAuthorizationToken()).
 		SetHeader(xShareToken, shareToken).
@@ -71,7 +73,7 @@ func (ali AliYunDrive) getFileListWithMarker(shareToken string, shareId string, 
 	data := downloadResp.Result().(*GetShareFileListResponse)
 	for _, item := range data.Items {
 		if item.FileType == "folder" {
-			err := ali.getFileList(shareToken, shareId, item.FileId, result)
+			err := ali.fileListByMarker(shareToken, shareId, item.FileId, "", result)
 			if err != nil {
 				log.Fatal(err)
 			}
@@ -80,7 +82,7 @@ func (ali AliYunDrive) getFileListWithMarker(shareToken string, shareId string, 
 		result <- item
 	}
 	if data.NextMarker != "" {
-		err := ali.getFileListWithMarker(shareToken, shareId, parentFileId, data.NextMarker, result)
+		err := ali.fileListByMarker(shareToken, shareId, parentFileId, data.NextMarker, result)
 		if err != nil {
 			return err
 		}
