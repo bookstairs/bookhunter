@@ -128,45 +128,33 @@ func (d *downloader) download() {
 			continue
 		}
 
-		// Download books from telecom
-		if link, ok := metadata.Links[ALIYUN]; ok {
-			links, err := spider.ResolveAliYunDrive(d.client, link.Url, link.Code, d.config.Formats...)
-			if err != nil {
-				log.Fatal(err)
-			}
-
-			if len(links) == 0 {
-				log.Warnf("[%d/%d] No downloadable links found, this resource could be banned.", bookID, d.progress.Size())
-			}
-
-			for _, l := range links {
-				err := d.client.Retry(func() error {
-					return d.downloadBook(metadata, l)
-				})
-				if err != nil {
-					log.Fatal(err)
-				}
-			}
+		var links []string
+		var err error
+		enableAliYunDl := len(spider.AliyunConfig.RefreshToken) > 0
+		if link, ok := metadata.Links[ALIYUN]; ok && enableAliYunDl {
+			// Download books from aliyun drive
+			links, err = spider.ResolveAliYunDrive(d.client, link.Url, link.Code, d.config.Formats...)
 		} else if link, ok := metadata.Links[TELECOM]; ok {
-			links, err := spider.ResolveTelecom(d.client, link.Url, link.Code, d.config.Formats...)
-			if err != nil {
-				log.Fatal(err)
-			}
-
-			if len(links) == 0 {
-				log.Warnf("[%d/%d] No downloadable links found, this resource could be banned.", bookID, d.progress.Size())
-			}
-
-			for _, l := range links {
-				err := d.client.Retry(func() error {
-					return d.downloadBook(metadata, l)
-				})
-				if err != nil {
-					log.Fatal(err)
-				}
-			}
+			// Download books from telecom
+			links, err = spider.ResolveTelecom(d.client, link.Url, link.Code, d.config.Formats...)
 		} else {
 			log.Warnf("[%d/%d] Book with ID %d don't have telecom link, skip.", bookID, d.progress.Size(), bookID)
+		}
+
+		if err != nil {
+			log.Fatal(err)
+		}
+		if len(links) == 0 {
+			log.Warnf("[%d/%d] No downloadable links found, this resource could be banned.", bookID, d.progress.Size())
+		}
+
+		for _, l := range links {
+			err := d.client.Retry(func() error {
+				return d.downloadBook(metadata, l)
+			})
+			if err != nil {
+				log.Fatal(err)
+			}
 		}
 
 		// Finished the book download.
