@@ -135,3 +135,10 @@ type BaseShareFile struct {
 	DomainId      string   `json:"domain_id"`
 	RevisionId    string   `json:"revision_id"`
 }
+
+type FileListParam struct {
+	shareToken   string
+	shareId      string
+	parentFileId string
+	marker       string
+}

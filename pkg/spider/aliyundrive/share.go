@@ -46,23 +46,27 @@ func (ali AliYunDrive) GetShredToken(shareId string, sharePwd string) (*GetShare
 }
 
 func (ali AliYunDrive) fileList(shareToken string, shareId string, result chan *BaseShareFile) error {
-	return ali.fileListByMarker(shareToken, shareId, "root", "", result)
+	return ali.fileListByMarker(FileListParam{
+		shareToken:   shareToken,
+		shareId:      shareId,
+		parentFileId: "root",
+		marker:       "",
+	}, result)
 }
 
-func (ali AliYunDrive) fileListByMarker(shareToken string, shareId string, parentFileId string,
-	marker string, result chan *BaseShareFile) error {
+func (ali AliYunDrive) fileListByMarker(param FileListParam, result chan *BaseShareFile) error {
 
 	downloadResp, err := ali.Client.R().
 		SetAuthToken(ali.GetAuthorizationToken()).
-		SetHeader(xShareToken, shareToken).
+		SetHeader(xShareToken, param.shareToken).
 		SetBody(GetShareFileListRequest{
-			ShareId:        shareId,
-			ParentFileId:   parentFileId,
+			ShareId:        param.shareId,
+			ParentFileId:   param.parentFileId,
 			UrlExpireSec:   14400,
 			OrderBy:        "name",
 			OrderDirection: "DESC",
 			Limit:          20,
-			Marker:         marker,
+			Marker:         param.marker,
 		}).
 		SetResult(GetShareFileListResponse{}).
 		SetError(ErrorResponse{}).
@@ -73,7 +77,12 @@ func (ali AliYunDrive) fileListByMarker(shareToken string, shareId string, paren
 	data := downloadResp.Result().(*GetShareFileListResponse)
 	for _, item := range data.Items {
 		if item.FileType == "folder" {
-			err := ali.fileListByMarker(shareToken, shareId, item.FileId, "", result)
+			err := ali.fileListByMarker(FileListParam{
+				shareToken:   param.shareToken,
+				shareId:      param.shareId,
+				parentFileId: item.FileId,
+				marker:       "",
+			}, result)
 			if err != nil {
 				log.Fatal(err)
 			}
@@ -82,7 +91,12 @@ func (ali AliYunDrive) fileListByMarker(shareToken string, shareId string, paren
 		result <- item
 	}
 	if data.NextMarker != "" {
-		err := ali.fileListByMarker(shareToken, shareId, parentFileId, data.NextMarker, result)
+		err := ali.fileListByMarker(FileListParam{
+			shareToken:   param.shareToken,
+			shareId:      param.shareId,
+			parentFileId: param.parentFileId,
+			marker:       data.NextMarker,
+		}, result)
 		if err != nil {
 			return err
 		}
