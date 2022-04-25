@@ -35,6 +35,7 @@ Use "bookhunter talebook [command] --help" for more information about a command.
 
 1. Find all the books update from [www.sanqiu.cc](https://www.sanqiu.cc/).
 2. Download required formats from 189 cloud drive.
+2. Download required formats from aliyun drive.
 3. Record the download progress for crontab jobs.
 
 ```shell
