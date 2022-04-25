@@ -42,18 +42,20 @@ Usage:
   bookhunter sanqiu [flags]
 
 Flags:
-  -c, --cookie string       The cookie file name you want to use, it would be saved under the download directory. (default "cookies")
-  -d, --download string     The book directory you want to use, default would be current working directory. (default "/Users/Yufan")
-  -f, --format strings      The file formats you want to download. (default [EPUB,MOBI,PDF])
-  -h, --help                help for sanqiu
-  -i, --initial int         The book id you want to start download. It should exceed 0. (default 1)
-  -g, --progress string     The download progress file name you want to use, it would be saved under the download directory. (default "progress")
-  -n, --rename              Rename the book file by book ID.
-  -r, --retry int           The max retry times for timeout download request. (default 5)
-  -t, --thread int          The number of download threads. (default 1)
-  -o, --timeout duration    The max pending time for download request. (default 10m0s)
-  -a, --user-agent string   Set User-Agent for download request. (default "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.51 Safari/537.36")
-  -w, --website string      The website for sanqiu. You don't need to override the default url. (default "https://www.sanqiu.cc")
+  -c, --cookie string         The cookie file name you want to use, it would be saved under the download directory. (default "cookies")
+      --debug                 Enable debug mode
+  -d, --download string       The book directory you want to use, default would be current working directory. (default "/Users/jianyun/GolandProjects/bookhunter")
+  -f, --format strings        The file formats you want to download. (default [EPUB,MOBI,PDF])
+  -h, --help                  help for sanqiu
+  -i, --initial int           The book id you want to start download. It should exceed 0. (default 1)
+  -g, --progress string       The download progress file name you want to use, it would be saved under the download directory. (default "progress")
+      --refreshToken string   The refreshToken for AliYun Drive.
+  -n, --rename                Rename the book file by book ID.
+  -r, --retry int             The max retry times for timeout download request. (default 5)
+  -t, --thread int            The number of download threads. (default 1)
+  -o, --timeout duration      The max pending time for download request. (default 10m0s)
+  -a, --user-agent string     Set User-Agent for download request. (default "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.51 Safari/537.36")
+  -w, --website string        The website for sanqiu. You don't need to override the default url. (default "https://www.sanqiu.cc")
 ```
 
 ### Download books from my Telegram groups.
