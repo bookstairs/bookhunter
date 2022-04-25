@@ -21,6 +21,7 @@ linters-settings:
       - whyNoLint
       - wrapperFunc
       - exitAfterDefer
+      - paramTypeCombine
   gocyclo:
     min-complexity: 15
   goimports:
