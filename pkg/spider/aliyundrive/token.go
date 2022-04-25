@@ -12,7 +12,7 @@ func (ali AliYunDrive) GetAuthorizationToken() string {
 	if err != nil {
 		log.Fatal(err)
 	}
-	return token.TokenType + " " + token.AccessToken
+	return token.AccessToken
 }
 
 func (ali AliYunDrive) getToken() (*TokenResponse, error) {
@@ -29,8 +29,7 @@ func (ali AliYunDrive) getToken() (*TokenResponse, error) {
 	if exist {
 		ali.RefreshToken = rt
 	}
-	resp, err := ali.Client.
-		NewRequest().
+	resp, err := ali.Client.R().
 		SetBody(TokenRequest{GrantType: "refresh_token", RefreshToken: ali.RefreshToken}).
 		SetResult(TokenResponse{}).
 		SetError(ErrorResponse{}).
