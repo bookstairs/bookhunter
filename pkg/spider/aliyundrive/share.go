@@ -55,7 +55,6 @@ func (ali AliYunDrive) fileList(shareToken string, shareId string, result chan *
 }
 
 func (ali AliYunDrive) fileListByMarker(param FileListParam, result chan *BaseShareFile) error {
-
 	downloadResp, err := ali.Client.R().
 		SetAuthToken(ali.GetAuthorizationToken()).
 		SetHeader(xShareToken, param.shareToken).
