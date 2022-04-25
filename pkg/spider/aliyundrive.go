@@ -43,7 +43,7 @@ func resolveShare(drive *aliyundrive.AliYunDrive, shareId string, sharePwd strin
 	var links []string
 	for item := range shareFiles {
 		for _, format := range formats {
-			if strings.ToUpper(item.FileExtension) == format {
+			if strings.EqualFold(item.FileExtension, format) {
 				url, err := drive.GetFileDownloadUrl(token.ShareToken, shareId, item.FileId)
 				if err != nil {
 					return nil, err

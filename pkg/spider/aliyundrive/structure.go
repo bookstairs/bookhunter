@@ -96,13 +96,13 @@ type GetShareFileListRequest struct {
 	ImageThumbnailProcess string `json:"image_thumbnail_process"`
 	Limit                 int    `json:"limit"`
 	Marker                string `json:"marker"`
-	OrderBy               string `json:"order_by"`        //'name'
-	OrderDirection        string `json:"order_direction"` //'DESC'
-	ParentFileId          string `json:"parent_file_id"`  //root
+	OrderBy               string `json:"order_by"`
+	OrderDirection        string `json:"order_direction"`
+	ParentFileId          string `json:"parent_file_id"`
 	Status                string `json:"status"`
 	FileType              string `json:"type"`
-	UrlExpireSec          int    `json:"url_expire_sec"`          //14400
-	VideoThumbnailProcess string `json:"video_thumbnail_process"` //video/snapshot,t_0,f_jpg,ar_auto,w_800
+	UrlExpireSec          int    `json:"url_expire_sec"`
+	VideoThumbnailProcess string `json:"video_thumbnail_process"`
 }
 
 type GetShareFileListResponse struct {
