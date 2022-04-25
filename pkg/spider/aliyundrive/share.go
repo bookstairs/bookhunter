@@ -19,7 +19,7 @@ func (ali AliYunDrive) GetAnonymousShare(shareId string) (*GetShareInfoResponse,
 	return response, nil
 }
 
-func (ali AliYunDrive) GetShare(shareId string, shareToken string, sharePwd string) (data chan *BaseShareFile, err error) {
+func (ali AliYunDrive) GetShare(shareId string, shareToken string) (data chan *BaseShareFile, err error) {
 	result := make(chan *BaseShareFile, 100)
 
 	go func() {

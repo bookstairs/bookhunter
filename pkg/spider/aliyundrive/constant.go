@@ -27,7 +27,7 @@ const (
 	V2ShareLinkGetShareToken       = BaseURL + "/v2/share_link/get_share_token"
 	V2FileGetShareLinkDownloadUrl  = ApiURL + "/v2/file/get_share_link_download_url"
 	V3FileList                     = ApiURL + "/adrive/v3/file/list"
-	V2ShareLinkGetShareByAnonymous = BaseURL + "/adrive/v2/share_link/get_share_by_anonymous"
+	V2ShareLinkGetShareByAnonymous = ApiURL + "/adrive/v2/share_link/get_share_by_anonymous"
 )
 
 type AliYunDrive struct {

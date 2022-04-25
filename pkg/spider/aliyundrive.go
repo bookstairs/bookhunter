@@ -2,7 +2,6 @@ package spider
 
 import (
 	"encoding/json"
-	"errors"
 	"strings"
 
 	"github.com/bibliolater/bookhunter/pkg/spider/aliyundrive"
@@ -29,21 +28,15 @@ func resolveAliYunDrive(client *Client, shareUrl string, sharePwd string, format
 	if drive == nil {
 		drive = NewAliYunDrive(client, AliyunConfig)
 	}
-
-	if len(sharePwd) == 0 {
-		return nil, errors.New("not currently supported")
-	} else {
-		return resolvePrivateShare(drive, shareId, sharePwd, formats)
-	}
+	return resolveShare(drive, shareId, sharePwd, formats)
 }
 
-func resolvePrivateShare(drive *aliyundrive.AliYunDrive, shareId string, sharePwd string, formats []string) ([]string, error) {
-	response, err := drive.GetShredToken(shareId, sharePwd)
+func resolveShare(drive *aliyundrive.AliYunDrive, shareId string, sharePwd string, formats []string) ([]string, error) {
+	token, err := drive.GetShredToken(shareId, sharePwd)
 	if err != nil {
 		return nil, err
 	}
-	shareToken := response.ShareToken
-	shareFiles, err := drive.GetShare(shareId, shareToken, sharePwd)
+	shareFiles, err := drive.GetShare(shareId, token.ShareToken)
 	if err != nil {
 		return nil, err
 	}
@@ -51,7 +44,7 @@ func resolvePrivateShare(drive *aliyundrive.AliYunDrive, shareId string, sharePw
 	for item := range shareFiles {
 		for _, format := range formats {
 			if strings.ToUpper(item.FileExtension) == format {
-				url, err := drive.GetFileDownloadUrl(shareToken, shareId, item.FileId)
+				url, err := drive.GetFileDownloadUrl(token.ShareToken, shareId, item.FileId)
 				if err != nil {
 					return nil, err
 				}
