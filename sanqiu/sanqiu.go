@@ -128,27 +128,33 @@ func (d *downloader) download() {
 			continue
 		}
 
-		// Download books from telecom
-		if link, ok := metadata.Links[TELECOM]; ok {
-			links, err := spider.ResolveTelecom(d.client, link.Url, link.Code, d.config.Formats...)
+		var links []string
+		var err error
+		enableAliYunDl := len(spider.AliyunConfig.RefreshToken) > 0
+		if link, ok := metadata.Links[ALIYUN]; ok && enableAliYunDl {
+			// Download books from aliyun drive
+			links, err = spider.ResolveAliYunDrive(d.client, link.Url, link.Code, d.config.Formats...)
+		} else if link, ok := metadata.Links[TELECOM]; ok {
+			// Download books from telecom
+			links, err = spider.ResolveTelecom(d.client, link.Url, link.Code, d.config.Formats...)
+		} else {
+			log.Warnf("[%d/%d] Book with ID %d don't have telecom link, skip.", bookID, d.progress.Size(), bookID)
+		}
+
+		if err != nil {
+			log.Fatal(err)
+		}
+		if len(links) == 0 {
+			log.Warnf("[%d/%d] No downloadable links found, this resource could be banned.", bookID, d.progress.Size())
+		}
+
+		for _, l := range links {
+			err := d.client.Retry(func() error {
+				return d.downloadBook(metadata, l)
+			})
 			if err != nil {
 				log.Fatal(err)
 			}
-
-			if len(links) == 0 {
-				log.Warnf("[%d/%d] No downloadable links found, this resource could be banned.", bookID, d.progress.Size())
-			}
-
-			for _, l := range links {
-				err := d.client.Retry(func() error {
-					return d.downloadBook(metadata, l)
-				})
-				if err != nil {
-					log.Fatal(err)
-				}
-			}
-		} else {
-			log.Warnf("[%d/%d] Book with ID %d don't have telecom link, skip.", bookID, d.progress.Size(), bookID)
 		}
 
 		// Finished the book download.
@@ -164,8 +170,13 @@ func (d *downloader) downloadBook(meta *BookMeta, link string) error {
 	}
 	defer func() { _ = resp.Body.Close() }()
 
+	//
 	// Generate file name.
-	format := spider.Extension(link)
+	format, ok := spider.Extension(link)
+	if !ok {
+		tmp := spider.Filename(resp)
+		format, _ = spider.Extension(tmp)
+	}
 	filename := strconv.FormatInt(meta.Id, 10) + "." + strings.ToLower(format)
 	if !d.config.Rename {
 		name := spider.Filename(resp)

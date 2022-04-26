@@ -33,6 +33,7 @@ type Config struct {
 	UserAgent     string        // The user agent for the download request.
 	Rename        bool          // Rename the file by using book ID.
 	Thread        int           // The number of download thread.
+	Debug         bool          // Enable debug log.
 }
 
 // NewConfig will return a default blank config.
@@ -75,6 +76,7 @@ func BindDownloadArgs(command *cobra.Command, config *Config) {
 	command.Flags().IntVarP(&config.Retry, "retry", "r", config.Retry, "The max retry times for timeout download request.")
 	command.Flags().StringVarP(&config.UserAgent, "user-agent", "a", config.UserAgent, "Set User-Agent for download request.")
 	command.Flags().BoolVarP(&config.Rename, "rename", "n", config.Rename, "Rename the book file by book ID.")
+	command.Flags().BoolVar(&config.Debug, "debug", config.Debug, "Enable debug mode")
 }
 
 // ValidateDownloadConfig would print the final download config table.

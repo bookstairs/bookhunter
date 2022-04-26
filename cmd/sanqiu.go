@@ -49,6 +49,8 @@ var sanqiuCmd = &cobra.Command{
 func init() {
 	sanqiuCmd.Flags().StringVarP(&c.Website, "website", "w", sanqiu.DefaultWebsite,
 		"The website for sanqiu. You don't need to override the default url.")
+	sanqiuCmd.Flags().StringVar(&spider.AliyunConfig.RefreshToken, "refreshToken", "",
+		"The refreshToken for AliYun Drive.")
 
 	// Set common download config arguments.
 	spider.BindDownloadArgs(sanqiuCmd, c)

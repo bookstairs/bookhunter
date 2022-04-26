@@ -4,8 +4,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/bibliolater/bookhunter/pkg/log"
 	"strings"
+
+	"github.com/bibliolater/bookhunter/pkg/log"
 
 	"github.com/gotd/td/telegram"
 	"github.com/gotd/td/tg"

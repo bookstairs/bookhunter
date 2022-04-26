@@ -106,7 +106,7 @@ func (d *tgDownloader) parseFile(message tg.MessageClass) (*tgFile, bool) {
 	if fileName == "" {
 		return nil, false
 	}
-	format := spider.Extension(fileName)
+	format, _ := spider.Extension(fileName)
 
 	file := strconv.Itoa(msg.GetID()) + "_" + fileName
 	if d.config.Rename {

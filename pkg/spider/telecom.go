@@ -86,7 +86,8 @@ func resolveTelegram(client *Client, url, passcode, shareId, fileId string, resu
 		return nil
 	} else if strings.HasPrefix(content, "http") {
 		// This is a download link. We won't filter the format.
-		format := strings.ToUpper(Extension(content))
+		extension, _ := Extension(content)
+		format := strings.ToUpper(extension)
 
 		if links, ok := results[format]; ok {
 			links = append(links, content)

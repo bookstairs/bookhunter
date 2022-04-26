@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"mime"
 	"net/http"
-	"net/url"
 	"strings"
 )
 
@@ -22,21 +21,24 @@ func DecodeResponse(resp *http.Response, data any) (err error) {
 }
 
 // Extension the file extension from the link or file name.
-func Extension(link string) string {
+func Extension(link string) (string, bool) {
 	end := strings.LastIndex(link, "?")
 	if end >= 0 {
 		link = link[:end]
 	}
 	start := strings.LastIndex(link, ".") + 1
 
-	return strings.ToLower(link[start:])
+	filename := strings.ToLower(link[start:])
+	if strings.Contains(filename, "/") {
+		return "", false
+	}
+	return filename, true
 }
 
 // Filename parse the file name from Content-Disposition header.
 // If there is no such head, we would return blank string.
 func Filename(resp *http.Response) (name string) {
 	if disposition := resp.Header.Get("Content-Disposition"); disposition != "" {
-		disposition, _ = url.QueryUnescape(disposition)
 		if _, params, err := mime.ParseMediaType(disposition); err == nil {
 			if filename, ok := params["filename"]; ok {
 				name = filename
