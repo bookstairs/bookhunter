@@ -1,10 +1,7 @@
 package spider
 
 import (
-	"encoding/json"
 	"strings"
-
-	"github.com/go-resty/resty/v2"
 
 	"github.com/bibliolater/bookhunter/pkg/spider/aliyundrive"
 )
@@ -57,19 +54,10 @@ func resolveShare(drive *aliyundrive.AliYunDrive, shareId string, sharePwd strin
 }
 
 func NewAliYunDrive(c *Client, aliConfig *AliYunConfig) *aliyundrive.AliYunDrive {
-	client := resty.NewWithClient(c.client)
-	client.JSONMarshal = json.Marshal
-	client.JSONUnmarshal = json.Unmarshal
-
-	client.SetTimeout(c.config.Timeout)
-	client.SetRetryCount(c.config.Retry)
-	client.SetDisableWarn(true)
-	client.SetDebug(c.config.Debug)
+	client := c.client
 	client.SetPreRequestHook(aliyundrive.HcHook)
-	client.SetHeader(aliyundrive.UserAgent, c.config.UserAgent)
-	client.SetHeader(aliyundrive.ContentType, aliyundrive.ContentTypeJSON)
 	return &aliyundrive.AliYunDrive{
-		Client:       client,
+		Client:       c.client,
 		RefreshToken: aliConfig.RefreshToken,
 		Cache:        map[string]string{},
 	}

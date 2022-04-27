@@ -3,7 +3,6 @@ package spider
 import (
 	"encoding/json"
 	"errors"
-	"io"
 	"strings"
 )
 
@@ -50,19 +49,20 @@ func ResolveTelecom(client *Client, url, passcode string, formats ...string) ([]
 // resolveTelegram will find all the downloadable links
 func resolveTelegram(client *Client, url, passcode, shareId, fileId string, results map[string][]string) error {
 	// Build queries
-	queries := make([]*Query, 0, 4)
-	queries = append(queries, &Query{Key: "url", Value: url})
+	queries := map[string]string{
+		"url": url,
+	}
 	if passcode != "" {
-		queries = append(queries, &Query{Key: "passCode", Value: passcode})
+		queries["passCode"] = passcode
 	}
 	if shareId != "" {
-		queries = append(queries, &Query{Key: "shareId", Value: shareId})
+		queries["shareId"] = shareId
 	}
 	if passcode != "" {
-		queries = append(queries, &Query{Key: "fileId", Value: fileId})
+		queries["fileId"] = fileId
 	}
 
-	content, err := requestContent(client, queries...)
+	content, err := requestContent(client, queries)
 	if err != nil {
 		return err
 	}
@@ -105,19 +105,13 @@ func resolveTelegram(client *Client, url, passcode, shareId, fileId string, resu
 }
 
 // requestContent will perform http request and return the response in string.
-func requestContent(client *Client, queries ...*Query) (string, error) {
+func requestContent(client *Client, queries map[string]string) (string, error) {
 	// Perform the request.
-	resp, err := client.Get(telecomAPI, "", queries...)
+	resp, err := client.R().
+		SetQueryParams(queries).
+		Get(telecomAPI)
 	if err != nil {
 		return "", err
 	}
-	defer func() { _ = resp.Body.Close() }()
-
-	// Read the request content.
-	b, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return "", err
-	}
-
-	return string(b), nil
+	return resp.String(), nil
 }

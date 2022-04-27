@@ -58,25 +58,29 @@ func register() {
 
 	website := spider.GenerateUrl(regConf.website, "/api/user/sign_up")
 	referer := spider.GenerateUrl(regConf.website, "/signup")
-	form := spider.Form{
-		spider.Field{Key: "username", Value: regConf.username},
-		spider.Field{Key: "password", Value: regConf.password},
-		spider.Field{Key: "nickname", Value: regConf.username},
-		spider.Field{Key: "email", Value: regConf.email},
+
+	// Prepare form data.
+	values := map[string]string{
+		"username": regConf.username,
+		"password": regConf.password,
+		"nickname": regConf.username,
+		"email":    regConf.email,
 	}
 
-	// Get http get response
-	resp, err := client.FormPost(website, referer, form)
+	resp, err := client.R().
+		SetHeader("Content-Type", "application/x-www-form-urlencoded").
+		SetHeader("referer", referer).
+		SetFormData(values).
+		SetResult(&talebook.CommonResponse{}).
+		Post(website)
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer func() { _ = resp.Body.Close() }()
-
-	result := &talebook.CommonResponse{}
-	if err := spider.DecodeResponse(resp, result); err != nil {
-		log.Fatal(err)
+	if resp.IsError() {
+		log.Fatal(resp.Status())
 	}
 
+	result := resp.Result().(*talebook.CommonResponse)
 	if result.Err == talebook.SuccessStatus {
 		log.Info("Register success.")
 	} else {

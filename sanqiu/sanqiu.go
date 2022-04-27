@@ -1,9 +1,8 @@
 package sanqiu
 
 import (
-	"errors"
+	"fmt"
 	"io"
-	"net/http"
 	"os"
 	"path"
 	"path/filepath"
@@ -37,13 +36,6 @@ type downloader struct {
 func NewDownloader(config *spider.Config) *downloader {
 	// Create common http client.
 	client := spider.NewClient(config)
-	client.CheckRedirect(func(req *http.Request, via []*http.Request) error {
-		// Allow 10 redirects by default.
-		if len(via) >= 10 {
-			return errors.New("stopped after 10 redirects")
-		}
-		return nil
-	})
 
 	// Get last book ID
 	last, err := latestBookID(client, config)
@@ -69,13 +61,14 @@ func NewDownloader(config *spider.Config) *downloader {
 
 // latestBookID will return the last available book ID.
 func latestBookID(client *spider.Client, config *spider.Config) (int64, error) {
-	resp, err := client.Get(config.Website, "")
+	resp, err := client.R().
+		SetDoNotParseResponse(true).
+		Get(config.Website)
 	if err != nil {
 		return 0, err
 	}
-	defer func() { _ = resp.Body.Close() }()
-
-	doc, err := goquery.NewDocumentFromReader(resp.Body)
+	defer func() { _ = resp.RawBody().Close() }()
+	doc, err := goquery.NewDocumentFromReader(resp.RawBody())
 	if err != nil {
 		return 0, err
 	}
@@ -149,9 +142,7 @@ func (d *downloader) download() {
 		}
 
 		for _, l := range links {
-			err := d.client.Retry(func() error {
-				return d.downloadBook(metadata, l)
-			})
+			err := d.downloadBook(metadata, l)
 			if err != nil {
 				log.Fatal(err)
 			}
@@ -164,13 +155,12 @@ func (d *downloader) download() {
 
 // downloadBook would download the book to saving path.
 func (d *downloader) downloadBook(meta *BookMeta, link string) error {
-	resp, err := d.client.Get(link, "")
+	resp, err := d.client.GetHttpClient().Get(link)
 	if err != nil {
-		return err
+		return fmt.Errorf("download faild: %s", err)
 	}
 	defer func() { _ = resp.Body.Close() }()
 
-	//
 	// Generate file name.
 	format, ok := spider.Extension(link)
 	if !ok {

@@ -5,6 +5,8 @@ import (
 	"mime"
 	"net/http"
 	"strings"
+
+	"github.com/go-resty/resty/v2"
 )
 
 const (
@@ -13,10 +15,9 @@ const (
 )
 
 // DecodeResponse would parse the http response into a json based content.
-func DecodeResponse(resp *http.Response, data any) (err error) {
-	decoder := json.NewDecoder(resp.Body)
+func DecodeResponse(resp *resty.Response, data any) (err error) {
+	decoder := json.NewDecoder(resp.RawBody())
 	err = decoder.Decode(data)
-
 	return
 }
 

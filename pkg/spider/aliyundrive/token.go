@@ -30,6 +30,7 @@ func (ali AliYunDrive) getToken() (*TokenResponse, error) {
 		ali.RefreshToken = rt
 	}
 	resp, err := ali.Client.R().
+		SetHeader(ContentType, ContentTypeJSON).
 		SetBody(TokenRequest{GrantType: "refresh_token", RefreshToken: ali.RefreshToken}).
 		SetResult(TokenResponse{}).
 		SetError(ErrorResponse{}).

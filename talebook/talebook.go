@@ -3,7 +3,6 @@ package talebook
 import (
 	"errors"
 	"io"
-	"net/http"
 	"os"
 	"path"
 	"path/filepath"
@@ -31,20 +30,7 @@ func NewDownloader(c *spider.Config) *downloadWorker {
 	client := spider.NewClient(c)
 
 	// Disable login redirect.
-	loginUrl := spider.GenerateUrl(c.Website, "/login")
-	client.CheckRedirect(
-		func(req *http.Request, via []*http.Request) error {
-			if req.URL.String() == loginUrl {
-				return ErrNeedSignin
-			}
-
-			// Allow 10 redirects by default.
-			if len(via) >= 10 {
-				return errors.New("stopped after 10 redirects")
-			}
-			return nil
-		},
-	)
+	//loginUrl := spider.GenerateUrl(c.Website, "/login")
 
 	// Try to signin if required.
 	if err := login(c.Username, c.Password, c.Website, client); err != nil {
@@ -85,26 +71,31 @@ func login(username, password, website string, client *spider.Client) error {
 
 	site := spider.GenerateUrl(website, "/api/user/sign_in")
 	referer := spider.GenerateUrl(website, "/login")
-	form := spider.Form{
-		spider.Field{Key: "username", Value: username},
-		spider.Field{Key: "password", Value: password},
+
+	// Prepare form data.
+	values := map[string]string{
+		"username": username,
+		"password": password,
 	}
 
-	resp, err := client.FormPost(site, referer, form)
+	resp, err := client.R().
+		SetHeader("Content-Type", "application/x-www-form-urlencoded").
+		SetHeader("referer", referer).
+		SetFormData(values).
+		SetResult(&LoginResponse{}).
+		Post(site)
 	if err != nil {
 		return err
 	}
-	defer func() { _ = resp.Body.Close() }()
 
-	result := &LoginResponse{}
-	if err := spider.DecodeResponse(resp, result); err != nil {
-		return err
+	if resp.IsError() {
+		return errors.New(resp.Status())
 	}
 
-	if result.Err != SuccessStatus {
+	result := resp.Result().(*LoginResponse)
+	if result.Err != "ok" {
 		return errors.New(result.Msg)
 	}
-
 	log.Info("Login success. Save cookies into file.")
 	return nil
 }
@@ -114,16 +105,17 @@ func latestBookID(website string, client *spider.Client) (int64, error) {
 	site := spider.GenerateUrl(website, "/api/recent")
 	referer := spider.GenerateUrl(website, "/recent")
 
-	resp, err := client.Get(site, referer)
+	resp, err := client.R().
+		SetHeader("referer", referer).
+		SetResult(&BookListResponse{}).
+		Get(site)
 	if err != nil {
 		return 0, err
 	}
-	defer func() { _ = resp.Body.Close() }()
-
-	result := &BookListResponse{}
-	if err := spider.DecodeResponse(resp, result); err != nil {
-		return 0, err
+	if resp.IsError() {
+		return 0, errors.New(resp.Status())
 	}
+	result := resp.Result().(*BookListResponse)
 
 	if result.Err != SuccessStatus {
 		return 0, errors.New(result.Msg)
@@ -185,16 +177,16 @@ func (worker *downloadWorker) Download() {
 func (worker *downloadWorker) queryBookInfo(bookID int64) (*BookResponse, error) {
 	site := spider.GenerateUrl(worker.config.Website, "/api/book", strconv.FormatInt(bookID, 10))
 
-	resp, err := worker.client.Get(site, "")
+	resp, err := worker.client.R().
+		SetResult(&BookResponse{}).
+		Get(site)
 	if err != nil {
 		return nil, err
 	}
-	defer func() { _ = resp.Body.Close() }()
-
-	result := &BookResponse{}
-	if err := spider.DecodeResponse(resp, result); err != nil {
-		return nil, err
+	if resp.IsError() {
+		return nil, errors.New(resp.Status())
 	}
+	result := resp.Result().(*BookResponse)
 
 	switch result.Err {
 	case SuccessStatus:
@@ -230,7 +222,7 @@ func (worker *downloadWorker) downloadBook(bookID int64, title, format, href str
 		site = spider.GenerateUrl(worker.config.Website, href)
 	}
 
-	resp, err := worker.client.Get(site, "")
+	resp, err := worker.client.GetHttpClient().Get(site)
 	if err != nil {
 		return err
 	}

@@ -48,13 +48,15 @@ func (d *downloader) bookMetadata(bookID int64) *BookMeta {
 	page := spider.GenerateUrl(d.config.Website, "/download.php?id="+strconv.FormatInt(bookID, 10))
 	referer := spider.GenerateUrl(d.config.Website, "/"+strconv.FormatInt(bookID, 10)+".html")
 
-	resp, err := d.client.Get(page, referer)
+	resp, err := d.client.R().
+		SetDoNotParseResponse(true).
+		SetHeader("referer", referer).
+		Get(page)
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer func() { _ = resp.Body.Close() }()
-
-	doc, err := goquery.NewDocumentFromReader(resp.Body)
+	defer func() { _ = resp.RawBody().Close() }()
+	doc, err := goquery.NewDocumentFromReader(resp.RawBody())
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -100,13 +102,13 @@ func (d *downloader) bookMetadata(bookID int64) *BookMeta {
 	te := doc.Find(".content h2")
 	if te.Length() < 1 || te.Text() == "" {
 		// Use title from book page.
-		resp, err := d.client.Get(referer, "")
+		resp, err := d.client.R().SetDoNotParseResponse(true).Get(referer)
 		if err != nil {
 			log.Fatal(err)
 		}
-		defer func() { _ = resp.Body.Close() }()
+		defer func() { _ = resp.RawBody().Close() }()
 
-		doc, err := goquery.NewDocumentFromReader(resp.Body)
+		doc, err := goquery.NewDocumentFromReader(resp.RawBody())
 		if err != nil {
 			log.Fatal(err)
 		}
