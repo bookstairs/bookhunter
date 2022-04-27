@@ -29,9 +29,6 @@ func NewDownloader(c *spider.Config) *downloadWorker {
 	// Create common http client.
 	client := spider.NewClient(c)
 
-	// Disable login redirect.
-	//loginUrl := spider.GenerateUrl(c.Website, "/login")
-
 	// Try to signin if required.
 	if err := login(c.Username, c.Password, c.Website, client); err != nil {
 		log.Fatal(err)
