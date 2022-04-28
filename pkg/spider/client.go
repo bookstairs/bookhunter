@@ -1,6 +1,7 @@
 package spider
 
 import (
+	"fmt"
 	"io"
 	"path"
 
@@ -43,6 +44,9 @@ func (c *Client) Download(link string, save func(filename string, contentLength 
 	resp, err := c.client.GetClient().Get(link)
 	if err != nil {
 		return err
+	}
+	if resp.StatusCode > 399 {
+		return fmt.Errorf("get link faild, %s", resp.Status)
 	}
 	filename := Filename(resp)
 	contentLength := resp.ContentLength
