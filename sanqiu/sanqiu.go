@@ -155,55 +155,47 @@ func (d *downloader) download() {
 
 // downloadBook would download the book to saving path.
 func (d *downloader) downloadBook(meta *BookMeta, link string) error {
-	resp, err := d.client.GetHttpClient().Get(link)
+	save := func(filename string, contentLength int64, data io.ReadCloser) error {
+		defer func() { _ = data.Close() }()
+		// Generate file name.
+		format, ok := spider.Extension(link)
+		if !ok {
+			format, _ = spider.Extension(filename)
+		}
+		newFilename := strconv.FormatInt(meta.Id, 10) + "." + strings.ToLower(format)
+		if !d.config.Rename && filename != "" {
+			newFilename = filename
+		}
+		// Remove illegal characters. Ref: https://en.wikipedia.org/wiki/Filename#Reserved_characters_and_words
+		newFilename = rename.EscapeFilename(newFilename)
+		// Generate the file path.
+		file := filepath.Join(d.config.DownloadPath, newFilename)
+		// Remove the exist file.
+		if _, err := os.Stat(file); err == nil {
+			if err := os.Remove(file); err != nil {
+				return err
+			}
+		}
+		// Create file writer.
+		writer, err := os.Create(file)
+		if err != nil {
+			return err
+		}
+		defer func() { _ = writer.Close() }()
+		// Add download progress
+		bar := log.NewProgressBar(meta.Id, d.progress.Size(), format+" "+meta.Title, contentLength)
+		// Write file content
+		_, err = io.Copy(io.MultiWriter(writer, bar), data)
+		if err != nil {
+			return err
+		}
+		return nil
+	}
+
+	err := d.client.Download(link, save)
 	if err != nil {
 		return fmt.Errorf("download faild: %s", err)
 	}
-	defer func() { _ = resp.Body.Close() }()
-
-	// Generate file name.
-	format, ok := spider.Extension(link)
-	if !ok {
-		tmp := spider.Filename(resp)
-		format, _ = spider.Extension(tmp)
-	}
-	filename := strconv.FormatInt(meta.Id, 10) + "." + strings.ToLower(format)
-	if !d.config.Rename {
-		name := spider.Filename(resp)
-		if name != "" {
-			filename = name
-		}
-	}
-
-	// Remove illegal characters. Ref: https://en.wikipedia.org/wiki/Filename#Reserved_characters_and_words
-	filename = rename.EscapeFilename(filename)
-
-	// Generate the file path.
-	file := filepath.Join(d.config.DownloadPath, filename)
-
-	// Remove the exist file.
-	if _, err := os.Stat(file); err == nil {
-		if err := os.Remove(file); err != nil {
-			return err
-		}
-	}
-
-	// Create file writer.
-	writer, err := os.Create(file)
-	if err != nil {
-		return err
-	}
-	defer func() { _ = writer.Close() }()
-
-	// Add download progress
-	bar := log.NewProgressBar(meta.Id, d.progress.Size(), format+" "+meta.Title, resp.ContentLength)
-
-	// Write file content
-	_, err = io.Copy(io.MultiWriter(writer, bar), resp.Body)
-	if err != nil {
-		return err
-	}
-
 	return nil
 }
 

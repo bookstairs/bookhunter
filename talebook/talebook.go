@@ -2,6 +2,7 @@ package talebook
 
 import (
 	"errors"
+	"fmt"
 	"io"
 	"os"
 	"path"
@@ -219,53 +220,47 @@ func (worker *downloadWorker) downloadBook(bookID int64, title, format, href str
 		site = spider.GenerateUrl(worker.config.Website, href)
 	}
 
-	resp, err := worker.client.GetHttpClient().Get(site)
-	if err != nil {
-		return err
-	}
-	defer func() { _ = resp.Body.Close() }()
-
-	// Generate file name.
-	filename := strconv.FormatInt(bookID, 10) + "." + strings.ToLower(format)
-	// Use readable name.
-	if !worker.config.Rename {
-		name := spider.Filename(resp)
-		if name == "" {
-			filename = title + "." + strings.ToLower(format)
-		} else {
-			filename = name
+	save := func(filename string, contentLength int64, data io.ReadCloser) error {
+		defer func() { _ = data.Close() }()
+		// Generate file name.
+		format, ok := spider.Extension(site)
+		if !ok {
+			format, _ = spider.Extension(filename)
 		}
-	}
-
-	// Remove illegal characters. Ref: https://en.wikipedia.org/wiki/Filename#Reserved_characters_and_words
-	filename = rename.EscapeFilename(filename)
-
-	// Generate the file path.
-	file := filepath.Join(worker.config.DownloadPath, filename)
-
-	// Remove the exist file.
-	if _, err := os.Stat(file); err == nil {
-		if err := os.Remove(file); err != nil {
+		newFilename := strconv.FormatInt(bookID, 10) + "." + strings.ToLower(format)
+		if !worker.config.Rename && filename != "" {
+			newFilename = filename
+		}
+		// Remove illegal characters. Ref: https://en.wikipedia.org/wiki/Filename#Reserved_characters_and_words
+		newFilename = rename.EscapeFilename(newFilename)
+		// Generate the file path.
+		file := filepath.Join(worker.config.DownloadPath, newFilename)
+		// Remove the exist file.
+		if _, err := os.Stat(file); err == nil {
+			if err := os.Remove(file); err != nil {
+				return err
+			}
+		}
+		// Create file writer.
+		writer, err := os.Create(file)
+		if err != nil {
 			return err
 		}
+		defer func() { _ = writer.Close() }()
+		// Add download progress
+		bar := log.NewProgressBar(bookID, worker.progress.Size(), format+" "+title, contentLength)
+		// Write file content
+		_, err = io.Copy(io.MultiWriter(writer, bar), data)
+		if err != nil {
+			return err
+		}
+		return nil
 	}
 
-	// Create file writer.
-	writer, err := os.Create(file)
+	err := worker.client.Download(site, save)
 	if err != nil {
-		return err
+		return fmt.Errorf("download faild: %s", err)
 	}
-	defer func() { _ = writer.Close() }()
-
-	// Add download progress
-	bar := log.NewProgressBar(bookID, worker.progress.Size(), format+" "+title, resp.ContentLength)
-
-	// Write file content
-	_, err = io.Copy(io.MultiWriter(writer, bar), resp.Body)
-	if err != nil {
-		return err
-	}
-
 	return nil
 }
 

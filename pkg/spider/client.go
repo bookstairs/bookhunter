@@ -1,7 +1,7 @@
 package spider
 
 import (
-	"net/http"
+	"io"
 	"path"
 
 	"github.com/go-resty/resty/v2"
@@ -12,12 +12,6 @@ import (
 type Client struct {
 	client *resty.Client
 	config *Config
-}
-
-// Query used for get
-type Query struct {
-	Key   string
-	Value string
 }
 
 // NewClient would create a client with persisted cookie file.
@@ -45,6 +39,13 @@ func (c *Client) R() *resty.Request {
 	return c.client.R()
 }
 
-func (c *Client) GetHttpClient() *http.Client {
-	return c.client.GetClient()
+func (c *Client) Download(link string, save func(filename string, contentLength int64, data io.ReadCloser) error) error {
+	resp, err := c.client.GetClient().Get(link)
+	if err != nil {
+		return err
+	}
+	filename := Filename(resp)
+	contentLength := resp.ContentLength
+	err = save(filename, contentLength, resp.Body)
+	return err
 }
