@@ -7,6 +7,7 @@ import (
 func (ali AliYunDrive) GetAnonymousShare(shareId string) (*GetShareInfoResponse, error) {
 	downloadResp, err := ali.Client.R().
 		SetAuthToken(ali.GetAuthorizationToken()).
+		SetHeader(ContentType, ContentTypeJSON).
 		SetBody(GetShareInfoRequest{ShareId: shareId}).
 		SetResult(GetShareInfoResponse{}).
 		SetError(ErrorResponse{}).
@@ -34,6 +35,7 @@ func (ali AliYunDrive) GetShare(shareId string, shareToken string) (data chan *B
 func (ali AliYunDrive) GetShredToken(shareId string, sharePwd string) (*GetShareTokenResponse, error) {
 	downloadResp, err := ali.Client.R().
 		SetAuthToken(ali.GetAuthorizationToken()).
+		SetHeader(ContentType, ContentTypeJSON).
 		SetBody(GetShareTokenRequest{ShareId: shareId, SharePwd: sharePwd}).
 		SetResult(GetShareTokenResponse{}).
 		SetError(ErrorResponse{}).
@@ -57,6 +59,7 @@ func (ali AliYunDrive) fileList(shareToken string, shareId string, result chan *
 func (ali AliYunDrive) fileListByMarker(param FileListParam, result chan *BaseShareFile) error {
 	downloadResp, err := ali.Client.R().
 		SetAuthToken(ali.GetAuthorizationToken()).
+		SetHeader(ContentType, ContentTypeJSON).
 		SetHeader(xShareToken, param.shareToken).
 		SetBody(GetShareFileListRequest{
 			ShareId:        param.shareId,
@@ -106,6 +109,7 @@ func (ali AliYunDrive) fileListByMarker(param FileListParam, result chan *BaseSh
 func (ali AliYunDrive) GetFileDownloadUrl(shareToken string, shareId string, fileId string) (string, error) {
 	downloadResp, err := ali.Client.R().
 		SetAuthToken(ali.GetAuthorizationToken()).
+		SetHeader(ContentType, ContentTypeJSON).
 		SetHeader(xShareToken, shareToken).
 		SetBody(GetShareLinkDownloadUrlRequest{
 			ShareId:   shareId,

@@ -2,8 +2,8 @@ package talebook
 
 import (
 	"errors"
+	"fmt"
 	"io"
-	"net/http"
 	"os"
 	"path"
 	"path/filepath"
@@ -29,22 +29,6 @@ type downloadWorker struct {
 func NewDownloader(c *spider.Config) *downloadWorker {
 	// Create common http client.
 	client := spider.NewClient(c)
-
-	// Disable login redirect.
-	loginUrl := spider.GenerateUrl(c.Website, "/login")
-	client.CheckRedirect(
-		func(req *http.Request, via []*http.Request) error {
-			if req.URL.String() == loginUrl {
-				return ErrNeedSignin
-			}
-
-			// Allow 10 redirects by default.
-			if len(via) >= 10 {
-				return errors.New("stopped after 10 redirects")
-			}
-			return nil
-		},
-	)
 
 	// Try to signin if required.
 	if err := login(c.Username, c.Password, c.Website, client); err != nil {
@@ -85,26 +69,31 @@ func login(username, password, website string, client *spider.Client) error {
 
 	site := spider.GenerateUrl(website, "/api/user/sign_in")
 	referer := spider.GenerateUrl(website, "/login")
-	form := spider.Form{
-		spider.Field{Key: "username", Value: username},
-		spider.Field{Key: "password", Value: password},
+
+	// Prepare form data.
+	values := map[string]string{
+		"username": username,
+		"password": password,
 	}
 
-	resp, err := client.FormPost(site, referer, form)
+	resp, err := client.R().
+		SetHeader("Content-Type", "application/x-www-form-urlencoded").
+		SetHeader("referer", referer).
+		SetFormData(values).
+		SetResult(&LoginResponse{}).
+		Post(site)
 	if err != nil {
 		return err
 	}
-	defer func() { _ = resp.Body.Close() }()
 
-	result := &LoginResponse{}
-	if err := spider.DecodeResponse(resp, result); err != nil {
-		return err
+	if resp.IsError() {
+		return errors.New(resp.Status())
 	}
 
-	if result.Err != SuccessStatus {
+	result := resp.Result().(*LoginResponse)
+	if result.Err != "ok" {
 		return errors.New(result.Msg)
 	}
-
 	log.Info("Login success. Save cookies into file.")
 	return nil
 }
@@ -114,16 +103,17 @@ func latestBookID(website string, client *spider.Client) (int64, error) {
 	site := spider.GenerateUrl(website, "/api/recent")
 	referer := spider.GenerateUrl(website, "/recent")
 
-	resp, err := client.Get(site, referer)
+	resp, err := client.R().
+		SetHeader("referer", referer).
+		SetResult(&BookListResponse{}).
+		Get(site)
 	if err != nil {
 		return 0, err
 	}
-	defer func() { _ = resp.Body.Close() }()
-
-	result := &BookListResponse{}
-	if err := spider.DecodeResponse(resp, result); err != nil {
-		return 0, err
+	if resp.IsError() {
+		return 0, errors.New(resp.Status())
 	}
+	result := resp.Result().(*BookListResponse)
 
 	if result.Err != SuccessStatus {
 		return 0, errors.New(result.Msg)
@@ -185,16 +175,16 @@ func (worker *downloadWorker) Download() {
 func (worker *downloadWorker) queryBookInfo(bookID int64) (*BookResponse, error) {
 	site := spider.GenerateUrl(worker.config.Website, "/api/book", strconv.FormatInt(bookID, 10))
 
-	resp, err := worker.client.Get(site, "")
+	resp, err := worker.client.R().
+		SetResult(&BookResponse{}).
+		Get(site)
 	if err != nil {
 		return nil, err
 	}
-	defer func() { _ = resp.Body.Close() }()
-
-	result := &BookResponse{}
-	if err := spider.DecodeResponse(resp, result); err != nil {
-		return nil, err
+	if resp.IsError() {
+		return nil, errors.New(resp.Status())
 	}
+	result := resp.Result().(*BookResponse)
 
 	switch result.Err {
 	case SuccessStatus:
@@ -230,53 +220,47 @@ func (worker *downloadWorker) downloadBook(bookID int64, title, format, href str
 		site = spider.GenerateUrl(worker.config.Website, href)
 	}
 
-	resp, err := worker.client.Get(site, "")
-	if err != nil {
-		return err
-	}
-	defer func() { _ = resp.Body.Close() }()
-
-	// Generate file name.
-	filename := strconv.FormatInt(bookID, 10) + "." + strings.ToLower(format)
-	// Use readable name.
-	if !worker.config.Rename {
-		name := spider.Filename(resp)
-		if name == "" {
-			filename = title + "." + strings.ToLower(format)
-		} else {
-			filename = name
+	save := func(filename string, contentLength int64, data io.ReadCloser) error {
+		defer func() { _ = data.Close() }()
+		// Generate file name.
+		format, ok := spider.Extension(site)
+		if !ok {
+			format, _ = spider.Extension(filename)
 		}
-	}
-
-	// Remove illegal characters. Ref: https://en.wikipedia.org/wiki/Filename#Reserved_characters_and_words
-	filename = rename.EscapeFilename(filename)
-
-	// Generate the file path.
-	file := filepath.Join(worker.config.DownloadPath, filename)
-
-	// Remove the exist file.
-	if _, err := os.Stat(file); err == nil {
-		if err := os.Remove(file); err != nil {
+		newFilename := strconv.FormatInt(bookID, 10) + "." + strings.ToLower(format)
+		if !worker.config.Rename && filename != "" {
+			newFilename = filename
+		}
+		// Remove illegal characters. Ref: https://en.wikipedia.org/wiki/Filename#Reserved_characters_and_words
+		newFilename = rename.EscapeFilename(newFilename)
+		// Generate the file path.
+		file := filepath.Join(worker.config.DownloadPath, newFilename)
+		// Remove the exist file.
+		if _, err := os.Stat(file); err == nil {
+			if err := os.Remove(file); err != nil {
+				return err
+			}
+		}
+		// Create file writer.
+		writer, err := os.Create(file)
+		if err != nil {
 			return err
 		}
+		defer func() { _ = writer.Close() }()
+		// Add download progress
+		bar := log.NewProgressBar(bookID, worker.progress.Size(), format+" "+title, contentLength)
+		// Write file content
+		_, err = io.Copy(io.MultiWriter(writer, bar), data)
+		if err != nil {
+			return err
+		}
+		return nil
 	}
 
-	// Create file writer.
-	writer, err := os.Create(file)
+	err := worker.client.Download(site, save)
 	if err != nil {
-		return err
+		return fmt.Errorf("download faild: %s", err)
 	}
-	defer func() { _ = writer.Close() }()
-
-	// Add download progress
-	bar := log.NewProgressBar(bookID, worker.progress.Size(), format+" "+title, resp.ContentLength)
-
-	// Write file content
-	_, err = io.Copy(io.MultiWriter(writer, bar), resp.Body)
-	if err != nil {
-		return err
-	}
-
 	return nil
 }
 
