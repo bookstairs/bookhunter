@@ -21,7 +21,7 @@ import (
 )
 
 // DefaultWebsite is the website for sanqiu book.
-const DefaultWebsite = "https://www.sanqiu.cc"
+const DefaultWebsite = "https://www.sanqiu.mobi"
 
 var (
 	bookIDRe = regexp.MustCompile(".*?/(\\d+?).html")

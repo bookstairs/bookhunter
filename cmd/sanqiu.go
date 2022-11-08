@@ -14,10 +14,10 @@ const lowestBookID = 163
 // Used for downloading books from sanqiu website.
 var c = spider.NewConfig()
 
-// sanqiuCmd used for download books from sanqiu.cc
+// sanqiuCmd used for download books from sanqiu.mobi
 var sanqiuCmd = &cobra.Command{
 	Use:   "sanqiu",
-	Short: "A tool for downloading books from sanqiu.cc",
+	Short: "A tool for downloading books from sanqiu.mobi",
 	Run: func(cmd *cobra.Command, args []string) {
 		// Validate config.
 		spider.ValidateDownloadConfig(c)

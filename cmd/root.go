@@ -13,7 +13,7 @@ var rootCmd = &cobra.Command{
 	Long: `You can use this command to download book from these websites.
 
 1. Self-hosted talebook websites
-2. https://www.sanqiu.cc
+2. https://www.sanqiu.mobi
 3. Telegram channel`,
 }
 

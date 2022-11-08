@@ -1,6 +1,6 @@
 # bookhunter
 
-Downloading books from [talebook](https://github.com/talebook/talebook), [www.sanqiu.cc](https://www.sanqiu.cc/)
+Downloading books from [talebook](https://github.com/talebook/talebook), [www.sanqiu.mobi](https://www.sanqiu.mobi/)
 This is totally rewrite fork compare to its [original version](https://github.com/hellojukay/dl-talebook).
 
 ## Development
@@ -33,10 +33,10 @@ Use "bookhunter talebook [command] --help" for more information about a command.
 
 ### Download books from Sanqiu
 
-1. Find all the books update from [www.sanqiu.cc](https://www.sanqiu.cc/).
+1. Find all the books update from [www.sanqiu.mobi](https://www.sanqiu.mobi/).
 2. Download required formats from 189 cloud drive.
-2. Download required formats from aliyun drive.
-3. Record the download progress for crontab jobs.
+3. Download required formats from aliyun drive.
+4. Record the download progress for crontab jobs.
 
 ```shell
 Usage:
@@ -56,10 +56,10 @@ Flags:
   -t, --thread int            The number of download threads. (default 1)
   -o, --timeout duration      The max pending time for download request. (default 10m0s)
   -a, --user-agent string     Set User-Agent for download request. (default "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.51 Safari/537.36")
-  -w, --website string        The website for sanqiu. You don't need to override the default url. (default "https://www.sanqiu.cc")
+  -w, --website string        The website for sanqiu. You don't need to override the default url. (default "https://www.sanqiu.mobi")
 ```
 
-### Download books from my Telegram groups.
+### Download books from Telegram groups.
 
 1. Download all the valid book formats from a telegram channel.
 2. Record the download progress for crontab jobs.
