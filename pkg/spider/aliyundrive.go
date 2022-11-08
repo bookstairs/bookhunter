@@ -6,7 +6,7 @@ import (
 
 	"github.com/go-resty/resty/v2"
 
-	"github.com/bibliolater/bookhunter/pkg/spider/aliyundrive"
+	"github.com/bookstairs/bookhunter/pkg/spider/aliyundrive"
 )
 
 type AliYunConfig struct {

@@ -7,9 +7,9 @@ import (
 
 	"github.com/gotd/td/telegram"
 
-	"github.com/bibliolater/bookhunter/pkg/log"
-	"github.com/bibliolater/bookhunter/pkg/progress"
-	"github.com/bibliolater/bookhunter/pkg/spider"
+	"github.com/bookstairs/bookhunter/pkg/log"
+	"github.com/bookstairs/bookhunter/pkg/progress"
+	"github.com/bookstairs/bookhunter/pkg/spider"
 )
 
 // Config extends the spider download config and add telegram related configuration.

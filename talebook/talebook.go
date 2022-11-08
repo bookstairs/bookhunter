@@ -10,10 +10,10 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/bibliolater/bookhunter/pkg/log"
-	"github.com/bibliolater/bookhunter/pkg/progress"
-	"github.com/bibliolater/bookhunter/pkg/rename"
-	"github.com/bibliolater/bookhunter/pkg/spider"
+	"github.com/bookstairs/bookhunter/pkg/log"
+	"github.com/bookstairs/bookhunter/pkg/progress"
+	"github.com/bookstairs/bookhunter/pkg/rename"
+	"github.com/bookstairs/bookhunter/pkg/spider"
 )
 
 var ErrNeedSignin = errors.New("need user account to download books")

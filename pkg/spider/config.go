@@ -8,7 +8,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/bibliolater/bookhunter/pkg/log"
+	"github.com/bookstairs/bookhunter/pkg/log"
 )
 
 var (

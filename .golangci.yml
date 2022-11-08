@@ -25,7 +25,7 @@ linters-settings:
   gocyclo:
     min-complexity: 15
   goimports:
-    local-prefixes: github.com/bibliolater/bookhunter
+    local-prefixes: github.com/bookstairs/bookhunter
   lll:
     line-length: 140
   misspell:

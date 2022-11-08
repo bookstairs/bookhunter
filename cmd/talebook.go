@@ -3,7 +3,7 @@ package cmd
 import (
 	"github.com/spf13/cobra"
 
-	"github.com/bibliolater/bookhunter/cmd/talebook"
+	"github.com/bookstairs/bookhunter/cmd/talebook"
 )
 
 // talebookCmd used to download books from talebook

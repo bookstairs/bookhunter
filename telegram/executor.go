@@ -13,7 +13,7 @@ import (
 	"golang.org/x/net/proxy"
 	"golang.org/x/time/rate"
 
-	"github.com/bibliolater/bookhunter/pkg/log"
+	"github.com/bookstairs/bookhunter/pkg/log"
 )
 
 type executor struct {

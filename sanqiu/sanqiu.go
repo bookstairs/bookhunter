@@ -14,10 +14,10 @@ import (
 
 	"github.com/PuerkitoBio/goquery"
 
-	"github.com/bibliolater/bookhunter/pkg/log"
-	"github.com/bibliolater/bookhunter/pkg/progress"
-	"github.com/bibliolater/bookhunter/pkg/rename"
-	"github.com/bibliolater/bookhunter/pkg/spider"
+	"github.com/bookstairs/bookhunter/pkg/log"
+	"github.com/bookstairs/bookhunter/pkg/progress"
+	"github.com/bookstairs/bookhunter/pkg/rename"
+	"github.com/bookstairs/bookhunter/pkg/spider"
 )
 
 // DefaultWebsite is the website for sanqiu book.

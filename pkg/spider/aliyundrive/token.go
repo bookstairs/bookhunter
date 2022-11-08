@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/bibliolater/bookhunter/pkg/log"
+	"github.com/bookstairs/bookhunter/pkg/log"
 )
 
 func (ali AliYunDrive) GetAuthorizationToken() string {

@@ -8,12 +8,12 @@ builds:
   - id: bookhunter
     ldflags:
       - -s -w
-      - -X github.com/bibliolater/bookhunter/cmd.gitMajor={{ .Major }}
-      - -X github.com/bibliolater/bookhunter/cmd.gitMinor={{ .Minor }}
-      - -X github.com/bibliolater/bookhunter/cmd.gitVersion={{ .Version }}
-      - -X github.com/bibliolater/bookhunter/cmd.gitCommit={{ .Commit }}
-      - -X github.com/bibliolater/bookhunter/cmd.gitTreeState=clean
-      - -X github.com/bibliolater/bookhunter/cmd.buildDate={{ .Date }}
+      - -X github.com/bookstairs/bookhunter/cmd.gitMajor={{ .Major }}
+      - -X github.com/bookstairs/bookhunter/cmd.gitMinor={{ .Minor }}
+      - -X github.com/bookstairs/bookhunter/cmd.gitVersion={{ .Version }}
+      - -X github.com/bookstairs/bookhunter/cmd.gitCommit={{ .Commit }}
+      - -X github.com/bookstairs/bookhunter/cmd.gitTreeState=clean
+      - -X github.com/bookstairs/bookhunter/cmd.buildDate={{ .Date }}
     env:
       - CGO_ENABLED=0
     goos:
@@ -27,27 +27,27 @@ builds:
 
 scoop:
   bucket:
-    owner: bibliolater
+    owner: bookstairs
     name: scoop-bucket
     branch: master
   commit_author:
     name: syhily
     email: syhily@gmail.com
-  homepage: "https://github.com/bibliolater"
+  homepage: "https://github.com/bookstairs"
   description: "Software to download chinese ebooks from Internet."
   license: MIT
 
 brews:
   - name: bookhunter
     tap:
-      owner: bibliolater
+      owner: bookstairs
       name: homebrew-tap
       branch: master
     commit_author:
       name: syhily
       email: syhily@gmail.com
     folder: Formula
-    homepage: "https://github.com/bibliolater"
+    homepage: "https://github.com/bookstairs"
     description: "Software to download chinese ebooks from Internet."
     license: "MIT"
     install: |

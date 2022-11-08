@@ -7,7 +7,7 @@ This is totally rewrite fork compare to its [original version](https://github.co
 
 1. [Go Releaser](https://github.com/goreleaser/goreleaser) is used for releasing and local building
 2. [golangci-lint](https://github.com/golangci/golangci-lint) is used for code style.
-3. [goimports-reviser](https://github.com/incu6us/goimports-reviser) is used for sorting imports.
+3. [pre-commit](https://pre-commit.com/) is used for checking code before committing.
 
 ## Feature
 
@@ -102,20 +102,20 @@ TODO
 ### Homebrew (for macOS, Linux)
 
 ```shell
-brew tap bibliolater/tap
+brew tap bookstairs/tap
 brew install bookhunter
 ```
 
 ### Scope (for Windows)
 
 ```shell
-scoop bucket add bibliolater https://github.com/bibliolater/scoop-bucket.git
-scoop install bibliolater/bookhunter
+scoop bucket add bookstairs https://github.com/bookstairs/scoop-bucket.git
+scoop install bookstairs/bookhunter
 ```
 
 ### Manually
 
-Download the latest release in [release page](https://github.com/bibliolater/bookhunter/releases). Choose related
+Download the latest release in [release page](https://github.com/bookstairs/bookhunter/releases). Choose related
 tarball by your running environment.
 
 ## Usage

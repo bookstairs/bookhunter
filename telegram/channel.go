@@ -6,10 +6,10 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/bibliolater/bookhunter/pkg/log"
-
 	"github.com/gotd/td/telegram"
 	"github.com/gotd/td/tg"
+
+	"github.com/bookstairs/bookhunter/pkg/log"
 )
 
 // channelInfo will return the last available book id, channel id and access hash.

@@ -13,7 +13,7 @@ import (
 	"github.com/gotd/td/tg"
 	"golang.org/x/crypto/ssh/terminal"
 
-	"github.com/bibliolater/bookhunter/pkg/log"
+	"github.com/bookstairs/bookhunter/pkg/log"
 )
 
 // TerminalAuth implements authentication via terminal.

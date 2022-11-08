@@ -7,8 +7,8 @@ import (
 
 	"github.com/PuerkitoBio/goquery"
 
-	"github.com/bibliolater/bookhunter/pkg/log"
-	"github.com/bibliolater/bookhunter/pkg/spider"
+	"github.com/bookstairs/bookhunter/pkg/log"
+	"github.com/bookstairs/bookhunter/pkg/spider"
 )
 
 type LinkType string

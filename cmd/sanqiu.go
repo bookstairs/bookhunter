@@ -4,9 +4,9 @@ import (
 	"github.com/jedib0t/go-pretty/v6/table"
 	"github.com/spf13/cobra"
 
-	"github.com/bibliolater/bookhunter/pkg/log"
-	"github.com/bibliolater/bookhunter/pkg/spider"
-	"github.com/bibliolater/bookhunter/sanqiu"
+	"github.com/bookstairs/bookhunter/pkg/log"
+	"github.com/bookstairs/bookhunter/pkg/spider"
+	"github.com/bookstairs/bookhunter/sanqiu"
 )
 
 const lowestBookID = 163
