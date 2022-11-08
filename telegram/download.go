@@ -118,7 +118,7 @@ func (d *tgDownloader) parseFile(message tg.MessageClass) (*tgFile, bool) {
 		id:       msg.ID,
 		name:     fileName,
 		format:   format,
-		size:     document.Size,
+		size:     int(document.Size),
 		document: document.AsInputDocumentFileLocation(),
 		dest:     dest,
 	}, true
