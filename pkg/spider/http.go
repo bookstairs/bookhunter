@@ -49,8 +49,8 @@ func Filename(resp *http.Response) (name string) {
 	return
 }
 
-// GenerateUrl would remove the "/" suffix and add schema prefix to url.
-func GenerateUrl(base string, paths ...string) string {
+// GenerateURL would remove the "/" suffix and add schema prefix to url.
+func GenerateURL(base string, paths ...string) string {
 	// Remove suffix
 	l := strings.TrimRight(base, "/")
 

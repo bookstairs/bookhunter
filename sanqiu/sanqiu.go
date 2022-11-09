@@ -24,7 +24,7 @@ import (
 const DefaultWebsite = "https://www.sanqiu.mobi"
 
 var (
-	bookIDRe = regexp.MustCompile(".*?/(\\d+?).html")
+	bookIDRe = regexp.MustCompile(`.*?/(\d+?).html`)
 )
 
 type downloader struct {
@@ -133,10 +133,10 @@ func (d *downloader) download() {
 		enableAliYunDl := len(spider.AliyunConfig.RefreshToken) > 0
 		if link, ok := metadata.Links[ALIYUN]; ok && enableAliYunDl {
 			// Download books from aliyun drive
-			links, err = spider.ResolveAliYunDrive(d.client, link.Url, link.Code, d.config.Formats...)
+			links, err = spider.ResolveAliYunDrive(d.client, link.URL, link.Code, d.config.Formats...)
 		} else if link, ok := metadata.Links[TELECOM]; ok {
 			// Download books from telecom
-			links, err = spider.ResolveTelecom(d.client, link.Url, link.Code, d.config.Formats...)
+			links, err = spider.ResolveTelecom(d.client, link.URL, link.Code, d.config.Formats...)
 		} else {
 			log.Warnf("[%d/%d] Book with ID %d don't have telecom link, skip.", bookID, d.progress.Size(), bookID)
 		}
@@ -177,7 +177,7 @@ func (d *downloader) downloadBook(meta *BookMeta, link string) error {
 		tmp := spider.Filename(resp)
 		format, _ = spider.Extension(tmp)
 	}
-	filename := strconv.FormatInt(meta.Id, 10) + "." + strings.ToLower(format)
+	filename := strconv.FormatInt(meta.ID, 10) + "." + strings.ToLower(format)
 	if !d.config.Rename {
 		name := spider.Filename(resp)
 		if name != "" {
@@ -206,7 +206,7 @@ func (d *downloader) downloadBook(meta *BookMeta, link string) error {
 	defer func() { _ = writer.Close() }()
 
 	// Add download progress
-	bar := log.NewProgressBar(meta.Id, d.progress.Size(), format+" "+meta.Title, resp.ContentLength)
+	bar := log.NewProgressBar(meta.ID, d.progress.Size(), format+" "+meta.Title, resp.ContentLength)
 
 	// Write file content
 	_, err = io.Copy(io.MultiWriter(writer, bar), resp.Body)

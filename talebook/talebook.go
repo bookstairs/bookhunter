@@ -31,10 +31,10 @@ func NewDownloader(c *spider.Config) *downloadWorker {
 	client := spider.NewClient(c)
 
 	// Disable login redirect.
-	loginUrl := spider.GenerateUrl(c.Website, "/login")
+	loginURL := spider.GenerateURL(c.Website, "/login")
 	client.CheckRedirect(
 		func(req *http.Request, via []*http.Request) error {
-			if req.URL.String() == loginUrl {
+			if req.URL.String() == loginURL {
 				return ErrNeedSignin
 			}
 
@@ -83,8 +83,8 @@ func login(username, password, website string, client *spider.Client) error {
 
 	log.Info("You have provided user information, start to login.")
 
-	site := spider.GenerateUrl(website, "/api/user/sign_in")
-	referer := spider.GenerateUrl(website, "/login")
+	site := spider.GenerateURL(website, "/api/user/sign_in")
+	referer := spider.GenerateURL(website, "/login")
 	form := spider.Form{
 		spider.Field{Key: "username", Value: username},
 		spider.Field{Key: "password", Value: password},
@@ -111,8 +111,8 @@ func login(username, password, website string, client *spider.Client) error {
 
 // latestBookID will return the last available book ID.
 func latestBookID(website string, client *spider.Client) (int64, error) {
-	site := spider.GenerateUrl(website, "/api/recent")
-	referer := spider.GenerateUrl(website, "/recent")
+	site := spider.GenerateURL(website, "/api/recent")
+	referer := spider.GenerateURL(website, "/recent")
 
 	resp, err := client.Get(site, referer)
 	if err != nil {
@@ -183,7 +183,7 @@ func (worker *downloadWorker) Download() {
 
 // queryBookInfo will find the required book information.
 func (worker *downloadWorker) queryBookInfo(bookID int64) (*BookResponse, error) {
-	site := spider.GenerateUrl(worker.config.Website, "/api/book", strconv.FormatInt(bookID, 10))
+	site := spider.GenerateURL(worker.config.Website, "/api/book", strconv.FormatInt(bookID, 10))
 
 	resp, err := worker.client.Get(site, "")
 	if err != nil {
@@ -227,7 +227,7 @@ func (worker *downloadWorker) downloadBook(bookID int64, title, format, href str
 		// Backward API support.
 		site = href
 	} else {
-		site = spider.GenerateUrl(worker.config.Website, href)
+		site = spider.GenerateURL(worker.config.Website, href)
 	}
 
 	resp, err := worker.client.Get(site, "")

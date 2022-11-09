@@ -53,20 +53,16 @@ func privateChannelInfo(ctx context.Context, client *telegram.Client, hash strin
 			accessHash = channel.AccessHash
 			return
 		}
-		break
-	case *tg.ChatInvite:
-		log.Warn("You haven't join this private channel, plz join it manually.")
-		break
 	case *tg.ChatInvitePeek:
 		if channel, ok := v.GetChat().(*tg.Channel); ok {
 			channelID = channel.ID
 			accessHash = channel.AccessHash
 			return
 		}
-		break
-	default:
-		break
+	case *tg.ChatInvite:
+		log.Warn("You haven't join this private channel, plz join it manually.")
 	}
+
 	err = errors.New("couldn't find access hash")
 	return
 }

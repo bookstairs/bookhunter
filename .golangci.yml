@@ -42,11 +42,9 @@ linters-settings:
 linters:
   disable-all: true
 
-  # Re-enable the comments after golangci-lint supports go 1.18
   ## https://github.com/golangci/golangci-lint/issues/2649
   enable:
-    # - bodyclose
-    - deadcode
+    - bodyclose
     - depguard
     - dogsled
     - dupl
@@ -60,22 +58,20 @@ linters:
     - goimports
     - goprintffuncname
     - gosec
-    # - gosimple
+    - gosimple
     - govet
     - ineffassign
     - lll
     - misspell
     - nakedret
-    # - noctx
+    - noctx
     - nolintlint
-    # - staticcheck
-    # - structcheck
-    # - stylecheck
+    - staticcheck
+    - stylecheck
     - typecheck
     - unconvert
-    # - unparam
-    # - unused
-    - varcheck
+    - unparam
+    - unused
     - whitespace
 
 run:

@@ -1,6 +1,7 @@
 package spider
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"net/http"
@@ -44,7 +45,7 @@ func NewClient(config *Config) *Client {
 
 // Get would perform http get.
 func (c *Client) Get(link, referer string, params ...*Query) (*http.Response, error) {
-	req, err := http.NewRequest(http.MethodGet, link, http.NoBody)
+	req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, link, http.NoBody)
 	if err != nil {
 		return nil, err
 	}
@@ -75,7 +76,7 @@ func (c *Client) FormPost(link, referer string, form Form) (*http.Response, erro
 		values[field.Key] = value
 	}
 
-	req, err := http.NewRequest(http.MethodPost, link, strings.NewReader(values.Encode()))
+	req, err := http.NewRequestWithContext(context.Background(), http.MethodPost, link, strings.NewReader(values.Encode()))
 	if err != nil {
 		return nil, fmt.Errorf("illegal form post request: %w", err)
 	}
@@ -95,7 +96,10 @@ func (c *Client) request(r *http.Request, referer string) (*http.Response, error
 	var resp *http.Response
 
 	err := c.Retry(func() (err error) {
-		resp, err = c.client.Do(r)
+		resp, err = c.client.Do(r) //nolint:bodyclose
+		if err != nil {
+			_ = resp.Body.Close()
+		}
 		return err
 	})
 	if err != nil {

@@ -21,7 +21,7 @@ type TelecomResponse struct {
 	Directory struct {
 		Count int `json:"count"`
 		Files []struct {
-			Id   string `json:"id"`
+			ID   string `json:"id"`
 			Name string `json:"name"`
 		} `json:"fileList"`
 	} `json:"fileListAO"`
@@ -48,18 +48,18 @@ func ResolveTelecom(client *Client, url, passcode string, formats ...string) ([]
 }
 
 // resolveTelegram will find all the downloadable links
-func resolveTelegram(client *Client, url, passcode, shareId, fileId string, results map[string][]string) error {
+func resolveTelegram(client *Client, url, passcode, shareID, fileID string, results map[string][]string) error {
 	// Build queries
 	queries := make([]*Query, 0, 4)
 	queries = append(queries, &Query{Key: "url", Value: url})
 	if passcode != "" {
 		queries = append(queries, &Query{Key: "passCode", Value: passcode})
 	}
-	if shareId != "" {
-		queries = append(queries, &Query{Key: "shareId", Value: shareId})
+	if shareID != "" {
+		queries = append(queries, &Query{Key: "shareId", Value: shareID})
 	}
 	if passcode != "" {
-		queries = append(queries, &Query{Key: "fileId", Value: fileId})
+		queries = append(queries, &Query{Key: "fileId", Value: fileID})
 	}
 
 	content, err := requestContent(client, queries...)
@@ -77,7 +77,7 @@ func resolveTelegram(client *Client, url, passcode, shareId, fileId string, resu
 
 		shareID := response.ShareID
 		for _, file := range response.Directory.Files {
-			err := resolveTelegram(client, url, passcode, shareID, file.Id, results)
+			err := resolveTelegram(client, url, passcode, shareID, file.ID, results)
 			if err != nil {
 				return err
 			}

@@ -22,22 +22,22 @@ func ResolveAliYunDrive(client *Client, url, passcode string, formats ...string)
 	return resolveAliYunDrive(client, url, passcode, formats)
 }
 
-func resolveAliYunDrive(client *Client, shareUrl string, sharePwd string, formats []string) ([]string, error) {
-	shareId := strings.TrimPrefix(shareUrl, "https://www.aliyundrive.com/s/")
+func resolveAliYunDrive(client *Client, shareURL string, sharePwd string, formats []string) ([]string, error) {
+	shareID := strings.TrimPrefix(shareURL, "https://www.aliyundrive.com/s/")
 	sharePwd = strings.TrimSpace(sharePwd)
 
 	if drive == nil {
 		drive = NewAliYunDrive(client, AliyunConfig)
 	}
-	return resolveShare(drive, shareId, sharePwd, formats)
+	return resolveShare(drive, shareID, sharePwd, formats)
 }
 
-func resolveShare(drive *aliyundrive.AliYunDrive, shareId string, sharePwd string, formats []string) ([]string, error) {
-	token, err := drive.GetShredToken(shareId, sharePwd)
+func resolveShare(drive *aliyundrive.AliYunDrive, shareID string, sharePwd string, formats []string) ([]string, error) {
+	token, err := drive.GetShredToken(shareID, sharePwd)
 	if err != nil {
 		return nil, err
 	}
-	shareFiles, err := drive.GetShare(shareId, token.ShareToken)
+	shareFiles, err := drive.GetShare(shareID, token.ShareToken)
 	if err != nil {
 		return nil, err
 	}
@@ -45,7 +45,7 @@ func resolveShare(drive *aliyundrive.AliYunDrive, shareId string, sharePwd strin
 	for item := range shareFiles {
 		for _, format := range formats {
 			if strings.EqualFold(item.FileExtension, format) {
-				url, err := drive.GetFileDownloadUrl(token.ShareToken, shareId, item.FileId)
+				url, err := drive.GetFileDownloadURL(token.ShareToken, shareID, item.FileID)
 				if err != nil {
 					return nil, err
 				}

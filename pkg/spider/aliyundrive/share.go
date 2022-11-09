@@ -4,10 +4,10 @@ import (
 	"github.com/bookstairs/bookhunter/pkg/log"
 )
 
-func (ali AliYunDrive) GetAnonymousShare(shareId string) (*GetShareInfoResponse, error) {
+func (ali AliYunDrive) GetAnonymousShare(shareID string) (*GetShareInfoResponse, error) {
 	downloadResp, err := ali.Client.R().
 		SetAuthToken(ali.GetAuthorizationToken()).
-		SetBody(GetShareInfoRequest{ShareId: shareId}).
+		SetBody(GetShareInfoRequest{ShareID: shareID}).
 		SetResult(GetShareInfoResponse{}).
 		SetError(ErrorResponse{}).
 		Post(V2ShareLinkGetShareByAnonymous)
@@ -18,11 +18,11 @@ func (ali AliYunDrive) GetAnonymousShare(shareId string) (*GetShareInfoResponse,
 	return response, nil
 }
 
-func (ali AliYunDrive) GetShare(shareId string, shareToken string) (data chan *BaseShareFile, err error) {
+func (ali AliYunDrive) GetShare(shareID string, shareToken string) (data chan *BaseShareFile, err error) {
 	result := make(chan *BaseShareFile, 100)
 
 	go func() {
-		err = ali.fileList(shareToken, shareId, result)
+		err = ali.fileList(shareToken, shareID, result)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -31,10 +31,10 @@ func (ali AliYunDrive) GetShare(shareId string, shareToken string) (data chan *B
 	return result, nil
 }
 
-func (ali AliYunDrive) GetShredToken(shareId string, sharePwd string) (*GetShareTokenResponse, error) {
+func (ali AliYunDrive) GetShredToken(shareID string, sharePwd string) (*GetShareTokenResponse, error) {
 	downloadResp, err := ali.Client.R().
 		SetAuthToken(ali.GetAuthorizationToken()).
-		SetBody(GetShareTokenRequest{ShareId: shareId, SharePwd: sharePwd}).
+		SetBody(GetShareTokenRequest{ShareID: shareID, SharePwd: sharePwd}).
 		SetResult(GetShareTokenResponse{}).
 		SetError(ErrorResponse{}).
 		Post(V2ShareLinkGetShareToken)
@@ -45,11 +45,11 @@ func (ali AliYunDrive) GetShredToken(shareId string, sharePwd string) (*GetShare
 	return response, nil
 }
 
-func (ali AliYunDrive) fileList(shareToken string, shareId string, result chan *BaseShareFile) error {
+func (ali AliYunDrive) fileList(shareToken string, shareID string, result chan *BaseShareFile) error {
 	return ali.fileListByMarker(FileListParam{
 		shareToken:   shareToken,
-		shareId:      shareId,
-		parentFileId: "root",
+		shareID:      shareID,
+		parentFileID: "root",
 		marker:       "",
 	}, result)
 }
@@ -59,9 +59,9 @@ func (ali AliYunDrive) fileListByMarker(param FileListParam, result chan *BaseSh
 		SetAuthToken(ali.GetAuthorizationToken()).
 		SetHeader(xShareToken, param.shareToken).
 		SetBody(GetShareFileListRequest{
-			ShareId:        param.shareId,
-			ParentFileId:   param.parentFileId,
-			UrlExpireSec:   14400,
+			ShareID:        param.shareID,
+			ParentFileID:   param.parentFileID,
+			URLExpireSec:   14400,
 			OrderBy:        "name",
 			OrderDirection: "DESC",
 			Limit:          20,
@@ -78,8 +78,8 @@ func (ali AliYunDrive) fileListByMarker(param FileListParam, result chan *BaseSh
 		if item.FileType == "folder" {
 			err := ali.fileListByMarker(FileListParam{
 				shareToken:   param.shareToken,
-				shareId:      param.shareId,
-				parentFileId: item.FileId,
+				shareID:      param.shareID,
+				parentFileID: item.FileID,
 				marker:       "",
 			}, result)
 			if err != nil {
@@ -92,8 +92,8 @@ func (ali AliYunDrive) fileListByMarker(param FileListParam, result chan *BaseSh
 	if data.NextMarker != "" {
 		err := ali.fileListByMarker(FileListParam{
 			shareToken:   param.shareToken,
-			shareId:      param.shareId,
-			parentFileId: param.parentFileId,
+			shareID:      param.shareID,
+			parentFileID: param.parentFileID,
 			marker:       data.NextMarker,
 		}, result)
 		if err != nil {
@@ -103,21 +103,21 @@ func (ali AliYunDrive) fileListByMarker(param FileListParam, result chan *BaseSh
 	return nil
 }
 
-func (ali AliYunDrive) GetFileDownloadUrl(shareToken string, shareId string, fileId string) (string, error) {
+func (ali AliYunDrive) GetFileDownloadURL(shareToken string, shareID string, fileID string) (string, error) {
 	downloadResp, err := ali.Client.R().
 		SetAuthToken(ali.GetAuthorizationToken()).
 		SetHeader(xShareToken, shareToken).
-		SetBody(GetShareLinkDownloadUrlRequest{
-			ShareId:   shareId,
-			FileId:    fileId,
+		SetBody(GetShareLinkDownloadURLRequest{
+			ShareID:   shareID,
+			FileID:    fileID,
 			ExpireSec: 600,
 		}).
-		SetResult(GetShareLinkDownloadUrlResponse{}).
+		SetResult(GetShareLinkDownloadURLResponse{}).
 		SetError(ErrorResponse{}).
-		Post(V2FileGetShareLinkDownloadUrl)
+		Post(V2FileGetShareLinkDownloadURL)
 	if err != nil {
 		return "", err
 	}
-	i := downloadResp.Result().(*GetShareLinkDownloadUrlResponse)
-	return i.DownloadUrl, nil
+	i := downloadResp.Result().(*GetShareLinkDownloadURLResponse)
+	return i.DownloadURL, nil
 }

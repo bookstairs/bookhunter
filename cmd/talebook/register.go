@@ -56,8 +56,8 @@ func register() {
 	config.UserAgent = regConf.userAgent
 	client := spider.NewClient(config)
 
-	website := spider.GenerateUrl(regConf.website, "/api/user/sign_up")
-	referer := spider.GenerateUrl(regConf.website, "/signup")
+	website := spider.GenerateURL(regConf.website, "/api/user/sign_up")
+	referer := spider.GenerateURL(regConf.website, "/signup")
 	form := spider.Form{
 		spider.Field{Key: "username", Value: regConf.username},
 		spider.Field{Key: "password", Value: regConf.password},

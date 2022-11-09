@@ -33,20 +33,20 @@ var (
 )
 
 type BookMeta struct {
-	Id    int64                  // The book id in website.
+	ID    int64                  // The book id in website.
 	Title string                 // The name of the book.
 	Links map[LinkType]*BookLink // All the available download links from drive.
 }
 
 type BookLink struct {
-	Url  string // The url to access the download page.
+	URL  string // The url to access the download page.
 	Code string // The passcode for querying the file content.
 }
 
 // bookMetadata will find all the available books.
 func (d *downloader) bookMetadata(bookID int64) *BookMeta {
-	page := spider.GenerateUrl(d.config.Website, "/download.php?id="+strconv.FormatInt(bookID, 10))
-	referer := spider.GenerateUrl(d.config.Website, "/"+strconv.FormatInt(bookID, 10)+".html")
+	page := spider.GenerateURL(d.config.Website, "/download.php?id="+strconv.FormatInt(bookID, 10))
+	referer := spider.GenerateURL(d.config.Website, "/"+strconv.FormatInt(bookID, 10)+".html")
 
 	resp, err := d.client.Get(page, referer)
 	if err != nil {
@@ -67,7 +67,7 @@ func (d *downloader) bookMetadata(bookID int64) *BookMeta {
 		if exists {
 			for linkType, name := range driveNamings {
 				if strings.Contains(driveName, name) {
-					links[linkType] = &BookLink{Url: href}
+					links[linkType] = &BookLink{URL: href}
 					break
 				}
 			}
@@ -87,7 +87,7 @@ func (d *downloader) bookMetadata(bookID int64) *BookMeta {
 				match := passcodeRe.FindStringSubmatch(text)
 				if len(match) == 2 {
 					links[linkType] = &BookLink{
-						Url:  link.Url,
+						URL:  link.URL,
 						Code: match[1],
 					}
 				}
@@ -117,7 +117,7 @@ func (d *downloader) bookMetadata(bookID int64) *BookMeta {
 	}
 
 	return &BookMeta{
-		Id:    bookID,
+		ID:    bookID,
 		Title: title,
 		Links: links,
 	}

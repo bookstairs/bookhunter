@@ -11,7 +11,7 @@ import (
 	"github.com/gotd/td/telegram"
 	"github.com/gotd/td/telegram/auth"
 	"github.com/gotd/td/tg"
-	"golang.org/x/crypto/ssh/terminal"
+	"golang.org/x/term"
 
 	"github.com/bookstairs/bookhunter/pkg/log"
 )
@@ -39,7 +39,7 @@ func (t *TerminalAuth) Phone(_ context.Context) (string, error) {
 
 func (t *TerminalAuth) Password(_ context.Context) (string, error) {
 	fmt.Print("Enter 2FA password: ")
-	bytePwd, err := terminal.ReadPassword(0)
+	bytePwd, err := term.ReadPassword(0)
 	if err != nil {
 		return "", err
 	}
