@@ -64,8 +64,8 @@ func (c *Config) newCookieJar() (http.CookieJar, error) {
 	return newCookieJar(filepath.Join(configPath, cookieFile))
 }
 
-func (c *Config) redirectPolicy() []resty.RedirectPolicy {
-	policies := []resty.RedirectPolicy{
+func (c *Config) redirectPolicy() []any {
+	policies := []any{
 		resty.FlexibleRedirectPolicy(5),
 		resty.DomainCheckRedirectPolicy(c.Host),
 	}
@@ -143,7 +143,7 @@ func New(c *Config) (*Client, error) {
 		SetRetryCount(3).
 		SetRetryWaitTime(3*time.Second).
 		SetRetryMaxWaitTime(10*time.Second).
-		SetRedirectPolicy(c.redirectPolicy()).
+		SetRedirectPolicy(c.redirectPolicy()...).
 		SetAllowGetMethodPayload(true).
 		SetTimeout(1*time.Minute).
 		SetContentLength(true).
