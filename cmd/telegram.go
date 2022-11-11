@@ -8,7 +8,6 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/bookstairs/bookhunter/internal/argument"
-	"github.com/bookstairs/bookhunter/internal/client"
 	"github.com/bookstairs/bookhunter/internal/fetcher"
 	"github.com/bookstairs/bookhunter/internal/log"
 )
@@ -55,29 +54,13 @@ var telegramCmd = &cobra.Command{
 			Row("Thread", argument.Thread).
 			Print()
 
-		// Create the fetcher config.
-		cc, err := client.NewConfig(argument.Website, argument.UserAgent, argument.Proxy, argument.ConfigRoot)
-		log.Fatal(err)
-		fs, err := fetcher.ParseFormats(argument.Formats)
-		log.Fatal(err)
-
 		// Create the fetcher.
-		f, err := fetcher.New(&fetcher.Config{
-			Config:        cc,
-			Category:      fetcher.Telegram,
-			Formats:       fs,
-			Extract:       argument.Extract,
-			DownloadPath:  argument.DownloadPath,
-			InitialBookID: argument.InitialBookID,
-			Rename:        argument.Rename,
-			Thread:        argument.Thread,
-			Properties: map[string]string{
-				"channelID": argument.ChannelID,
-				"mobile":    argument.Mobile,
-				"reLogin":   strconv.FormatBool(argument.ReLogin),
-				"appID":     strconv.FormatInt(argument.AppID, 10),
-				"appHash":   argument.AppHash,
-			},
+		f, err := argument.NewFetcher(fetcher.Telegram, map[string]string{
+			"channelID": argument.ChannelID,
+			"mobile":    argument.Mobile,
+			"reLogin":   strconv.FormatBool(argument.ReLogin),
+			"appID":     strconv.FormatInt(argument.AppID, 10),
+			"appHash":   argument.AppHash,
 		})
 		log.Fatal(err)
 
