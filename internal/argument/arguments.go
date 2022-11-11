@@ -1,6 +1,9 @@
 package argument
 
-import "github.com/bookstairs/bookhunter/internal/fetcher"
+import (
+	"github.com/bookstairs/bookhunter/internal/client"
+	"github.com/bookstairs/bookhunter/internal/fetcher"
+)
 
 var (
 	// Flags for talebook registering.
@@ -37,3 +40,28 @@ var (
 	AppID     = int64(0)
 	AppHash   = ""
 )
+
+// NewFetcher will create the fetcher by the command line arguments.
+func NewFetcher(category fetcher.Category, properties map[string]string) (fetcher.Fetcher, error) {
+	cc, err := client.NewConfig(Website, UserAgent, Proxy, ConfigRoot)
+	if err != nil {
+		return nil, err
+	}
+
+	fs, err := fetcher.ParseFormats(Formats)
+	if err != nil {
+		return nil, err
+	}
+
+	return fetcher.New(&fetcher.Config{
+		Config:        cc,
+		Category:      category,
+		Formats:       fs,
+		Extract:       Extract,
+		DownloadPath:  DownloadPath,
+		InitialBookID: InitialBookID,
+		Rename:        Rename,
+		Thread:        Thread,
+		Properties:    properties,
+	})
+}

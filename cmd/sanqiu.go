@@ -4,7 +4,6 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/bookstairs/bookhunter/internal/argument"
-	"github.com/bookstairs/bookhunter/internal/client"
 	"github.com/bookstairs/bookhunter/internal/fetcher"
 	"github.com/bookstairs/bookhunter/internal/log"
 )
@@ -40,25 +39,12 @@ var sanqiuCmd = &cobra.Command{
 			Row("Aliyun RefreshToken", "******").
 			Print()
 
-		// Create the fetcher config.
-		cc, err := client.NewConfig(sanqiuWebsite, argument.UserAgent, argument.Proxy, argument.ConfigRoot)
-		log.Fatal(err)
-		fs, err := fetcher.ParseFormats(argument.Formats)
-		log.Fatal(err)
+		// Set the fetcher config.
+		argument.Website = sanqiuWebsite
 
 		// Create the fetcher.
-		f, err := fetcher.New(&fetcher.Config{
-			Config:        cc,
-			Category:      fetcher.SanQiu,
-			Formats:       fs,
-			Extract:       argument.Extract,
-			DownloadPath:  argument.DownloadPath,
-			InitialBookID: argument.InitialBookID,
-			Rename:        argument.Rename,
-			Thread:        argument.Thread,
-			Properties: map[string]string{
-				"refreshToken": argument.RefreshToken,
-			},
+		f, err := argument.NewFetcher(fetcher.SanQiu, map[string]string{
+			"refreshToken": argument.RefreshToken,
 		})
 		log.Fatal(err)
 

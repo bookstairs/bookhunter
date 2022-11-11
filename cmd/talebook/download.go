@@ -4,7 +4,6 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/bookstairs/bookhunter/internal/argument"
-	"github.com/bookstairs/bookhunter/internal/client"
 	"github.com/bookstairs/bookhunter/internal/fetcher"
 	"github.com/bookstairs/bookhunter/internal/log"
 )
@@ -31,25 +30,10 @@ var DownloadCmd = &cobra.Command{
 			Row("Thread", argument.Thread).
 			Print()
 
-		// Create the fetcher config.
-		cc, err := client.NewConfig(argument.Website, argument.UserAgent, argument.Proxy, argument.ConfigRoot)
-		log.Fatal(err)
-		fs, err := fetcher.ParseFormats(argument.Formats)
-		log.Fatal(err)
-
 		// Create the fetcher.
-		f, err := fetcher.New(&fetcher.Config{
-			Config:        cc,
-			Category:      fetcher.Talebook,
-			Formats:       fs,
-			DownloadPath:  argument.DownloadPath,
-			InitialBookID: argument.InitialBookID,
-			Rename:        argument.Rename,
-			Thread:        argument.Thread,
-			Properties: map[string]string{
-				"username": argument.Username,
-				"password": argument.Password,
-			},
+		f, err := argument.NewFetcher(fetcher.Talebook, map[string]string{
+			"username": argument.Username,
+			"password": argument.Password,
 		})
 		log.Fatal(err)
 
