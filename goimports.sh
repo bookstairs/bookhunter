@@ -62,7 +62,7 @@ parse_file_hook_args "$@"
 #
 for file in "${FILES[@]}"; do
   gsed -i '
-    /^import/,/)/ {
+    /^import (/,/)/ {
       /^$/ d
     }
   ' "${file}"
