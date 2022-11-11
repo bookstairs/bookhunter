@@ -1,0 +1,172 @@
+package client
+
+import (
+	"errors"
+	"fmt"
+	"net/http"
+	"net/url"
+	"os"
+	"path/filepath"
+	"time"
+
+	"github.com/go-resty/resty/v2"
+	jsoniter "github.com/json-iterator/go"
+)
+
+var (
+	json = jsoniter.ConfigCompatibleWithStandardLibrary
+
+	ErrInvalidRequestURL = errors.New("invalid request url, we only support https:// or http://")
+)
+
+const (
+	cookieFile       = "cookies.json"
+	defaultUserAgent = "Mozilla/5.0 (X11; Linux i686; rv:13.0) Gecko/13.0 Firefox/13.0"
+)
+
+// Client is the wrapper for resty.Client we may provide extra method on this wrapper.
+type Client struct {
+	*resty.Client
+	*Config
+}
+
+// Config is the basic configuration for creating the client.
+type Config struct {
+	HTTPS      bool   // If the request was under the https of http.
+	Host       string // The request host name.
+	UserAgent  string // Custom user agent for mocking as the browser client.
+	Proxy      string // The proxy address, such as the http://127.0.0.1:7890, socks://127.0.0.1:7890
+	ConfigRoot string // The root config path for whole bookhunter download service.
+
+	// The custom redirect function.
+	Redirect resty.RedirectPolicy `json:"-"`
+}
+
+// ConfigPath will return a unique path for this download service.
+func (c *Config) ConfigPath() (string, error) {
+	if c.ConfigRoot == "" {
+		var err error
+		c.ConfigRoot, err = DefaultConfigRoot()
+		if err != nil {
+			return "", err
+		}
+	}
+
+	return mkdir(filepath.Join(c.ConfigRoot, c.Host))
+}
+
+func (c *Config) newCookieJar() (http.CookieJar, error) {
+	configPath, err := c.ConfigPath()
+	if err != nil {
+		return nil, err
+	}
+
+	return newCookieJar(filepath.Join(configPath, cookieFile))
+}
+
+func (c *Config) redirectPolicy() []resty.RedirectPolicy {
+	policies := []resty.RedirectPolicy{
+		resty.FlexibleRedirectPolicy(5),
+		resty.DomainCheckRedirectPolicy(c.Host),
+	}
+	if c.Redirect != nil {
+		policies = append(policies, c.Redirect)
+	}
+
+	return policies
+}
+
+func (c *Config) userAgent() string {
+	if c.UserAgent == "" {
+		return defaultUserAgent
+	}
+
+	return c.UserAgent
+}
+
+func (c *Config) baseURL() string {
+	if c.HTTPS {
+		return "https://" + c.Host
+	}
+
+	return "http://" + c.Host
+}
+
+// DefaultConfigRoot will generate the default config path based on the user and his running environment.
+func DefaultConfigRoot() (string, error) {
+	home, err := os.UserHomeDir()
+	if err != nil {
+		return "", err
+	}
+
+	return mkdir(filepath.Join(home, ".config", "bookhunter"))
+}
+
+func mkdir(path string) (string, error) {
+	if err := os.MkdirAll(path, 0755); err != nil {
+		return "", err
+	}
+
+	return path, nil
+}
+
+// NewConfig will create a config instance by using the request url.
+func NewConfig(rawURL, userAgent, proxy, configRoot string) (*Config, error) {
+	u, err := url.Parse(rawURL)
+	if err != nil {
+		return nil, fmt.Errorf(rawURL, err)
+	}
+
+	if u.Scheme != "http" && u.Scheme != "https" {
+		return nil, ErrInvalidRequestURL
+	}
+
+	if configRoot == "" {
+		configRoot, err = DefaultConfigRoot()
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return &Config{
+		HTTPS:      u.Scheme == "https",
+		Host:       u.Host,
+		UserAgent:  userAgent,
+		Proxy:      proxy,
+		ConfigRoot: configRoot,
+	}, nil
+}
+
+// New will create a resty client with a lot of predefined settings.
+func New(c *Config) (*Client, error) {
+	client := resty.New().
+		SetRetryCount(3).
+		SetRetryWaitTime(3*time.Second).
+		SetRetryMaxWaitTime(10*time.Second).
+		SetRedirectPolicy(c.redirectPolicy()).
+		SetAllowGetMethodPayload(true).
+		SetTimeout(1*time.Minute).
+		SetContentLength(true).
+		SetHeader("User-Agent", c.userAgent()).
+		SetBaseURL(c.baseURL())
+
+	// Setting the cookiejar
+	cookieJar, err := c.newCookieJar()
+	if err != nil {
+		return nil, err
+	}
+	client.SetCookieJar(cookieJar)
+
+	// Setting the proxy for the resty client.
+	if c.Proxy != "" {
+		client.SetProxy(c.Proxy)
+	} else {
+		client.RemoveProxy()
+	}
+
+	// Override the json binding.
+	client.JSONMarshal = json.Marshal
+	client.JSONUnmarshal = json.Unmarshal
+
+	return &Client{Client: client, Config: c}, nil
+}
