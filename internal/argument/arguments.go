@@ -15,7 +15,7 @@ var (
 	// Common flags.
 
 	Website    = ""
-	UserAgent  = ""
+	UserAgent  = client.DefaultUserAgent
 	Proxy      = ""
 	ConfigRoot = ""
 

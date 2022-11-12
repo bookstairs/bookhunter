@@ -21,7 +21,7 @@ var (
 
 const (
 	cookieFile       = "cookies.json"
-	defaultUserAgent = "Mozilla/5.0 (X11; Linux i686; rv:13.0) Gecko/13.0 Firefox/13.0"
+	DefaultUserAgent = "Mozilla/5.0 (X11; Linux i686; rv:13.0) Gecko/13.0 Firefox/13.0"
 )
 
 // Client is the wrapper for resty.Client we may provide extra method on this wrapper.
@@ -78,7 +78,7 @@ func (c *Config) redirectPolicy() []any {
 
 func (c *Config) userAgent() string {
 	if c.UserAgent == "" {
-		return defaultUserAgent
+		return DefaultUserAgent
 	}
 
 	return c.UserAgent
