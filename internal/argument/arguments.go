@@ -21,7 +21,13 @@ var (
 
 	// Common download flags.
 
-	Formats       = fetcher.NormalizeFormats(fetcher.EPUB, fetcher.AZW3, fetcher.MOBI, fetcher.PDF, fetcher.ZIP)
+	Formats = []string{
+		string(fetcher.EPUB),
+		string(fetcher.AZW3),
+		string(fetcher.MOBI),
+		string(fetcher.PDF),
+		string(fetcher.ZIP),
+	}
 	Extract       = false
 	DownloadPath  = ""
 	InitialBookID = 1
