@@ -36,6 +36,7 @@ var sanqiuCmd = &cobra.Command{
 			Row("Initial ID", argument.InitialBookID).
 			Row("Rename File", argument.Rename).
 			Row("Thread", argument.Thread).
+			Row("Request Per Minute", argument.RateLimit).
 			Row("Aliyun RefreshToken", "******").
 			Print()
 
@@ -69,6 +70,7 @@ func init() {
 		"The book id you want to start download. It should exceed 0.")
 	flags.BoolVarP(&argument.Rename, "rename", "r", argument.Rename, "Rename the book file by book ID.")
 	flags.IntVarP(&argument.Thread, "thread", "t", argument.Thread, "The number of concurrent download thead.")
+	flags.IntVarP(&argument.RateLimit, "ratelimit", "", argument.RateLimit, "The request per minutes.")
 
 	// Drive ISP flags.
 	flags.StringVarP(&argument.RefreshToken, "refreshToken", "", argument.RefreshToken,

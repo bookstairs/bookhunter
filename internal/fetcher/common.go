@@ -42,6 +42,7 @@ type Config struct {
 	InitialBookID int      // The book id start to download.
 	Rename        bool     // Rename the file by using book ID.
 	Thread        int      // The number of download threads.
+	RateLimit     int      // Request per minute.
 
 	// The extra configuration for a custom fetcher services.
 	Properties map[string]string
