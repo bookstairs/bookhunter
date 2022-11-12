@@ -33,6 +33,7 @@ var (
 	InitialBookID = 1
 	Rename        = false
 	Thread        = 1
+	RateLimit     = 30
 
 	// Drive ISP configurations.
 
@@ -68,6 +69,7 @@ func NewFetcher(category fetcher.Category, properties map[string]string) (fetche
 		InitialBookID: InitialBookID,
 		Rename:        Rename,
 		Thread:        Thread,
+		RateLimit:     RateLimit,
 		Properties:    properties,
 	})
 }
