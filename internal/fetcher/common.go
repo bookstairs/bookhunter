@@ -1,6 +1,7 @@
 package fetcher
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 
@@ -72,29 +73,19 @@ func ParseFormats(formats []string) ([]Format, error) {
 	return fs, nil
 }
 
-// NormalizeFormats will convert the formats into string slice.
-func NormalizeFormats(formats ...Format) []string {
-	var fs []string
-	for _, format := range formats {
-		fs = append(fs, string(format))
-	}
-	return fs
-}
-
 // New create a fetcher service for downloading books.
 func New(c *Config) (Fetcher, error) {
-	// TODO We should implement it now.
 	switch c.Category {
 	case Talebook:
-		return nil, nil
-	case Telegram:
-		return nil, nil
-	case SoBooks:
-		return nil, nil
+		return nil, errors.New("we don't talebook talebook now")
 	case SanQiu:
-		return nil, nil
+		return nil, errors.New("we don't support sanqiu now")
+	case Telegram:
+		return nil, errors.New("we don't support telegram now")
+	case SoBooks:
+		return nil, errors.New("we don't support sobooks now")
 	case TianLang:
-		return nil, nil
+		return nil, errors.New("we don't support tianlang now")
 	default:
 		return nil, fmt.Errorf("no such fetcher service [%s] supported", c.Category)
 	}
