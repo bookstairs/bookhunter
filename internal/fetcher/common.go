@@ -11,6 +11,10 @@ import (
 	"github.com/bookstairs/bookhunter/internal/client"
 )
 
+var (
+	ErrOverrideRedirectHandler = errors.New("couldn't override the existed redirect handler")
+)
+
 type (
 	Format   string // The supported file extension.
 	Category string // The fetcher service identity.
@@ -65,7 +69,7 @@ func (c *Config) Property(name string) string {
 
 func (c *Config) SetRedirect(redirect func(request *http.Request, requests []*http.Request) error) error {
 	if c.Config.Redirect != nil {
-		return errors.New("couldn't override the existed redirect handler")
+		return ErrOverrideRedirectHandler
 	}
 	c.Config.Redirect = resty.RedirectPolicyFunc(redirect)
 
@@ -76,13 +80,22 @@ func (c *Config) SetRedirect(redirect func(request *http.Request, requests []*ht
 func ParseFormats(formats []string) ([]Format, error) {
 	var fs []Format
 	for _, format := range formats {
-		f := Format(strings.ToLower(format))
-		if !IsValidFormat(f) {
-			return nil, fmt.Errorf("invalid format %s", format)
+		f, err := ParseFormat(format)
+		if err != nil {
+			return nil, err
 		}
 		fs = append(fs, f)
 	}
 	return fs, nil
+}
+
+// ParseFormat will create the format from the string.
+func ParseFormat(format string) (Format, error) {
+	f := Format(strings.ToLower(format))
+	if !IsValidFormat(f) {
+		return "", fmt.Errorf("invalid format %s", format)
+	}
+	return f, nil
 }
 
 // IsValidFormat judge if this format was supported.

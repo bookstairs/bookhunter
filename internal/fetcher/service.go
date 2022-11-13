@@ -16,10 +16,10 @@ type service interface {
 	size() (int64, error)
 
 	// formats will query the available downloadable file formats.
-	formats() ([]Format, error)
+	formats(id int64) (map[Format]string, error)
 
 	// fetch the given book ID.
-	fetch(id int64, format Format) (*fetch, error)
+	fetch(id int64, format Format, url string) (*fetch, error)
 }
 
 // fetch is the result which can be created from a resty.Response
