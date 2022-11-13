@@ -37,7 +37,7 @@ const (
 	Telegram Category = "telegram"
 )
 
-// Archive will return if this format is an archive.
+// The Archive will return if this format is an archive.
 func (f Format) Archive() bool {
 	return f == ZIP
 }

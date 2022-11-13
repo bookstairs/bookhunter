@@ -46,12 +46,14 @@ func newService(c *Config) (service, error) {
 	case Talebook:
 		return newTalebookService(c)
 	case SanQiu:
-		return nil, errors.New("we don't support sanqiu now")
+		return newSanqiuService(c)
 	case Telegram:
-		return nil, errors.New("we don't support telegram now")
+		return newTelegramService(c)
 	case SoBooks:
+		// TODO We are working on this feature now.
 		return nil, errors.New("we don't support sobooks now")
 	case TianLang:
+		// TODO We are working on this feature now.
 		return nil, errors.New("we don't support tianlang now")
 	default:
 		return nil, fmt.Errorf("no such fetcher service [%s] supported", c.Category)
