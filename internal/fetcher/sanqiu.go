@@ -4,6 +4,7 @@ import (
 	"errors"
 
 	"github.com/bookstairs/bookhunter/internal/client"
+	"github.com/bookstairs/bookhunter/internal/driver"
 	"github.com/bookstairs/bookhunter/internal/sanqiu"
 )
 
@@ -55,12 +56,12 @@ func (s *sanqiuService) size() (int64, error) {
 	return books[0].ID, nil
 }
 
-func (s *sanqiuService) formats(id int64) (map[Format]string, error) {
+func (s *sanqiuService) formats(id int64) (map[Format]driver.Share, error) {
 	// TODO implement me
 	panic("implement me")
 }
 
-func (s *sanqiuService) fetch(id int64, format Format, url string) (*fetch, error) {
+func (s *sanqiuService) fetch(id int64, format Format, share driver.Share) (*fetch, error) {
 	// TODO implement me
 	panic("implement me")
 }

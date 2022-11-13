@@ -2,10 +2,13 @@ package fetcher
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/bookstairs/bookhunter/internal/client"
+	"github.com/bookstairs/bookhunter/internal/driver"
 	"github.com/bookstairs/bookhunter/internal/log"
 	"github.com/bookstairs/bookhunter/internal/talebook"
 )
@@ -98,7 +101,7 @@ func (t *talebookService) size() (int64, error) {
 	return bookID, nil
 }
 
-func (t *talebookService) formats(id int64) (map[Format]string, error) {
+func (t *talebookService) formats(id int64) (map[Format]driver.Share, error) {
 	resp, err := t.client.R().
 		SetResult(&talebook.BookResp{}).
 		SetPathParam("bookID", strconv.FormatInt(id, 10)).
@@ -110,13 +113,16 @@ func (t *talebookService) formats(id int64) (map[Format]string, error) {
 	result := resp.Result().(*talebook.BookResp)
 	switch result.Err {
 	case talebook.SuccessStatus:
-		formats := make(map[Format]string)
+		formats := make(map[Format]driver.Share)
 		for _, file := range result.Book.Files {
-			format, err := ParseFormat(file.Format)
+			format, err := ParseFormat(strings.ToLower(file.Format))
 			if err != nil {
 				return nil, err
 			}
-			formats[format] = file.Href
+			formats[format] = driver.Share{
+				FileName: fmt.Sprintf("%s.%s", result.Book.Title, format),
+				URL:      file.Href,
+			}
 		}
 		return formats, nil
 	case talebook.BookNotFoundStatus:
@@ -126,10 +132,10 @@ func (t *talebookService) formats(id int64) (map[Format]string, error) {
 	}
 }
 
-func (t *talebookService) fetch(_ int64, _ Format, url string) (*fetch, error) {
+func (t *talebookService) fetch(_ int64, _ Format, share driver.Share) (*fetch, error) {
 	resp, err := t.client.R().
 		SetDoNotParseResponse(true).
-		Get(url)
+		Get(share.URL)
 	if err != nil {
 		return nil, err
 	}
