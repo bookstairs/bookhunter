@@ -88,7 +88,7 @@ func (f *commonFetcher) startDownload() {
 		// The error will be sent to the channel.
 
 		// Acquire the available file formats
-		formats, err := f.service.formats()
+		formats, err := f.service.formats(bookID)
 		if err != nil {
 			f.finishDownload(err)
 			break
@@ -98,19 +98,26 @@ func (f *commonFetcher) startDownload() {
 		formats = f.filterFormats(formats)
 
 		// Download the file by formats one by one.
-		for _, format := range formats {
-			err := f.downloadFile(bookID, format)
+		for format, url := range formats {
+			err := f.downloadFile(bookID, format, url)
 			if err != nil {
 				f.finishDownload(err)
 				break
 			}
 		}
+
+		// Save the download progress
+		err = f.progress.SaveBookID(bookID)
+		if err != nil {
+			f.finishDownload(err)
+			break
+		}
 	}
 }
 
 // downloadFile in a thread.
-func (f *commonFetcher) downloadFile(bookID int64, format Format) error {
-	file, err := f.service.fetch(bookID, format)
+func (f *commonFetcher) downloadFile(bookID int64, format Format, url string) error {
+	file, err := f.service.fetch(bookID, format, url)
 	if err != nil {
 		return err
 	}
@@ -164,24 +171,24 @@ func (f *commonFetcher) downloadFile(bookID int64, format Format) error {
 	return nil
 }
 
+// filterFormats will find the valid formats by user configure.
+func (f *commonFetcher) filterFormats(formats map[Format]string) map[Format]string {
+	fs := make(map[Format]string)
+	for format, url := range formats {
+		for _, vf := range f.Formats {
+			if format == vf {
+				fs[format] = url
+				break
+			}
+		}
+	}
+	return fs
+}
+
 // finishDownload will exist the download thread.
 func (f *commonFetcher) finishDownload(err error) {
 	if err != nil {
 		f.errs <- err
 	}
 	f.wait.Done()
-}
-
-// filterFormats will find the valid formats by user configure.
-func (f *commonFetcher) filterFormats(formats []Format) []Format {
-	var fs []Format
-	for _, format := range formats {
-		for _, vf := range f.Formats {
-			if format == vf {
-				fs = append(fs, format)
-				break
-			}
-		}
-	}
-	return fs
 }
