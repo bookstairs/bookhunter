@@ -7,6 +7,8 @@ import (
 	"strconv"
 	"sync"
 
+	"github.com/yi-ge/unzip"
+
 	"github.com/bookstairs/bookhunter/internal/log"
 	"github.com/bookstairs/bookhunter/internal/naming"
 	"github.com/bookstairs/bookhunter/internal/progress"
@@ -151,6 +153,12 @@ func (f *commonFetcher) downloadFile(bookID int64, format Format) error {
 	_, err = io.Copy(io.MultiWriter(writer, bar), file.content)
 	if err != nil {
 		return err
+	}
+
+	// Extract the archives.
+	if format.Archive() && f.Extract {
+		u := unzip.New(path, f.DownloadPath)
+		return u.Extract()
 	}
 
 	return nil
