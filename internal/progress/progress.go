@@ -19,8 +19,22 @@ var (
 	ErrStorageFile       = errors.New("couldn't create file for storing download process")
 )
 
-// Progress is a bit based
-type Progress struct {
+type Progress interface {
+	// AcquireBookID would find the book id from the assign array.
+	AcquireBookID() int64
+
+	// SaveBookID would save the download progress.
+	SaveBookID(bookID int64) error
+
+	// Finished would tell the called whether all the books have downloaded.
+	Finished() bool
+
+	// Size would return the book size.
+	Size() int64
+}
+
+// bitProgress is a bit-based implementation with file persistence.
+type bitProgress struct {
 	limit    ratelimit.Limiter // The ratelimit for acquiring a book ID.
 	progress *bitset.BitSet    // progress is used for file Progress.
 	assigned *bitset.BitSet    // the assign status, memory based.
@@ -29,7 +43,7 @@ type Progress struct {
 }
 
 // NewProgress Create a storge for save the download progress.
-func NewProgress(start, size int64, rate int, path string) (*Progress, error) {
+func NewProgress(start, size int64, rate int, path string) (Progress, error) {
 	if start < 1 {
 		return nil, ErrStartBookID
 	}
@@ -90,7 +104,7 @@ func NewProgress(start, size int64, rate int, path string) (*Progress, error) {
 	// Create ratelimit
 	limit := ratelimit.New(rate, ratelimit.Per(time.Minute))
 
-	return &Progress{
+	return &bitProgress{
 		limit:    limit,
 		progress: progress,
 		assigned: assigned,
@@ -113,13 +127,14 @@ func loadStorage(file *os.File) (*bitset.BitSet, error) {
 	return set, nil
 }
 
-// AcquireBookID would find the book id from assign array.
-func (storage *Progress) AcquireBookID() int64 {
+// AcquireBookID would find the book id from the assign array.
+func (storage *bitProgress) AcquireBookID() int64 {
 	storage.lock.Lock()
 	defer storage.lock.Unlock()
 
 	// Block until the rate meets the given config.
 	storage.limit.Take()
+
 	for i := uint(0); i < storage.assigned.Len(); i++ {
 		if !storage.assigned.Test(i) {
 			storage.assigned.Set(i)
@@ -131,7 +146,7 @@ func (storage *Progress) AcquireBookID() int64 {
 }
 
 // SaveBookID would save the download progress.
-func (storage *Progress) SaveBookID(bookID int64) error {
+func (storage *bitProgress) SaveBookID(bookID int64) error {
 	storage.lock.Lock()
 	defer storage.lock.Unlock()
 
@@ -152,11 +167,11 @@ func (storage *Progress) SaveBookID(bookID int64) error {
 }
 
 // Finished would tell the called whether all the books have downloaded.
-func (storage *Progress) Finished() bool {
+func (storage *bitProgress) Finished() bool {
 	return storage.progress.Count() == storage.progress.Len()
 }
 
 // Size would return the book size.
-func (storage *Progress) Size() int64 {
+func (storage *bitProgress) Size() int64 {
 	return int64(storage.progress.Len())
 }
