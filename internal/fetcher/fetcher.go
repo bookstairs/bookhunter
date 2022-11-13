@@ -155,7 +155,7 @@ func (f *commonFetcher) downloadFile(bookID int64, format Format) error {
 		return err
 	}
 
-	// Extract the archives.
+	// Extract the archives. We only support the zip file now.
 	if format.Archive() && f.Extract {
 		u := unzip.New(path, f.DownloadPath)
 		return u.Extract()
