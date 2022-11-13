@@ -1,12 +1,9 @@
 package naming
 
 import (
-	"mime"
 	"net/url"
 	"strings"
 	"unicode"
-
-	"github.com/go-resty/resty/v2"
 )
 
 func isLetter(s string) bool {
@@ -33,19 +30,4 @@ func Extension(link string) (string, bool) {
 		return strings.ToLower(ext), true
 	}
 	return "", false
-}
-
-// Filename parse the file name from Content-Disposition header.
-// If there is no such head, we would return blank string.
-func Filename(resp *resty.Response) (name string) {
-	header := resp.Header()
-	if disposition := header.Get("Content-Disposition"); disposition != "" {
-		if _, params, err := mime.ParseMediaType(disposition); err == nil {
-			if filename, ok := params["filename"]; ok {
-				name = EscapeFilename(filename)
-			}
-		}
-	}
-
-	return
 }

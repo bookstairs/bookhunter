@@ -1,5 +1,7 @@
 package fetcher
 
+import "github.com/bookstairs/bookhunter/internal/driver"
+
 type telegramService struct {
 	config *Config
 }
@@ -14,10 +16,10 @@ func (s *telegramService) size() (int64, error) {
 	panic("implement me")
 }
 
-func (s *telegramService) formats(id int64) (map[Format]string, error) {
+func (s *telegramService) formats(id int64) (map[Format]driver.Share, error) {
 	panic("implement me")
 }
 
-func (s *telegramService) fetch(id int64, format Format, url string) (*fetch, error) {
+func (s *telegramService) fetch(id int64, format Format, share driver.Share) (*fetch, error) {
 	panic("implement me")
 }

@@ -9,6 +9,7 @@ import (
 
 	"github.com/yi-ge/unzip"
 
+	"github.com/bookstairs/bookhunter/internal/driver"
 	"github.com/bookstairs/bookhunter/internal/log"
 	"github.com/bookstairs/bookhunter/internal/naming"
 	"github.com/bookstairs/bookhunter/internal/progress"
@@ -102,8 +103,8 @@ func (f *commonFetcher) startDownload() {
 		formats = f.filterFormats(formats)
 
 		// Download the file by formats one by one.
-		for format, url := range formats {
-			err := f.downloadFile(bookID, format, url)
+		for format, share := range formats {
+			err := f.downloadFile(bookID, format, share)
 			if err != nil {
 				f.finishDownload(err)
 				break
@@ -120,8 +121,8 @@ func (f *commonFetcher) startDownload() {
 }
 
 // downloadFile in a thread.
-func (f *commonFetcher) downloadFile(bookID int64, format Format, url string) error {
-	file, err := f.service.fetch(bookID, format, url)
+func (f *commonFetcher) downloadFile(bookID int64, format Format, share driver.Share) error {
+	file, err := f.service.fetch(bookID, format, share)
 	if err != nil {
 		return err
 	}
@@ -130,17 +131,17 @@ func (f *commonFetcher) downloadFile(bookID int64, format Format, url string) er
 	// Rename if it was required.
 	prefix := strconv.FormatInt(bookID, 10)
 	if f.Rename {
-		file.name = prefix + "." + string(format)
+		share.FileName = prefix + "." + string(format)
 	} else {
-		file.name = prefix + "_" + file.name
+		share.FileName = prefix + "_" + share.FileName
 	}
 
 	// Escape the file name for avoiding the illegal characters.
 	// Ref: https://en.wikipedia.org/wiki/Filename#Reserved_characters_and_words
-	file.name = naming.EscapeFilename(file.name)
+	share.FileName = naming.EscapeFilename(share.FileName)
 
 	// Generate the file path.
-	path := filepath.Join(f.DownloadPath, file.name)
+	path := filepath.Join(f.DownloadPath, share.FileName)
 
 	// Remove the exist file.
 	if _, err := os.Stat(path); err == nil {
@@ -157,7 +158,7 @@ func (f *commonFetcher) downloadFile(bookID int64, format Format, url string) er
 	defer func() { _ = writer.Close() }()
 
 	// Add download progress.
-	bar := log.NewProgressBar(bookID, f.progress.Size(), file.name, file.size)
+	bar := log.NewProgressBar(bookID, f.progress.Size(), share.FileName, file.size)
 	defer func() { _ = bar.Close() }()
 
 	// Write file content
@@ -176,12 +177,12 @@ func (f *commonFetcher) downloadFile(bookID int64, format Format, url string) er
 }
 
 // filterFormats will find the valid formats by user configure.
-func (f *commonFetcher) filterFormats(formats map[Format]string) map[Format]string {
-	fs := make(map[Format]string)
-	for format, url := range formats {
+func (f *commonFetcher) filterFormats(formats map[Format]driver.Share) map[Format]driver.Share {
+	fs := make(map[Format]driver.Share)
+	for format, share := range formats {
 		for _, vf := range f.Formats {
 			if format == vf {
-				fs[format] = url
+				fs[format] = share
 				break
 			}
 		}
