@@ -44,7 +44,7 @@ func createFetch(resp *resty.Response) *fetch {
 func newService(c *Config) (service, error) {
 	switch c.Category {
 	case Talebook:
-		return newTalebookService()
+		return newTalebookService(c)
 	case SanQiu:
 		return nil, errors.New("we don't support sanqiu now")
 	case Telegram:

@@ -1,8 +1,12 @@
 package fetcher
 
 import (
+	"errors"
 	"fmt"
+	"net/http"
 	"strings"
+
+	"github.com/go-resty/resty/v2"
 
 	"github.com/bookstairs/bookhunter/internal/client"
 )
@@ -52,11 +56,20 @@ type Config struct {
 }
 
 // Property will require an existed property from the config.
-func (c *Config) Property(name string) (string, error) {
+func (c *Config) Property(name string) string {
 	if v, ok := c.Properties[name]; ok {
-		return v, nil
+		return v
 	}
-	return "", fmt.Errorf("no such config key [%s] existed", name)
+	return ""
+}
+
+func (c *Config) SetRedirect(redirect func(request *http.Request, requests []*http.Request) error) error {
+	if c.Config.Redirect != nil {
+		return errors.New("couldn't override the existed redirect handler")
+	}
+	c.Config.Redirect = resty.RedirectPolicyFunc(redirect)
+
+	return nil
 }
 
 // ParseFormats will create the format array from the string slice.
