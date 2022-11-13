@@ -14,6 +14,10 @@ import (
 	"github.com/bookstairs/bookhunter/internal/progress"
 )
 
+const (
+	progressFile = "progress.db"
+)
+
 // Fetcher exposes the download method to the command line.
 type Fetcher interface {
 	// Download the books from the given service.
@@ -44,7 +48,7 @@ func (f *commonFetcher) Download() error {
 	}
 
 	// Create download progress with ratelimit.
-	f.progress, err = progress.NewProgress(f.InitialBookID, size, f.RateLimit, filepath.Join(configPath, "process.db"))
+	f.progress, err = progress.NewProgress(f.InitialBookID, size, f.RateLimit, filepath.Join(configPath, progressFile))
 	if err != nil {
 		return err
 	}

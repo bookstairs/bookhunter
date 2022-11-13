@@ -123,6 +123,10 @@ func NewConfig(rawURL, userAgent, proxy, configRoot string) (*Config, error) {
 		if err != nil {
 			return nil, err
 		}
+	} else {
+		if err := os.MkdirAll(configRoot, 0755); err != nil {
+			return nil, err
+		}
 	}
 
 	return &Config{

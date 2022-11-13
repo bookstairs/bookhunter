@@ -40,7 +40,7 @@ var sanqiuCmd = &cobra.Command{
 			Row("Aliyun RefreshToken", "******").
 			Print()
 
-		// Set the fetcher config.
+		// Set the domain for using in resty.Client.
 		argument.Website = sanqiuWebsite
 
 		// Create the fetcher.
