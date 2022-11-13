@@ -145,6 +145,7 @@ func (f *commonFetcher) downloadFile(bookID int64, format Format) error {
 
 	// Add download progress.
 	bar := log.NewProgressBar(bookID, f.progress.Size(), file.name, file.size)
+	defer func() { _ = bar.Close() }()
 
 	// Write file content
 	_, err = io.Copy(io.MultiWriter(writer, bar), file.content)
