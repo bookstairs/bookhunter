@@ -30,7 +30,7 @@ var (
 	}
 	Extract       = false
 	DownloadPath  = ""
-	InitialBookID = 1
+	InitialBookID = int64(1)
 	Rename        = false
 	Thread        = 1
 	RateLimit     = 30

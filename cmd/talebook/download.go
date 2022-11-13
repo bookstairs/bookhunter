@@ -60,7 +60,7 @@ func init() {
 	flags.StringSliceVarP(&argument.Formats, "format", "f", argument.Formats, "The file formats you want to download.")
 	flags.StringVarP(&argument.DownloadPath, "download", "d", argument.DownloadPath,
 		"The book directory you want to use, default would be current working directory.")
-	flags.IntVarP(&argument.InitialBookID, "initial", "i", argument.InitialBookID,
+	flags.Int64VarP(&argument.InitialBookID, "initial", "i", argument.InitialBookID,
 		"The book id you want to start download. It should exceed 0.")
 	flags.BoolVarP(&argument.Rename, "rename", "r", argument.Rename, "Rename the book file by book ID.")
 	flags.IntVarP(&argument.Thread, "thread", "t", argument.Thread, "The number of concurrent download thead.")

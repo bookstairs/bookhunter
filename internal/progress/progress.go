@@ -5,8 +5,10 @@ import (
 	"fmt"
 	"os"
 	"sync"
+	"time"
 
 	"github.com/bits-and-blooms/bitset"
+	"go.uber.org/ratelimit"
 )
 
 const NoBookToDownload = -1
@@ -19,14 +21,15 @@ var (
 
 // Progress is a bit based
 type Progress struct {
-	progress *bitset.BitSet // progress is used for file Progress.
-	assigned *bitset.BitSet // the assign status, memory based.
-	lock     *sync.Mutex    // lock is used for concurrent request.
-	file     string         // The Progress file path for download progress.
+	limit    ratelimit.Limiter // The ratelimit for acquiring a book ID.
+	progress *bitset.BitSet    // progress is used for file Progress.
+	assigned *bitset.BitSet    // the assign status, memory based.
+	lock     *sync.Mutex       // lock is used for concurrent request.
+	file     string            // The Progress file path for download progress.
 }
 
 // NewProgress Create a storge for save the download progress.
-func NewProgress(start, size int64, path string) (*Progress, error) {
+func NewProgress(start, size int64, rate int, path string) (*Progress, error) {
 	if start < 1 {
 		return nil, ErrStartBookID
 	}
@@ -84,7 +87,11 @@ func NewProgress(start, size int64, path string) (*Progress, error) {
 	assigned := bitset.New(progress.Len())
 	progress.Copy(assigned)
 
+	// Create ratelimit
+	limit := ratelimit.New(rate, ratelimit.Per(time.Minute))
+
 	return &Progress{
+		limit:    limit,
 		progress: progress,
 		assigned: assigned,
 		lock:     new(sync.Mutex),
@@ -111,6 +118,8 @@ func (storage *Progress) AcquireBookID() int64 {
 	storage.lock.Lock()
 	defer storage.lock.Unlock()
 
+	// Block until the rate meets the given config.
+	storage.limit.Take()
 	for i := uint(0); i < storage.assigned.Len(); i++ {
 		if !storage.assigned.Test(i) {
 			storage.assigned.Set(i)

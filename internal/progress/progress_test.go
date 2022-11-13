@@ -17,7 +17,7 @@ func TestProgress_AcquireBookID(t *testing.T) {
 	file := tempFile()
 	defer func() { _ = os.Remove(file) }()
 
-	s, err := NewProgress(1, 10000, file)
+	s, err := NewProgress(1, 10000, 10000, file)
 	if err != nil {
 		t.Errorf("Error in creating Progress: %v", err)
 	}
@@ -34,7 +34,7 @@ func TestProgress_SaveBookID(t *testing.T) {
 	file := tempFile()
 	defer func() { _ = os.Remove(file) }()
 
-	s, err := NewProgress(1, 1000, file)
+	s, err := NewProgress(1, 1000, 10000, file)
 	if err != nil {
 		t.Errorf("Error in creating Progress: %v", err)
 	}
@@ -51,7 +51,7 @@ func TestProgress_SaveBookID(t *testing.T) {
 		}
 	}
 
-	s2, err := NewProgress(1, 1000, file)
+	s2, err := NewProgress(1, 1000, 10000, file)
 	if err != nil {
 		t.Errorf("Error in creating Progress: %v", err)
 	}

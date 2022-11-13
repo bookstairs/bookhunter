@@ -39,7 +39,7 @@ type Config struct {
 	Formats       []Format // The formats that the user wants.
 	Extract       bool     // Extract the archives after download.
 	DownloadPath  string   // The path for storing the file.
-	InitialBookID int      // The book id start to download.
+	InitialBookID int64    // The book id start to download.
 	Rename        bool     // Rename the file by using book ID.
 	Thread        int      // The number of download threads.
 	RateLimit     int      // Request per minute.
