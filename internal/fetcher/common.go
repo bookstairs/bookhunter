@@ -1,7 +1,6 @@
 package fetcher
 
 import (
-	"errors"
 	"fmt"
 	"strings"
 
@@ -20,9 +19,6 @@ const (
 	AZW3 Format = "azw3"
 	PDF  Format = "pdf"
 	ZIP  Format = "zip"
-	RAR  Format = "rar"
-	TAR  Format = "tar"
-	GZIP Format = "gz"
 )
 
 const (
@@ -32,6 +28,11 @@ const (
 	TianLang Category = "tianlang"
 	Telegram Category = "telegram"
 )
+
+// Archive will return if this format is an archive.
+func (f Format) Archive() bool {
+	return f == ZIP
+}
 
 // Config is used to define a common config for a specified fetcher service.
 type Config struct {
@@ -50,15 +51,12 @@ type Config struct {
 	*client.Config
 }
 
+// Property will require an existed property from the config.
 func (c *Config) Property(name string) (string, error) {
 	if v, ok := c.Properties[name]; ok {
 		return v, nil
 	}
 	return "", fmt.Errorf("no such config key [%s] existed", name)
-}
-
-type Fetcher interface {
-	Download() error
 }
 
 // ParseFormats will create the format array from the string slice.
@@ -72,24 +70,6 @@ func ParseFormats(formats []string) ([]Format, error) {
 		fs = append(fs, f)
 	}
 	return fs, nil
-}
-
-// New create a fetcher service for downloading books.
-func New(c *Config) (Fetcher, error) {
-	switch c.Category {
-	case Talebook:
-		return nil, errors.New("we don't talebook talebook now")
-	case SanQiu:
-		return nil, errors.New("we don't support sanqiu now")
-	case Telegram:
-		return nil, errors.New("we don't support telegram now")
-	case SoBooks:
-		return nil, errors.New("we don't support sobooks now")
-	case TianLang:
-		return nil, errors.New("we don't support tianlang now")
-	default:
-		return nil, fmt.Errorf("no such fetcher service [%s] supported", c.Category)
-	}
 }
 
 // IsValidFormat judge if this format was supported.
@@ -107,13 +87,20 @@ func IsValidFormat(format Format) bool {
 		return true
 	case ZIP:
 		return true
-	case RAR:
-		return true
-	case TAR:
-		return true
-	case GZIP:
-		return true
 	default:
 		return false
 	}
+}
+
+// New create a fetcher service for downloading books.
+func New(c *Config) (Fetcher, error) {
+	s, err := newService(c)
+	if err != nil {
+		return nil, err
+	}
+
+	return &commonFetcher{
+		Config:  c,
+		service: s,
+	}, nil
 }
