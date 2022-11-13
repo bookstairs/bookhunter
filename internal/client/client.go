@@ -10,12 +10,9 @@ import (
 	"time"
 
 	"github.com/go-resty/resty/v2"
-	jsoniter "github.com/json-iterator/go"
 )
 
 var (
-	json = jsoniter.ConfigCompatibleWithStandardLibrary
-
 	ErrInvalidRequestURL = errors.New("invalid request url, we only support https:// or http://")
 )
 
@@ -163,10 +160,6 @@ func New(c *Config) (*Client, error) {
 	} else {
 		client.RemoveProxy()
 	}
-
-	// Override the json binding.
-	client.JSONMarshal = json.Marshal
-	client.JSONUnmarshal = json.Unmarshal
 
 	return &Client{Client: client, Config: c}, nil
 }
