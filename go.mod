@@ -10,6 +10,7 @@ require (
 	github.com/mitchellh/colorstring v0.0.0-20190213212951-d06e56a500db
 	github.com/schollz/progressbar/v3 v3.12.1
 	github.com/spf13/cobra v1.6.1
+	github.com/yi-ge/unzip v1.0.2
 	go.uber.org/ratelimit v0.2.0
 )
 
