@@ -7,17 +7,46 @@ import (
 )
 
 // ShareFiles will resolve the telecom-shared link.
-func (t *Telecom) ShareFiles(accessURL, accessCode string) ([]ShareFile, error) {
+func (t *Telecom) ShareFiles(accessURL, accessCode string) (*ShareInfo, []ShareFile, error) {
+	// Get share info.
 	info, err := t.shareInfo(accessURL)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
+	// Reclusive get the shared files.
+	var files []ShareFile
 	if info.IsFolder {
-		return t.listShareFolders(accessCode, info.FileID, info.FileID, info.ShareID, info.ShareMode)
+		files, err = t.listShareFolders(accessCode, info.FileID, info.FileID, info.ShareID, info.ShareMode)
 	} else {
-		return t.listShareFiles(accessCode, info.FileID, info.ShareID, info.ShareMode)
+		files, err = t.listShareFiles(accessCode, info.FileID, info.ShareID, info.ShareMode)
 	}
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return info, files, nil
+}
+
+func (t *Telecom) DownloadURL(fileID string, shareID int64, shareCode string) (string, error) {
+	resp, err := t.client.R().
+		SetHeaders(map[string]string{
+			"accept":  "application/json;charset=UTF-8",
+			"origin":  "https://cloud.189.cn",
+			"Referer": "https://cloud.189.cn/web/share?code=" + shareCode,
+		}).
+		SetQueryParams(map[string]string{
+			"fileId":  fileID,
+			"shareId": strconv.FormatInt(shareID, 10),
+		}).
+		SetResult(&ShareLink{}).
+		Get(webPrefix + "/api/open/file/getFileDownloadUrl.action")
+	if err != nil {
+		return "", err
+	}
+	link := resp.Result().(*ShareLink)
+
+	return link.FileDownloadURL, nil
 }
 
 func (t *Telecom) shareInfo(accessURL string) (*ShareInfo, error) {

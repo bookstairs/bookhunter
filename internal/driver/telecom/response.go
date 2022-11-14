@@ -111,4 +111,10 @@ type (
 		} `json:"fileListAO"`
 		LastRev int64 `json:"lastRev"`
 	}
+
+	ShareLink struct {
+		ResCode         int    `json:"res_code"`
+		ResMessage      string `json:"res_message"`
+		FileDownloadURL string `json:"fileDownloadUrl"`
+	}
 )
