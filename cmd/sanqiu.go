@@ -37,7 +37,9 @@ var sanqiuCmd = &cobra.Command{
 			Row("Rename File", argument.Rename).
 			Row("Thread", argument.Thread).
 			Row("Request Per Minute", argument.RateLimit).
-			Row("Aliyun RefreshToken", "******").
+			Row("Aliyun RefreshToken", argument.RefreshToken).
+			Row("Telecom Username", argument.TelecomUsername).
+			Row("Telecom Password", argument.TelecomPassword).
 			Print()
 
 		// Set the domain for using in resty.Client.
@@ -45,7 +47,9 @@ var sanqiuCmd = &cobra.Command{
 
 		// Create the fetcher.
 		f, err := argument.NewFetcher(fetcher.SanQiu, map[string]string{
-			"refreshToken": argument.RefreshToken,
+			"refreshToken":    argument.RefreshToken,
+			"telecomUsername": argument.TelecomUsername,
+			"telecomPassword": argument.TelecomPassword,
 		})
 		log.Fatal(err)
 
@@ -75,4 +79,8 @@ func init() {
 	// Drive ISP flags.
 	flags.StringVarP(&argument.RefreshToken, "refreshToken", "", argument.RefreshToken,
 		"We would try to download from the aliyun drive if you provide this token.")
+	flags.StringVarP(&argument.TelecomUsername, "telecomUsername", "", argument.TelecomUsername,
+		"Used to download file from telecom drive")
+	flags.StringVarP(&argument.TelecomPassword, "telecomPassword", "", argument.TelecomPassword,
+		"Used to download file from telecom drive")
 }

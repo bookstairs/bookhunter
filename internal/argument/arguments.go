@@ -39,7 +39,10 @@ var (
 
 	// Drive ISP configurations.
 
-	RefreshToken = ""
+	RefreshToken = "" // Aliyun Drive
+
+	TelecomUsername = "" // Telecom Cloud.
+	TelecomPassword = ""
 
 	// Telegram configurations.
 
