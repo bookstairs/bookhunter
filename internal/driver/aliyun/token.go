@@ -3,6 +3,7 @@ package aliyun
 import "fmt"
 
 // AuthToken will return the token by the given refreshToken.
+// You can call this method for automatically refreshing the access token.
 func (ali *Aliyun) AuthToken() (string, error) {
 	// Get the token from the cache.
 	token := ali.cachedToken()
