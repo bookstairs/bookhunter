@@ -10,6 +10,8 @@ import (
 	"time"
 
 	"github.com/go-resty/resty/v2"
+
+	"github.com/bookstairs/bookhunter/internal/log"
 )
 
 var (
@@ -144,12 +146,17 @@ func New(c *Config) (*Client, error) {
 		SetRetryCount(3).
 		SetRetryWaitTime(3*time.Second).
 		SetRetryMaxWaitTime(10*time.Second).
-		SetRedirectPolicy(c.redirectPolicy()...).
 		SetAllowGetMethodPayload(true).
 		SetTimeout(1*time.Minute).
 		SetContentLength(true).
+		SetDebug(log.EnableDebug).
+		SetDisableWarn(true).
 		SetHeader("User-Agent", c.userAgent()).
 		SetBaseURL(c.baseURL())
+
+	if len(c.redirectPolicy()) > 0 {
+		client.SetRedirectPolicy(c.redirectPolicy()...)
+	}
 
 	// Setting the cookiejar
 	cookieJar, err := c.newCookieJar()
