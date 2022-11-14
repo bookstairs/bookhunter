@@ -3,39 +3,26 @@ package driver
 import (
 	"io"
 
-	"github.com/tickstep/cloudpan189-api/cloudpan"
-
 	"github.com/bookstairs/bookhunter/internal/client"
+	"github.com/bookstairs/bookhunter/internal/driver/telecom"
 )
 
-func newTelecomDriver(_ *client.Config, properties map[string]string) (Driver, error) {
-	webToken := &cloudpan.WebLoginToken{}
-	appToken := &cloudpan.AppLoginToken{}
-
+func newTelecomDriver(config *client.Config, properties map[string]string) (Driver, error) {
 	// Try to sign in to the telecom disk.
 	username := properties["username"]
 	password := properties["password"]
-	if username != "" && password != "" {
-		token, err := cloudpan.AppLogin(username, password)
-		if err != nil {
-			return nil, err
-		}
-
-		webTokenStr := cloudpan.RefreshCookieToken(token.SessionKey)
-		if webTokenStr != "" {
-			webToken.CookieLoginUser = webTokenStr
-		}
-		appToken = token
-	}
 
 	// Create the pan client.
-	c := cloudpan.NewPanClient(*webToken, *appToken)
+	t, err := telecom.New(config, username, password)
+	if err != nil {
+		return nil, err
+	}
 
-	return &telecomDriver{client: c}, nil
+	return &telecomDriver{client: t}, nil
 }
 
 type telecomDriver struct {
-	client *cloudpan.PanClient
+	client *telecom.Telecom
 }
 
 func (t *telecomDriver) Resolve(shareLink string, passcode string) []Share {
