@@ -21,7 +21,7 @@ type Aliyun struct {
 	refreshToken string
 }
 
-// New will create a aliyun download service.
+// New will create an aliyun download service.
 func New(c *client.Config, refreshToken string) (*Aliyun, error) {
 	if refreshToken == "" {
 		return nil, errors.New("refreshToken is required")

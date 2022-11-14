@@ -39,12 +39,12 @@ const (
 )
 
 // New will create the basic driver service.
-func New(source Source, config *client.Config) (Driver, error) {
+func New(source Source, config *client.Config, properties map[string]string) (Driver, error) {
 	switch source {
 	case ALIYUN:
-		return newAliyunDriver(config)
+		return newAliyunDriver(config, properties)
 	case TELECOM:
-		return nil, errors.New("we don't support telecom currently")
+		return newTelecomDriver(config, properties)
 	case LANZOU:
 		return nil, errors.New("we don't support lanzou currently")
 	default:

@@ -33,13 +33,13 @@ func (j *jar) SetCookies(u *url.URL, cookies []*http.Cookie) {
 	// Create or open the file.
 	file, err := os.OpenFile(j.path, os.O_CREATE|os.O_RDWR, 0644)
 	if err != nil {
-		log.Fatal(err)
+		log.Warn(err)
 	}
 	defer func() { _ = file.Close() }()
 
 	encoder := json.NewEncoder(file)
 	if err := encoder.Encode(&j.cookies); err != nil {
-		log.Fatal(err)
+		log.Warn(err)
 	}
 
 	j.subJar.SetCookies(u, cookies)
