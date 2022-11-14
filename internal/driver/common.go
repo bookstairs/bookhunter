@@ -1,7 +1,6 @@
 package driver
 
 import (
-	"errors"
 	"fmt"
 	"io"
 
@@ -46,7 +45,7 @@ func New(source Source, config *client.Config, properties map[string]string) (Dr
 	case TELECOM:
 		return newTelecomDriver(config, properties)
 	case LANZOU:
-		return nil, errors.New("we don't support lanzou currently")
+		return newLanzouDriver(config, properties)
 	default:
 		return nil, fmt.Errorf("invalid driver service %s", source)
 	}

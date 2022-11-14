@@ -38,6 +38,8 @@ linters-settings:
   gosec:
     excludes:
       - G107
+      - G401
+      - G501
 
 linters:
   disable-all: true
