@@ -1,6 +1,8 @@
 package argument
 
 import (
+	"os"
+
 	"github.com/bookstairs/bookhunter/internal/client"
 	"github.com/bookstairs/bookhunter/internal/fetcher"
 )
@@ -28,12 +30,12 @@ var (
 		string(fetcher.PDF),
 		string(fetcher.ZIP),
 	}
-	Extract       = false
-	DownloadPath  = ""
-	InitialBookID = int64(1)
-	Rename        = false
-	Thread        = 1
-	RateLimit     = 30
+	Extract         = false
+	DownloadPath, _ = os.Getwd()
+	InitialBookID   = int64(1)
+	Rename          = false
+	Thread          = 1
+	RateLimit       = 30
 
 	// Drive ISP configurations.
 
