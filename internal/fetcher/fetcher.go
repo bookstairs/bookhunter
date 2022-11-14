@@ -62,6 +62,8 @@ func (f *commonFetcher) Download() error {
 
 	// Create the download thread and save the files.
 	f.errs = make(chan error, f.Thread)
+	defer close(f.errs)
+
 	for i := 0; i < f.Thread; i++ {
 		f.wait.Add(1)
 		go f.startDownload()

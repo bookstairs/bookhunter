@@ -42,7 +42,7 @@ const (
 func New(source Source, config *client.Config) (Driver, error) {
 	switch source {
 	case ALIYUN:
-		return nil, errors.New("we don't support aliyun currently")
+		return newAliyunDriver(config)
 	case TELECOM:
 		return nil, errors.New("we don't support telecom currently")
 	case LANZOU:
