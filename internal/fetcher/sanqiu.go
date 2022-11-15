@@ -120,5 +120,13 @@ func (s *sanqiuService) formats(id int64) (map[Format]driver.Share, error) {
 }
 
 func (s *sanqiuService) fetch(id int64, format Format, share driver.Share) (*fetch, error) {
-	panic("TODO implement me")
+	content, size, err := s.driver.Download(share)
+	if err != nil {
+		return nil, err
+	}
+
+	return &fetch{
+		content: content,
+		size:    size,
+	}, nil
 }

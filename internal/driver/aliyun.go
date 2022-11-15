@@ -47,6 +47,6 @@ func (a *aliyunDriver) Resolve(shareLink string, passcode string) ([]Share, erro
 	panic("TODO implement me")
 }
 
-func (a *aliyunDriver) Download(share Share) (io.ReadCloser, error) {
+func (a *aliyunDriver) Download(share Share) (io.ReadCloser, int64, error) {
 	panic("TODO implement me")
 }
