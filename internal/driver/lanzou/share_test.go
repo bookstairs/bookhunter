@@ -67,10 +67,8 @@ func TestParseLanzouUrl(t *testing.T) {
 			},
 		},
 	}
-	drive, _ := NewDrive(&client.Config{
-		HTTPS: true,
-		Host:  "lanzoux.com",
-	})
+
+	drive, _ := NewDrive(&client.Config{})
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

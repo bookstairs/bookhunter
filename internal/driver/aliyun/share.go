@@ -1,6 +1,10 @@
 package aliyun
 
-import "io"
+import (
+	"io"
+
+	"github.com/bookstairs/bookhunter/internal/log"
+)
 
 // AnonymousShare will try to access the share without the user information.
 func (ali *Aliyun) AnonymousShare(shareID string) (*ShareInfoResp, error) {
@@ -140,9 +144,12 @@ func (ali *Aliyun) DownloadURL(shareToken string, shareID string, fileID string)
 }
 
 func (ali *Aliyun) DownloadFile(downloadURL string) (io.ReadCloser, int64, error) {
-	resp, err := ali.downloader.R().
+	log.Debugf("Start to download file from aliyun drive: %s", downloadURL)
+
+	resp, err := ali.client.R().
 		SetDoNotParseResponse(true).
 		Get(downloadURL)
 	response := resp.RawResponse
+
 	return response.Body, response.ContentLength, err
 }
