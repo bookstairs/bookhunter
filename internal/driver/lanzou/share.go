@@ -13,7 +13,7 @@ import (
 	"github.com/bookstairs/bookhunter/internal/log"
 )
 
-func (l Drive) ResolveShareURL(shareURL string, pwd string) (*Response, error) {
+func (l *Drive) ResolveShareURL(shareURL string, pwd string) (*Response, error) {
 	// 移除url前部的主机
 	rawURL, _ := url.Parse(shareURL)
 	parsedURI := rawURL.RequestURI()
@@ -27,21 +27,21 @@ func (l Drive) ResolveShareURL(shareURL string, pwd string) (*Response, error) {
 	return nil, fmt.Errorf("unsupport share url %v", shareURL)
 }
 
-func (l Drive) IsDirURL(shareURL string) bool {
+func (l *Drive) IsDirURL(shareURL string) bool {
 	return dirURLRe.MatchString(shareURL)
 }
 
-func (l Drive) IsFileURL(shareURL string) bool {
+func (l *Drive) IsFileURL(shareURL string) bool {
 	return fileURLRe.MatchString(shareURL)
 }
 
-func (l Drive) removeNotes(html string) string {
+func (l *Drive) removeNotes(html string) string {
 	html = htmlNoteRe.ReplaceAllString(html, "")
 	html = jsNoteRe.ReplaceAllString(html, "$1")
 	return html
 }
 
-func (l Drive) resolveFileShareURL(parsedURI string, pwd string) (*Response, error) {
+func (l *Drive) resolveFileShareURL(parsedURI string, pwd string) (*Response, error) {
 	get, _ := l.client.R().Get(parsedURI)
 
 	firstPage := get.String()
@@ -124,7 +124,7 @@ func (l Drive) resolveFileShareURL(parsedURI string, pwd string) (*Response, err
 	return nil, fmt.Errorf("解析页面失败")
 }
 
-func (l Drive) parseDom(result *Dom) (*Response, error) {
+func (l *Drive) parseDom(result *Dom) (*Response, error) {
 	if result.Zt != 1 {
 		return nil, fmt.Errorf("解析直链失败")
 	}
@@ -158,14 +158,14 @@ func (l Drive) parseDom(result *Dom) (*Response, error) {
 	}, nil
 }
 
-func (l Drive) calcAcwScV2(htmlText string) string {
+func (l *Drive) calcAcwScV2(htmlText string) string {
 	arg1Re := regexp.MustCompile(`arg1='([0-9A-Z]+)'`)
 	arg1 := l.extractRegex(arg1Re, htmlText)
 	acwScV2 := l.hexXor(l.unbox(arg1), "3000176000856006061501533003690027800375")
 	return acwScV2
 }
 
-func (l Drive) unbox(arg string) string {
+func (l *Drive) unbox(arg string) string {
 	v1 := []int{15, 35, 29, 24, 33, 16, 1, 38, 10, 9, 19, 31, 40, 27, 22, 23, 25, 13, 6, 11,
 		39, 18, 20, 8, 14, 21, 32, 26, 2, 30, 7, 4, 17, 5, 3, 28, 34, 37, 12, 36}
 	v2 := make([]string, len(v1))
@@ -186,7 +186,7 @@ func min(x, y int) int {
 	return y
 }
 
-func (l Drive) hexXor(arg string, args string) string {
+func (l *Drive) hexXor(arg string, args string) string {
 	a := min(len(arg), len(args))
 	res := ""
 	for idx := 0; idx < a; idx += 2 {
@@ -199,7 +199,7 @@ func (l Drive) hexXor(arg string, args string) string {
 	return res
 }
 
-func (l Drive) extractRegex(reg *regexp.Regexp, str string) string {
+func (l *Drive) extractRegex(reg *regexp.Regexp, str string) string {
 	matches := reg.FindStringSubmatch(str)
 	if len(matches) >= 2 {
 		return matches[1]
@@ -207,7 +207,7 @@ func (l Drive) extractRegex(reg *regexp.Regexp, str string) string {
 	return ""
 }
 
-func (l Drive) resolveFileItemShareURL(parsedURI string, pwd string) (*Response, error) {
+func (l *Drive) resolveFileItemShareURL(parsedURI string, pwd string) (*Response, error) {
 	resp, _ := l.client.R().Get(parsedURI)
 	str := resp.String()
 	formData := map[string]string{
