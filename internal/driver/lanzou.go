@@ -4,20 +4,36 @@ import (
 	"io"
 
 	"github.com/bookstairs/bookhunter/internal/client"
+	"github.com/bookstairs/bookhunter/internal/driver/lanzou"
 )
 
-func newLanzouDriver(_ *client.Config, _ map[string]string) (Driver, error) {
-	// TODO Add this implementation.
-	return &lanzouDriver{}, nil
+func newLanzouDriver(c *client.Config, _ map[string]string) (Driver, error) {
+	cl, _ := client.New(&client.Config{
+		HTTPS:      true,
+		Host:       "lanzoux.com",
+		UserAgent:  c.UserAgent,
+		Proxy:      c.Proxy,
+		ConfigRoot: c.ConfigRoot,
+	})
+	driver := &lanzou.Drive{
+		Client:  cl.Client,
+		BaseURL: "https://lanzoux.com",
+	}
+	return &lanzouDriver{
+		driver: driver,
+	}, nil
 }
 
-type lanzouDriver struct{}
+type lanzouDriver struct {
+	driver *lanzou.Drive
+}
 
 func (l *lanzouDriver) Source() Source {
 	return LANZOU
 }
 
 func (l *lanzouDriver) Resolve(shareLink string, passcode string) []Share {
+	_, _ = l.driver.ResolveShareURL(shareLink, passcode)
 	panic("TODO implement me")
 }
 
