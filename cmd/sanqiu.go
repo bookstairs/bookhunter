@@ -37,9 +37,9 @@ var sanqiuCmd = &cobra.Command{
 			Row("Rename File", argument.Rename).
 			Row("Thread", argument.Thread).
 			Row("Request Per Minute", argument.RateLimit).
-			Row("Aliyun RefreshToken", argument.RefreshToken).
-			Row("Telecom Username", argument.TelecomUsername).
-			Row("Telecom Password", argument.TelecomPassword).
+			Row("Aliyun RefreshToken", argument.HideSensitive(argument.RefreshToken)).
+			Row("Telecom Username", argument.HideSensitive(argument.TelecomUsername)).
+			Row("Telecom Password", argument.HideSensitive(argument.TelecomPassword)).
 			Print()
 
 		// Set the domain for using in resty.Client.

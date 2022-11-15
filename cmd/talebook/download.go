@@ -18,8 +18,8 @@ var DownloadCmd = &cobra.Command{
 			Title("Talebook Download Information").
 			Head(log.DefaultHead...).
 			Row("Website", argument.Website).
-			Row("Username", argument.Username).
-			Row("Password", "******").
+			Row("Username", argument.HideSensitive(argument.Username)).
+			Row("Password", argument.HideSensitive(argument.Password)).
 			Row("Config Path", argument.ConfigRoot).
 			Row("Proxy", argument.Proxy).
 			Row("UserAgent", argument.UserAgent).
