@@ -86,7 +86,7 @@ func (s *sanqiuService) formats(id int64) (map[Format]driver.Share, error) {
 			continue
 		}
 
-		shares, err := s.driver.Resolve(link.URL, link.URL)
+		shares, err := s.driver.Resolve(link.URL, link.Code)
 		if err != nil {
 			return nil, err
 		}
