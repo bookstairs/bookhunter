@@ -1,6 +1,7 @@
 package driver
 
 import (
+	"errors"
 	"fmt"
 	"io"
 
@@ -14,7 +15,7 @@ func newLanzouDriver(c *client.Config, _ map[string]string) (Driver, error) {
 		return nil, err
 	}
 
-	return &lanzouDriver{driver: drive}, nil
+	return &lanzouDriver{driver: drive}, errors.New("we don't support lanzou currently")
 }
 
 type lanzouDriver struct {
@@ -34,9 +35,14 @@ func (l *lanzouDriver) Resolve(shareLink string, passcode string) ([]Share, erro
 		return nil, fmt.Errorf("parsed faild: %v", resp.Msg)
 	}
 
-	return []Share{{FileName: resp.Data.Name, URL: resp.Data.URL, Properties: nil}}, err
+	share := Share{
+		FileName: resp.Data.Name,
+		URL:      resp.Data.URL,
+	}
+
+	return []Share{share}, err
 }
 
-func (l *lanzouDriver) Download(share Share) (io.ReadCloser, int64, error) {
+func (l *lanzouDriver) Download(share Share) (io.ReadCloser, error) {
 	return l.driver.DownloadFile(share.URL)
 }

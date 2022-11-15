@@ -42,11 +42,11 @@ func (t *telecomDriver) Resolve(shareLink string, passcode string) ([]Share, err
 	for _, file := range files {
 		shares = append(shares, Share{
 			FileName: file.Name,
-			Properties: map[string]string{
-				"fileID":    strconv.FormatInt(file.ID, 10),
-				"shareID":   strconv.FormatInt(info.ShareID, 10),
+			Size:     file.Size,
+			Properties: map[string]any{
 				"shareCode": code,
-				"fileSize":  strconv.FormatInt(file.Size, 10),
+				"shareID":   strconv.FormatInt(info.ShareID, 10),
+				"fileID":    strconv.FormatInt(file.ID, 10),
 			},
 		})
 	}
@@ -54,20 +54,19 @@ func (t *telecomDriver) Resolve(shareLink string, passcode string) ([]Share, err
 	return shares, nil
 }
 
-func (t *telecomDriver) Download(share Share) (io.ReadCloser, int64, error) {
-	shareCode := share.Properties["shareCode"]
-	shareID := share.Properties["shareID"]
-	fileID := share.Properties["fileID"]
-	size, _ := strconv.ParseInt(share.Properties["fileSize"], 10, 64)
+func (t *telecomDriver) Download(share Share) (io.ReadCloser, error) {
+	shareCode := share.Properties["shareCode"].(string)
+	shareID := share.Properties["shareID"].(string)
+	fileID := share.Properties["fileID"].(string)
 
 	// Resolve the link.
 	url, err := t.client.DownloadURL(shareCode, shareID, fileID)
 	if err != nil {
-		return nil, 0, err
+		return nil, err
 	}
 
 	// Download the file.
 	file, err := t.client.DownloadFile(url)
 
-	return file, size, err
+	return file, err
 }

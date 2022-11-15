@@ -44,35 +44,45 @@ func (a *aliyunDriver) Source() Source {
 }
 
 func (a *aliyunDriver) Resolve(shareLink string, passcode string) ([]Share, error) {
-	c := a.client
-	token, err := c.ShareToken(shareLink, passcode)
+	token, err := a.client.ShareToken(shareLink, passcode)
 	if err != nil {
 		return nil, err
 	}
-	shareFiles, err := c.Share(shareLink, token.ShareToken)
+
+	files, err := a.client.Share(shareLink, token.ShareToken)
 	if err != nil {
 		return nil, err
 	}
+
 	var shares []Share
-	for index := range shareFiles {
-		item := shareFiles[index]
-		shares = append(shares, Share{
+	for index := range files {
+		item := files[index]
+		share := Share{
 			FileName: item.Name,
+			Size:     int64(item.Size),
 			URL:      item.FileID,
-			Properties: map[string]string{
+			Properties: map[string]any{
 				"shareToken": token.ShareToken,
 				"shareID":    shareLink,
+				"fileID":     item.FileID,
 			},
-		})
+		}
+
+		shares = append(shares, share)
 	}
+
 	return shares, nil
 }
 
-func (a *aliyunDriver) Download(share Share) (io.ReadCloser, int64, error) {
-	c := a.client
-	url, err := c.DownloadURL(share.Properties["shareToken"], share.Properties["shareID"], share.URL)
+func (a *aliyunDriver) Download(share Share) (io.ReadCloser, error) {
+	shareToken := share.Properties["shareToken"].(string)
+	shareID := share.Properties["shareID"].(string)
+	fileID := share.Properties["fileID"].(string)
+
+	url, err := a.client.DownloadURL(shareToken, shareID, fileID)
 	if err != nil {
-		return nil, 0, err
+		return nil, err
 	}
-	return c.DownloadFile(url)
+
+	return a.client.DownloadFile(url)
 }

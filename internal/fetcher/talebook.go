@@ -3,6 +3,7 @@ package fetcher
 import (
 	"errors"
 	"fmt"
+	"io"
 	"net/http"
 	"strconv"
 	"strings"
@@ -132,13 +133,17 @@ func (t *talebookService) formats(id int64) (map[Format]driver.Share, error) {
 	}
 }
 
-func (t *talebookService) fetch(_ int64, _ Format, share driver.Share) (*fetch, error) {
+func (t *talebookService) fetch(_ int64, _ Format, share driver.Share, writer io.Writer) error {
 	resp, err := t.client.R().
 		SetDoNotParseResponse(true).
 		Get(share.URL)
 	if err != nil {
-		return nil, err
+		return err
 	}
+	body := resp.RawBody()
+	defer func() { _ = body.Close() }()
 
-	return createFetch(resp), nil
+	// Save the download content info files.
+	_, err = io.Copy(writer, body)
+	return err
 }

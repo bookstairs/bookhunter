@@ -117,7 +117,7 @@ func (ali *Aliyun) ShareToken(shareID string, sharePwd string) (*ShareTokenResp,
 	return resp.Result().(*ShareTokenResp), nil
 }
 
-func (ali *Aliyun) DownloadURL(shareToken string, shareID string, fileID string) (string, error) {
+func (ali *Aliyun) DownloadURL(shareToken, shareID, fileID string) (string, error) {
 	token, err := ali.AuthToken()
 	if err != nil {
 		return "", err
@@ -143,13 +143,15 @@ func (ali *Aliyun) DownloadURL(shareToken string, shareID string, fileID string)
 	return res.DownloadURL, nil
 }
 
-func (ali *Aliyun) DownloadFile(downloadURL string) (io.ReadCloser, int64, error) {
+func (ali *Aliyun) DownloadFile(downloadURL string) (io.ReadCloser, error) {
 	log.Debugf("Start to download file from aliyun drive: %s", downloadURL)
 
 	resp, err := ali.client.R().
 		SetDoNotParseResponse(true).
 		Get(downloadURL)
-	response := resp.RawResponse
+	if err != nil {
+		return nil, err
+	}
 
-	return response.Body, response.ContentLength, err
+	return resp.RawBody(), err
 }
