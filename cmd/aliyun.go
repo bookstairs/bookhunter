@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"path/filepath"
 
@@ -38,6 +39,7 @@ var aliyunCmd = &cobra.Command{
 		ctx := context.Background()
 
 		// Valid the token, we will sign in with QR code if this token is expired.
+		fmt.Println()
 		user, err := ins.Auth.LoginByQrcode(ctx, &aliyundrive.LoginByQrcodeReq{})
 		if err != nil {
 			log.Fatal(err)
