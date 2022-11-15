@@ -124,12 +124,6 @@ func (f *commonFetcher) startDownload() {
 
 // downloadFile in a thread.
 func (f *commonFetcher) downloadFile(bookID int64, format Format, share driver.Share) error {
-	file, err := f.service.fetch(bookID, format, share)
-	if err != nil {
-		return err
-	}
-	defer func() { _ = file.content.Close() }()
-
 	// Rename if it was required.
 	prefix := strconv.FormatInt(bookID, 10)
 	if f.Rename {
@@ -160,12 +154,11 @@ func (f *commonFetcher) downloadFile(bookID int64, format Format, share driver.S
 	defer func() { _ = writer.Close() }()
 
 	// Add download progress.
-	bar := log.NewProgressBar(bookID, f.progress.Size(), share.FileName, file.size)
+	bar := log.NewProgressBar(bookID, f.progress.Size(), share.FileName, share.Size)
 	defer func() { _ = bar.Close() }()
 
-	// Write file content
-	_, err = io.Copy(io.MultiWriter(writer, bar), file.content)
-	if err != nil {
+	// Write file content.
+	if err := f.service.fetch(bookID, format, share, io.MultiWriter(writer, bar)); err != nil {
 		return err
 	}
 

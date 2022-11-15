@@ -15,10 +15,12 @@ type (
 	Share struct {
 		// FileName is a file name with the file extension.
 		FileName string
+		// Size is the file size in bytes.
+		Size int64
 		// URL is the downloadable url for this file.
 		URL string
 		// Properties could be some metadata, such as the token for this downloadable share.
-		Properties map[string]string
+		Properties map[string]any
 	}
 
 	// Driver is used to resolve the links from a Source.
@@ -30,7 +32,7 @@ type (
 		Resolve(shareLink string, passcode string) ([]Share, error)
 
 		// Download the given link.
-		Download(share Share) (io.ReadCloser, int64, error)
+		Download(share Share) (io.ReadCloser, error)
 	}
 )
 
