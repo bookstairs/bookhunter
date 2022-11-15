@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+	"strings"
 
 	"github.com/gotd/contrib/middleware/floodwait"
 	"github.com/gotd/td/session"
@@ -36,6 +37,9 @@ func newTelegramFetcher(config *Config) (Fetcher, error) {
 	mobile := config.Property("mobile")
 	appID, _ := strconv.ParseInt(config.Property("appID"), 10, 64)
 	appHash := config.Property("appHash")
+
+	// Change the process file name.
+	config.precessFile = strings.ReplaceAll(channelID, "/", "_") + ".db"
 
 	// Create the http proxy dial.
 	dialFunc, err := telegram.CreateProxy(config.Proxy)

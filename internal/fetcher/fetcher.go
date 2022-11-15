@@ -16,7 +16,7 @@ import (
 )
 
 const (
-	progressFile = "progress.db"
+	defaultProgressFile = "progress.db"
 )
 
 // Fetcher exposes the download method to the command line.
@@ -47,9 +47,13 @@ func (f *commonFetcher) Download() error {
 	if err != nil {
 		return err
 	}
+	log.Infof("Successfully query the download content counts: %d", size)
 
 	// Create download progress with ratelimit.
-	f.progress, err = progress.NewProgress(f.InitialBookID, size, f.RateLimit, filepath.Join(configPath, progressFile))
+	if f.precessFile == "" {
+		f.precessFile = defaultProgressFile
+	}
+	f.progress, err = progress.NewProgress(f.InitialBookID, size, f.RateLimit, filepath.Join(configPath, f.precessFile))
 	if err != nil {
 		return err
 	}

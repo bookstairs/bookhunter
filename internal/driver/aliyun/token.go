@@ -15,7 +15,7 @@ func (ali *Aliyun) AuthToken() (string, error) {
 	resp, err := ali.client.R().
 		SetBody(&TokenReq{GrantType: "refresh_token", RefreshToken: ali.refreshToken}).
 		SetResult(&TokenResp{}).
-		SetResult(&ErrorResp{}).
+		SetError(&ErrorResp{}).
 		Post("https://auth.aliyundrive.com/v2/account/token")
 	if err != nil {
 		return "", err

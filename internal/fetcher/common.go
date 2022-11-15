@@ -52,6 +52,7 @@ type Config struct {
 	Rename        bool     // Rename the file by using book ID.
 	Thread        int      // The number of download threads.
 	RateLimit     int      // Request per minute.
+	precessFile   string   // Define the download process.
 
 	// The extra configuration for a custom fetcher services.
 	Properties map[string]string
