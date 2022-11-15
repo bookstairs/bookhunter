@@ -3,7 +3,7 @@ package cmd
 import (
 	"github.com/spf13/cobra"
 
-	"github.com/bookstairs/bookhunter/internal/argument"
+	"github.com/bookstairs/bookhunter/cmd/flags"
 	"github.com/bookstairs/bookhunter/internal/fetcher"
 	"github.com/bookstairs/bookhunter/internal/log"
 )
@@ -19,37 +19,37 @@ var sanqiuCmd = &cobra.Command{
 	Short: "A tool for downloading books from sanqiu.mobi",
 	Run: func(cmd *cobra.Command, args []string) {
 		// Set the default start index.
-		if argument.InitialBookID < lowestBookID {
-			argument.InitialBookID = lowestBookID
+		if flags.InitialBookID < lowestBookID {
+			flags.InitialBookID = lowestBookID
 		}
 
 		// Print download configuration.
 		log.NewPrinter().
 			Title("Sanqiu Download Information").
 			Head(log.DefaultHead...).
-			Row("Config Path", argument.ConfigRoot).
-			Row("Proxy", argument.Proxy).
-			Row("UserAgent", argument.UserAgent).
-			Row("Formats", argument.Formats).
-			Row("Extract Archive", argument.Extract).
-			Row("Download Path", argument.DownloadPath).
-			Row("Initial ID", argument.InitialBookID).
-			Row("Rename File", argument.Rename).
-			Row("Thread", argument.Thread).
-			Row("Request Per Minute", argument.RateLimit).
-			Row("Aliyun RefreshToken", argument.HideSensitive(argument.RefreshToken)).
-			Row("Telecom Username", argument.HideSensitive(argument.TelecomUsername)).
-			Row("Telecom Password", argument.HideSensitive(argument.TelecomPassword)).
+			Row("Config Path", flags.ConfigRoot).
+			Row("Proxy", flags.Proxy).
+			Row("UserAgent", flags.UserAgent).
+			Row("Formats", flags.Formats).
+			Row("Extract Archive", flags.Extract).
+			Row("Download Path", flags.DownloadPath).
+			Row("Initial ID", flags.InitialBookID).
+			Row("Rename File", flags.Rename).
+			Row("Thread", flags.Thread).
+			Row("Request Per Minute", flags.RateLimit).
+			Row("Aliyun RefreshToken", flags.HideSensitive(flags.RefreshToken)).
+			Row("Telecom Username", flags.HideSensitive(flags.TelecomUsername)).
+			Row("Telecom Password", flags.HideSensitive(flags.TelecomPassword)).
 			Print()
 
-		// Set the domain for using in client.Client.
-		argument.Website = sanqiuWebsite
+		// Set the domain for using in the client.Client.
+		flags.Website = sanqiuWebsite
 
 		// Create the fetcher.
-		f, err := argument.NewFetcher(fetcher.SanQiu, map[string]string{
-			"refreshToken":    argument.RefreshToken,
-			"telecomUsername": argument.TelecomUsername,
-			"telecomPassword": argument.TelecomPassword,
+		f, err := flags.NewFetcher(fetcher.SanQiu, map[string]string{
+			"refreshToken":    flags.RefreshToken,
+			"telecomUsername": flags.TelecomUsername,
+			"telecomPassword": flags.TelecomPassword,
 		})
 		log.Fatal(err)
 
@@ -63,24 +63,24 @@ var sanqiuCmd = &cobra.Command{
 }
 
 func init() {
-	flags := sanqiuCmd.Flags()
+	f := sanqiuCmd.Flags()
 
 	// Common download flags.
-	flags.StringSliceVarP(&argument.Formats, "format", "f", argument.Formats, "The file formats you want to download.")
-	flags.BoolVarP(&argument.Extract, "extract", "e", argument.Extract, "Extract the archive file for filtering.")
-	flags.StringVarP(&argument.DownloadPath, "download", "d", argument.DownloadPath,
+	f.StringSliceVarP(&flags.Formats, "format", "f", flags.Formats, "The file formats you want to download.")
+	f.BoolVarP(&flags.Extract, "extract", "e", flags.Extract, "Extract the archive file for filtering.")
+	f.StringVarP(&flags.DownloadPath, "download", "d", flags.DownloadPath,
 		"The book directory you want to use, default would be current working directory.")
-	flags.Int64VarP(&argument.InitialBookID, "initial", "i", argument.InitialBookID,
+	f.Int64VarP(&flags.InitialBookID, "initial", "i", flags.InitialBookID,
 		"The book id you want to start download. It should exceed 0.")
-	flags.BoolVarP(&argument.Rename, "rename", "r", argument.Rename, "Rename the book file by book ID.")
-	flags.IntVarP(&argument.Thread, "thread", "t", argument.Thread, "The number of concurrent download thead.")
-	flags.IntVarP(&argument.RateLimit, "ratelimit", "", argument.RateLimit, "The request per minutes.")
+	f.BoolVarP(&flags.Rename, "rename", "r", flags.Rename, "Rename the book file by book ID.")
+	f.IntVarP(&flags.Thread, "thread", "t", flags.Thread, "The number of concurrent download thead.")
+	f.IntVar(&flags.RateLimit, "ratelimit", flags.RateLimit, "The request per minutes.")
 
 	// Drive ISP flags.
-	flags.StringVarP(&argument.RefreshToken, "refreshToken", "", argument.RefreshToken,
+	f.StringVar(&flags.RefreshToken, "refreshToken", flags.RefreshToken,
 		"We would try to download from the aliyun drive if you provide this token.")
-	flags.StringVarP(&argument.TelecomUsername, "telecomUsername", "", argument.TelecomUsername,
+	f.StringVar(&flags.TelecomUsername, "telecomUsername", flags.TelecomUsername,
 		"Used to download file from telecom drive")
-	flags.StringVarP(&argument.TelecomPassword, "telecomPassword", "", argument.TelecomPassword,
+	f.StringVar(&flags.TelecomPassword, "telecomPassword", flags.TelecomPassword,
 		"Used to download file from telecom drive")
 }
