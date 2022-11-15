@@ -39,6 +39,10 @@ type aliyunDriver struct {
 	client *aliyun.Aliyun
 }
 
+func (a *aliyunDriver) Source() Source {
+	return ALIYUN
+}
+
 func (a *aliyunDriver) Resolve(shareLink string, passcode string) []Share {
 	panic("TODO implement me")
 }
