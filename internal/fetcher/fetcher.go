@@ -104,9 +104,13 @@ func (f *commonFetcher) startDownload() {
 			f.finishDownload(err)
 			break
 		}
+		log.Debugf("Book id %d formats: %v", bookID, formats)
 
 		// Filter the formats.
 		formats = f.filterFormats(formats)
+		if len(formats) == 0 {
+			log.Warnf("[%d/%d] No downloadable files found.", bookID, f.progress.Size())
+		}
 
 		// Download the file by formats one by one.
 		for format, share := range formats {

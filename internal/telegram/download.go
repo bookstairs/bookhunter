@@ -7,7 +7,6 @@ import (
 	"github.com/gotd/td/telegram/downloader"
 	"github.com/gotd/td/tg"
 
-	"github.com/bookstairs/bookhunter/internal/log"
 	"github.com/bookstairs/bookhunter/internal/naming"
 )
 
@@ -42,12 +41,8 @@ func (t *Telegram) ParseMessage(info *ChannelInfo, msgID int64) ([]File, error) 
 	messages := history.(*tg.MessagesChannelMessages)
 	for i := len(messages.Messages) - 1; i >= 0; i-- {
 		message := messages.Messages[i]
-
 		if file, ok := parseFile(message); ok {
 			files = append(files, *file)
-		} else {
-			log.Warnf("[%d/%d] No downloadable files found.", message.GetID(), info.LastMsgID)
-			continue
 		}
 	}
 

@@ -5,10 +5,14 @@ import (
 	"io"
 	"strconv"
 	"strings"
+
+	"github.com/bookstairs/bookhunter/internal/log"
 )
 
 // ShareFiles will resolve the telecom-shared link.
 func (t *Telecom) ShareFiles(accessURL, accessCode string) (*ShareInfo, []ShareFile, error) {
+	log.Debugf("Download telecom file from %s -- %s", accessURL, accessCode)
+
 	// Get share info.
 	info, err := t.shareInfo(accessURL)
 	if err != nil {
@@ -39,6 +43,7 @@ func (t *Telecom) DownloadURL(shareCode, shareID, fileID string) (string, error)
 		SetQueryParams(map[string]string{
 			"fileId":  fileID,
 			"shareId": shareID,
+			"dt":      "1",
 		}).
 		SetResult(&ShareLink{}).
 		Get(webPrefix + "/api/open/file/getFileDownloadUrl.action")

@@ -1,17 +1,13 @@
 package telecom
 
 import (
-	"strconv"
-	"time"
+	"errors"
 
 	"github.com/bookstairs/bookhunter/internal/client"
-	"github.com/bookstairs/bookhunter/internal/log"
 )
 
 const (
-	webPrefix  = "https://cloud.189.cn"
-	authPrefix = "https://open.e.189.cn/api/logbox/oauth2"
-	apiPrefix  = "https://api.cloud.189.cn"
+	webPrefix = "https://cloud.189.cn"
 )
 
 type Telecom struct {
@@ -31,12 +27,11 @@ func New(c *client.Config, username, password string) (*Telecom, error) {
 		return nil, err
 	}
 
+	cl.SetHeader("Accept", "application/json;charset=UTF-8")
 	t := &Telecom{client: cl}
 
 	if username == "" || password == "" {
-		log.Warn("No username or password provide, we may not able to download from telecom disk.")
-		t.appToken = &AppLoginToken{}
-		return t, nil
+		return nil, errors.New("no username or password provide, we may not able to download from telecom disk")
 	}
 
 	// Start to sign in.
@@ -45,9 +40,4 @@ func New(c *client.Config, username, password string) (*Telecom, error) {
 	}
 
 	return t, nil
-}
-
-// timeStamp is used to return the telecom required time str.
-func timeStamp() string {
-	return strconv.FormatInt(time.Now().UTC().UnixNano()/1e6, 10)
 }

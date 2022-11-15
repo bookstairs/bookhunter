@@ -10,7 +10,7 @@ import (
 
 func newTelecomDriver(config *client.Config, properties map[string]string) (Driver, error) {
 	// Create the pan client.
-	t, err := telecom.New(config, properties["username"], properties["password"])
+	t, err := telecom.New(config, properties["telecomUsername"], properties["telecomPassword"])
 	if err != nil {
 		return nil, err
 	}
