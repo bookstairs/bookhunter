@@ -171,10 +171,9 @@ func New(c *Config) (*Client, error) {
 	client.SetCookieJar(cookieJar)
 
 	// Setting the proxy for the resty client.
+	// The proxy environment is also supported.
 	if c.Proxy != "" {
 		client.SetProxy(c.Proxy)
-	} else {
-		client.RemoveProxy()
 	}
 
 	return &Client{Client: client, Config: c}, nil
