@@ -29,10 +29,10 @@ func (t *telecomDriver) Source() Source {
 	return TELECOM
 }
 
-func (t *telecomDriver) Resolve(shareLink string, passcode string) []Share {
+func (t *telecomDriver) Resolve(shareLink string, passcode string) ([]Share, error) {
 	panic("TODO implement me")
 }
 
-func (t *telecomDriver) Download(share Share) io.ReadCloser {
+func (t *telecomDriver) Download(share Share) (io.ReadCloser, error) {
 	panic("TODO implement me")
 }

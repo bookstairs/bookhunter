@@ -2,9 +2,12 @@ package fetcher
 
 import (
 	"errors"
+	"strconv"
 
 	"github.com/bookstairs/bookhunter/internal/client"
 	"github.com/bookstairs/bookhunter/internal/driver"
+	"github.com/bookstairs/bookhunter/internal/log"
+	"github.com/bookstairs/bookhunter/internal/naming"
 	"github.com/bookstairs/bookhunter/internal/sanqiu"
 )
 
@@ -74,11 +77,48 @@ func (s *sanqiuService) size() (int64, error) {
 }
 
 func (s *sanqiuService) formats(id int64) (map[Format]driver.Share, error) {
-	// TODO implement me
-	panic("implement me")
+	resp, err := s.client.R().
+		SetQueryParam("id", strconv.FormatInt(id, 10)).
+		Get("/download.php")
+	if err != nil {
+		return nil, err
+	}
+
+	links, err := sanqiu.DownloadLinks(resp.String())
+	if err != nil {
+		return nil, err
+	}
+
+	for source, link := range links {
+		if source != s.driver.Source() {
+			continue
+		}
+
+		shares, err := s.driver.Resolve(link.URL, link.URL)
+		if err != nil {
+			return nil, err
+		}
+
+		res := make(map[Format]driver.Share)
+		for _, share := range shares {
+			if ext, has := naming.Extension(share.FileName); has {
+				if format, err := ParseFormat(ext); err == nil {
+					res[format] = share
+				} else {
+					log.Debugf("The file name %s don't have valid extension %s", share.FileName, ext)
+				}
+			} else {
+				log.Debugf("The file name %s don't have the extension", share.FileName)
+			}
+		}
+
+		return res, nil
+	}
+
+	log.Debug("No downloadable files found in this link.")
+	return map[Format]driver.Share{}, nil
 }
 
 func (s *sanqiuService) fetch(id int64, format Format, share driver.Share) (*fetch, error) {
-	// TODO implement me
-	panic("implement me")
+	panic("TODO implement me")
 }

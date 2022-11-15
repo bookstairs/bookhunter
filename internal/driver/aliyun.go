@@ -43,10 +43,10 @@ func (a *aliyunDriver) Source() Source {
 	return ALIYUN
 }
 
-func (a *aliyunDriver) Resolve(shareLink string, passcode string) []Share {
+func (a *aliyunDriver) Resolve(shareLink string, passcode string) ([]Share, error) {
 	panic("TODO implement me")
 }
 
-func (a *aliyunDriver) Download(share Share) io.ReadCloser {
+func (a *aliyunDriver) Download(share Share) (io.ReadCloser, error) {
 	panic("TODO implement me")
 }

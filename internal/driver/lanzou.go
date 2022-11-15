@@ -32,11 +32,11 @@ func (l *lanzouDriver) Source() Source {
 	return LANZOU
 }
 
-func (l *lanzouDriver) Resolve(shareLink string, passcode string) []Share {
+func (l *lanzouDriver) Resolve(shareLink string, passcode string) ([]Share, error) {
 	_, _ = l.driver.ResolveShareURL(shareLink, passcode)
 	panic("TODO implement me")
 }
 
-func (l *lanzouDriver) Download(share Share) io.ReadCloser {
+func (l *lanzouDriver) Download(share Share) (io.ReadCloser, error) {
 	panic("TODO implement me")
 }
