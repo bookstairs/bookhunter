@@ -4,8 +4,6 @@ import (
 	"os"
 	"strings"
 
-	"golang.org/x/exp/utf8string"
-
 	"github.com/bookstairs/bookhunter/internal/client"
 	"github.com/bookstairs/bookhunter/internal/fetcher"
 )
@@ -88,8 +86,8 @@ func HideSensitive(content string) string {
 	}
 
 	// Preserve only the prefix and suffix, replace others with *
-	s := utf8string.NewString(content)
-	c := s.RuneCount()
+	s := []rune(content)
+	c := len(s)
 
 	// Determine the visible length of the prefix and suffix.
 	l := 1
@@ -99,5 +97,5 @@ func HideSensitive(content string) string {
 		l = 2
 	}
 
-	return s.Slice(0, l) + strings.Repeat("*", c-l*2) + s.Slice(c-l, c)
+	return string(s[0:l]) + strings.Repeat("*", c-l*2) + string(s[c-l:c])
 }
