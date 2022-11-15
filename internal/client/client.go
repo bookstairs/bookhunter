@@ -151,8 +151,11 @@ func New(c *Config) (*Client, error) {
 		SetContentLength(true).
 		SetDebug(log.EnableDebug).
 		SetDisableWarn(true).
-		SetHeader("User-Agent", c.userAgent()).
-		SetBaseURL(c.baseURL())
+		SetHeader("User-Agent", c.userAgent())
+
+	if c.Host != "" {
+		client.SetBaseURL(c.baseURL())
+	}
 
 	if len(c.redirectPolicy()) > 0 {
 		client.SetRedirectPolicy(c.redirectPolicy()...)

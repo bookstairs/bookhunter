@@ -2,6 +2,7 @@ package lanzou
 
 import (
 	"fmt"
+	"io"
 	"net/http"
 	"net/url"
 	"regexp"
@@ -10,28 +11,46 @@ import (
 
 	"github.com/go-resty/resty/v2"
 
+	"github.com/bookstairs/bookhunter/internal/client"
 	"github.com/bookstairs/bookhunter/internal/log"
 )
 
 type Drive struct {
-	Client  *resty.Client
-	BaseURL string
+	client     *client.Client
+	downloader *client.Client
 }
 
-func NewDefaultDrive(client *resty.Client) *Drive {
-	baseURL := "https://lanzoux.com"
-	return NewDrive(client, baseURL)
-}
+func NewDrive(config *client.Config) (*Drive, error) {
+	cl, err := client.New(&client.Config{
+		HTTPS:      true,
+		Host:       "lanzoux.com",
+		UserAgent:  config.UserAgent,
+		Proxy:      config.Proxy,
+		ConfigRoot: config.ConfigRoot,
+	})
 
-func NewDrive(client *resty.Client, baseURL string) *Drive {
-	client.
-		SetBaseURL(baseURL).
-		SetHeader("Accept-Language", "zh-CN,zh;q=0.9").
-		SetHeader("Referer", baseURL)
-	return &Drive{
-		Client:  client,
-		BaseURL: baseURL,
+	if err != nil {
+		return nil, err
 	}
+
+	cl.Client.
+		SetHeader("Accept-Language", "zh-CN,zh;q=0.9").
+		SetHeader("Referer", cl.BaseURL)
+
+	c2, err := client.New(&client.Config{
+		HTTPS:      true,
+		UserAgent:  config.UserAgent,
+		Proxy:      config.Proxy,
+		ConfigRoot: config.ConfigRoot,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return &Drive{
+		client:     cl,
+		downloader: c2,
+	}, nil
 }
 
 type Response struct {
@@ -71,7 +90,7 @@ func (l Drive) removeNotes(html string) string {
 }
 
 func (l Drive) resolveFileShareURL(parsedURI string, pwd string) (*Response, error) {
-	get, _ := l.Client.R().Get(parsedURI)
+	get, _ := l.client.R().Get(parsedURI)
 
 	firstPage := get.String()
 	firstPage = l.removeNotes(firstPage)
@@ -81,12 +100,12 @@ func (l Drive) resolveFileShareURL(parsedURI string, pwd string) (*Response, err
 		// 在页面被过多访问或其他情况下，有时候会先返回一个加密的页面，其执行计算出一个acw_sc__v2后放入页面后再重新访问页面才能获得正常页面
 		//	# 若该页面进行了js加密，则进行解密，计算acw_sc__v2，并加入cookie
 		acwScV2 := l.calcAcwScV2(firstPage)
-		l.Client.SetCookie(&http.Cookie{
+		l.client.SetCookie(&http.Cookie{
 			Name:  "acw_sc__v2",
 			Value: acwScV2,
 		})
 		log.Infof("Set Cookie: acw_sc__v2=%v", acwScV2)
-		get, _ := l.Client.R().Get(parsedURI)
+		get, _ := l.client.R().Get(parsedURI)
 		firstPage = get.String()
 	}
 
@@ -104,8 +123,8 @@ func (l Drive) resolveFileShareURL(parsedURI string, pwd string) (*Response, err
 
 		query, _ := url.ParseQuery(params)
 
-		_, _ = l.Client.R().
-			SetHeader("referer", l.BaseURL+parsedURI).
+		_, _ = l.client.R().
+			SetHeader("referer", l.client.BaseURL+parsedURI).
 			SetHeader("Content-Type", "application/x-www-form-urlencoded").
 			SetResult(result).
 			SetFormDataFromValues(query).
@@ -116,7 +135,7 @@ func (l Drive) resolveFileShareURL(parsedURI string, pwd string) (*Response, err
 	// Share without password
 	allString = find2Re.FindStringSubmatch(firstPage)
 	if len(allString) == 2 {
-		dom, _ := l.Client.R().Get(allString[1])
+		dom, _ := l.client.R().Get(allString[1])
 
 		data := make(map[string]string)
 
@@ -127,9 +146,9 @@ func (l Drive) resolveFileShareURL(parsedURI string, pwd string) (*Response, err
 		title := l.extractRegex(find2TitleRe, firstPage)
 
 		result := &LanzouyDom{}
-		_, _ = l.Client.R().
-			SetHeader("origin", l.BaseURL).
-			SetHeader("referer", l.BaseURL+parsedURI).
+		_, _ = l.client.R().
+			SetHeader("origin", l.client.BaseURL).
+			SetHeader("referer", l.client.BaseURL+parsedURI).
 			SetHeader("Content-Type", "application/x-www-form-urlencoded").
 			SetResult(result).
 			SetFormData(map[string]string{
@@ -153,35 +172,45 @@ func (l Drive) resolveFileShareURL(parsedURI string, pwd string) (*Response, err
 }
 
 func (l Drive) parseLanzouDom(result *LanzouyDom) (*Response, error) {
+	if result.Zt != 1 {
+		return nil, fmt.Errorf("解析直链失败")
+	}
+
 	var header = map[string]string{
 		"Accept-Language": "zh-CN,zh;q=0.9,en;q=0.8",
 		"Referer":         "https://lanzous.com",
 	}
-	if result.Zt == 1 {
-		request := resty.New().SetRedirectPolicy(resty.NoRedirectPolicy()).R()
-		rr, err := request.SetHeaders(header).
-			Get(result.Dom + "/file/" + result.URL)
-		if rr.StatusCode() != 302 && err != nil {
-			log.Fatal("解析链接失败", err)
-		}
 
-		if strings.Contains(rr.String(), "网络异常") {
-			log.Fatal("访问过多，被限制，解限功能待实现", err)
-		}
-
-		location := rr.Header().Get("location")
-
-		title, _ := result.Inf.(string)
-		return &Response{
-			Code: 200,
-			Data: ResponseData{
-				Name: title,
-				URL:  location,
-			},
-		}, nil
-	} else {
-		return nil, fmt.Errorf("解析直链失败")
+	request := resty.New().SetRedirectPolicy(resty.NoRedirectPolicy()).
+		R()
+	rr, err := request.SetHeaders(header).
+		Get(result.Dom + "/file/" + result.URL)
+	if rr.StatusCode() != 302 && err != nil {
+		log.Fatal("解析链接失败", err)
 	}
+
+	if strings.Contains(rr.String(), "网络异常") {
+		log.Fatal("访问过多，被限制，解限功能待实现", err)
+	}
+
+	location := rr.Header().Get("location")
+
+	title, _ := result.Inf.(string)
+	return &Response{
+		Code: 200,
+		Data: ResponseData{
+			Name: title,
+			URL:  location,
+		},
+	}, nil
+}
+
+func (l Drive) DownloadFile(downloadURL string) (io.ReadCloser, int64, error) {
+	resp, err := l.downloader.R().
+		SetDoNotParseResponse(true).
+		Get(downloadURL)
+	response := resp.RawResponse
+	return response.Body, response.ContentLength, err
 }
 
 func (l Drive) calcAcwScV2(htmlText string) string {
@@ -269,7 +298,6 @@ var (
 
 func (l Drive) extractRegex(reg *regexp.Regexp, str string) string {
 	matches := reg.FindStringSubmatch(str)
-
 	if len(matches) >= 2 {
 		return matches[1]
 	}
@@ -277,7 +305,7 @@ func (l Drive) extractRegex(reg *regexp.Regexp, str string) string {
 }
 
 func (l Drive) resolveFileItemShareURL(parsedURI string, pwd string) (*Response, error) {
-	resp, _ := l.Client.R().Get(parsedURI)
+	resp, _ := l.client.R().Get(parsedURI)
 	str := resp.String()
 	formData := map[string]string{
 		"lx":  l.extractRegex(lxReg, str),
@@ -293,7 +321,7 @@ func (l Drive) resolveFileItemShareURL(parsedURI string, pwd string) (*Response,
 	}
 
 	result := &FileList{}
-	_, _ = l.Client.R().SetFormData(formData).SetResult(result).Post("/filemoreajax.php")
+	_, _ = l.client.R().SetFormData(formData).SetResult(result).Post("/filemoreajax.php")
 
 	if len(result.Text) > 0 {
 		u := ""

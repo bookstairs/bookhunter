@@ -1,6 +1,7 @@
 package driver
 
 import (
+	"fmt"
 	"io"
 
 	"github.com/bookstairs/bookhunter/internal/client"
@@ -8,19 +9,12 @@ import (
 )
 
 func newLanzouDriver(c *client.Config, _ map[string]string) (Driver, error) {
-	cl, _ := client.New(&client.Config{
-		HTTPS:      true,
-		Host:       "lanzoux.com",
-		UserAgent:  c.UserAgent,
-		Proxy:      c.Proxy,
-		ConfigRoot: c.ConfigRoot,
-	})
-	driver := &lanzou.Drive{
-		Client:  cl.Client,
-		BaseURL: "https://lanzoux.com",
+	drive, err := lanzou.NewDrive(c)
+	if err != nil {
+		return nil, err
 	}
 	return &lanzouDriver{
-		driver: driver,
+		driver: drive,
 	}, nil
 }
 
@@ -33,10 +27,18 @@ func (l *lanzouDriver) Source() Source {
 }
 
 func (l *lanzouDriver) Resolve(shareLink string, passcode string) ([]Share, error) {
-	_, _ = l.driver.ResolveShareURL(shareLink, passcode)
-	panic("TODO implement me")
+	resp, err := l.driver.ResolveShareURL(shareLink, passcode)
+	if err != nil {
+		return nil, err
+	}
+	if resp.Code != 200 {
+		return nil, fmt.Errorf("parsed faild: %v", resp.Msg)
+	}
+	return []Share{
+		{FileName: resp.Data.Name, URL: resp.Data.URL, Properties: nil},
+	}, err
 }
 
 func (l *lanzouDriver) Download(share Share) (io.ReadCloser, int64, error) {
-	panic("TODO implement me")
+	return l.driver.DownloadFile(share.URL)
 }
