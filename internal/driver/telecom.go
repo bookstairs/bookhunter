@@ -33,6 +33,6 @@ func (t *telecomDriver) Resolve(shareLink string, passcode string) ([]Share, err
 	panic("TODO implement me")
 }
 
-func (t *telecomDriver) Download(share Share) (io.ReadCloser, error) {
+func (t *telecomDriver) Download(share Share) (io.ReadCloser, int64, error) {
 	panic("TODO implement me")
 }

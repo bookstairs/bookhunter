@@ -37,6 +37,6 @@ func (l *lanzouDriver) Resolve(shareLink string, passcode string) ([]Share, erro
 	panic("TODO implement me")
 }
 
-func (l *lanzouDriver) Download(share Share) (io.ReadCloser, error) {
+func (l *lanzouDriver) Download(share Share) (io.ReadCloser, int64, error) {
 	panic("TODO implement me")
 }
