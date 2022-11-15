@@ -13,13 +13,13 @@ import (
 // talebookCmd used to download books from talebook
 var talebookCmd = &cobra.Command{
 	Use:   "talebook",
-	Short: "A tool for downloading books from talebook server.",
+	Short: "A tool for downloading books from talebook server",
 }
 
 // talebookDownloadCmd represents the download command
 var talebookDownloadCmd = &cobra.Command{
 	Use:   "download",
-	Short: "Download the books from talebook.",
+	Short: "Download the books from talebook",
 	Run: func(cmd *cobra.Command, args []string) {
 		// Print download configuration.
 		log.NewPrinter().
@@ -58,9 +58,9 @@ var talebookDownloadCmd = &cobra.Command{
 // talebookRegisterCmd represents the register command.
 var talebookRegisterCmd = &cobra.Command{
 	Use:   "register",
-	Short: "Register account on talebook.",
-	Long: `Some talebook website need a user account for downloading books.
-You can use this register command for creating account.`,
+	Short: "Register account on talebook",
+	Long: `Some talebook website need a user account for downloading books
+You can use this register command for creating account`,
 	Run: func(cmd *cobra.Command, args []string) {
 		// Print register configuration.
 		log.NewPrinter().
@@ -112,19 +112,17 @@ func init() {
 	f := talebookDownloadCmd.Flags()
 
 	// Talebook related flags.
-	f.StringVarP(&flags.Username, "username", "u", flags.Username, "The account login name.")
-	f.StringVarP(&flags.Password, "password", "p", flags.Password, "The account password.")
-	f.StringVarP(&flags.Website, "website", "w", flags.Website, "The talebook website.")
+	f.StringVarP(&flags.Username, "username", "u", flags.Username, "The talebook username")
+	f.StringVarP(&flags.Password, "password", "p", flags.Password, "The talebook password")
+	f.StringVarP(&flags.Website, "website", "w", flags.Website, "The talebook link")
 
 	// Common download flags.
-	f.StringSliceVarP(&flags.Formats, "format", "f", flags.Formats, "The file formats you want to download.")
-	f.StringVarP(&flags.DownloadPath, "download", "d", flags.DownloadPath,
-		"The book directory you want to use, default would be current working directory.")
-	f.Int64VarP(&flags.InitialBookID, "initial", "i", flags.InitialBookID,
-		"The book id you want to start download. It should exceed 0.")
-	f.BoolVarP(&flags.Rename, "rename", "r", flags.Rename, "Rename the book file by book ID.")
-	f.IntVarP(&flags.Thread, "thread", "t", flags.Thread, "The number of concurrent download thead.")
-	f.IntVar(&flags.RateLimit, "ratelimit", flags.RateLimit, "The request per minutes.")
+	f.StringSliceVarP(&flags.Formats, "format", "f", flags.Formats, "The file formats you want to download")
+	f.StringVarP(&flags.DownloadPath, "download", "d", flags.DownloadPath, "The book directory you want to use")
+	f.Int64VarP(&flags.InitialBookID, "initial", "i", flags.InitialBookID, "The book id you want to start download")
+	f.BoolVarP(&flags.Rename, "rename", "r", flags.Rename, "Rename the book file by book id")
+	f.IntVarP(&flags.Thread, "thread", "t", flags.Thread, "The number of download thead")
+	f.IntVar(&flags.RateLimit, "ratelimit", flags.RateLimit, "The allowed requests per minutes")
 
 	// Mark some flags as required.
 	_ = talebookDownloadCmd.MarkFlagRequired("website")
@@ -136,10 +134,10 @@ func init() {
 	f = talebookRegisterCmd.Flags()
 
 	// Add flags for registering.
-	f.StringVarP(&flags.Username, "username", "u", flags.Username, "The account login name.")
-	f.StringVarP(&flags.Password, "password", "p", flags.Password, "The account password.")
-	f.StringVarP(&flags.Email, "email", "e", flags.Email, "The account email.")
-	f.StringVarP(&flags.Website, "website", "w", flags.Website, "The talebook website.")
+	f.StringVarP(&flags.Username, "username", "u", flags.Username, "The talebook username")
+	f.StringVarP(&flags.Password, "password", "p", flags.Password, "The talebook password")
+	f.StringVarP(&flags.Email, "email", "e", flags.Email, "The talebook email")
+	f.StringVarP(&flags.Website, "website", "w", flags.Website, "The talebook link")
 
 	// Mark some flags as required.
 	_ = talebookRegisterCmd.MarkFlagRequired("website")

@@ -38,13 +38,6 @@ var (
 	Thread          = 1
 	RateLimit       = 30
 
-	// Drive ISP configurations.
-
-	RefreshToken = "" // Aliyun Drive
-
-	TelecomUsername = "" // Telecom Cloud.
-	TelecomPassword = ""
-
 	// Telegram configurations.
 
 	ChannelID = ""

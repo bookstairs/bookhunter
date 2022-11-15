@@ -65,7 +65,7 @@ func New(config *fetcher.Config) (*Telegram, error) {
 			SessionStorage: &session.FileStorage{Path: sessionPath},
 			Middlewares: []telegram.Middleware{
 				floodwait.NewSimpleWaiter().WithMaxRetries(uint(3)),
-				ratelimit.New(rate.Every(100*time.Millisecond), 5),
+				ratelimit.New(rate.Every(time.Minute), config.RateLimit),
 			},
 		},
 	)

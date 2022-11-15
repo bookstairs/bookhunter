@@ -29,16 +29,7 @@ func newSanqiuService(config *Config) (service, error) {
 	}
 
 	// Create the net disk driver.
-	var d driver.Driver
-	refreshToken := config.Property("refreshToken")
-	if refreshToken != "" {
-		d, err = driver.New(driver.ALIYUN, config.Config, map[string]string{"refreshToken": refreshToken})
-	} else {
-		d, err = driver.New(driver.TELECOM, config.Config, map[string]string{
-			"username": config.Property("telecomUsername"),
-			"password": config.Property("telecomPassword"),
-		})
-	}
+	d, err := driver.New(config.Config, config.Properties)
 	if err != nil {
 		return nil, err
 	}
