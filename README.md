@@ -11,6 +11,14 @@ This is totally rewrite fork compare to its [original version](https://github.co
 
 ## Feature
 
+### Login Aliyundrive to get the `refreshToken`
+
+We would show a QR code at the first time. And cache the `refreshToken` after successfully login.
+
+```shell
+bookhunter aliyun
+```
+
 ### Download books from Talebook
 
 1. Download from previous progress.

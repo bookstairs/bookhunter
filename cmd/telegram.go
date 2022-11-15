@@ -28,6 +28,7 @@ var telegramCmd = &cobra.Command{
 			Row("Proxy", flags.Proxy).
 			Row("UserAgent", flags.UserAgent).
 			Row("Channel ID", flags.ChannelID).
+			Row("Mobile", flags.HideSensitive(flags.Mobile)).
 			Row("AppID", flags.HideSensitive(strconv.FormatInt(flags.AppID, 10))).
 			Row("AppHash", flags.HideSensitive(flags.AppHash)).
 			Row("Formats", flags.Formats).
@@ -42,6 +43,7 @@ var telegramCmd = &cobra.Command{
 		// Create the fetcher.
 		f, err := flags.NewFetcher(fetcher.Telegram, map[string]string{
 			"channelID": flags.ChannelID,
+			"mobile":    flags.Mobile,
 			"reLogin":   strconv.FormatBool(flags.ReLogin),
 			"appID":     strconv.FormatInt(flags.AppID, 10),
 			"appHash":   flags.AppHash,
@@ -62,6 +64,7 @@ func init() {
 
 	// Telegram download arguments.
 	f.StringVarP(&flags.ChannelID, "channelID", "k", flags.ChannelID, "The channelId for telegram.")
+	f.StringVarP(&flags.Mobile, "mobile", "b", flags.Mobile, "The mobile number, default (+86).")
 	f.BoolVar(&flags.ReLogin, "refresh", flags.ReLogin, "Refresh the login session.")
 	f.Int64Var(&flags.AppID, "appID", flags.AppID,
 		"The appID for telegram. Refer https://core.telegram.org/api/obtaining_api_id to create your own appID")

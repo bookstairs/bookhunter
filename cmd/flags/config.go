@@ -48,6 +48,7 @@ var (
 	// Telegram configurations.
 
 	ChannelID = ""
+	Mobile    = ""
 	ReLogin   = false
 	AppID     = int64(0)
 	AppHash   = ""
