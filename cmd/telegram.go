@@ -63,24 +63,20 @@ func init() {
 	f := telegramCmd.Flags()
 
 	// Telegram download arguments.
-	f.StringVarP(&flags.ChannelID, "channelID", "k", flags.ChannelID, "The channelId for telegram.")
-	f.StringVarP(&flags.Mobile, "mobile", "b", flags.Mobile, "The mobile number, default (+86).")
-	f.BoolVar(&flags.ReLogin, "refresh", flags.ReLogin, "Refresh the login session.")
-	f.Int64Var(&flags.AppID, "appID", flags.AppID,
-		"The appID for telegram. Refer https://core.telegram.org/api/obtaining_api_id to create your own appID")
-	f.StringVar(&flags.AppHash, "appHash", flags.AppHash,
-		"The appHash for telegram. Refer to https://core.telegram.org/api/obtaining_api_id to create your own appHash")
+	f.StringVarP(&flags.ChannelID, "channelID", "k", flags.ChannelID, "The channel id for telegram")
+	f.StringVarP(&flags.Mobile, "mobile", "b", flags.Mobile, "The mobile number, we will add +86 as default zone code")
+	f.BoolVar(&flags.ReLogin, "refresh", flags.ReLogin, "Refresh the login session")
+	f.Int64Var(&flags.AppID, "appID", flags.AppID, "The app id for telegram")
+	f.StringVar(&flags.AppHash, "appHash", flags.AppHash, "The app hash for telegram")
 
 	// Common download flags.
-	f.StringSliceVarP(&flags.Formats, "format", "f", flags.Formats, "The file formats you want to download.")
-	f.BoolVarP(&flags.Extract, "extract", "e", flags.Extract, "Extract the archive file for filtering.")
-	f.StringVarP(&flags.DownloadPath, "download", "d", flags.DownloadPath,
-		"The book directory you want to use, default would be current working directory.")
-	f.Int64VarP(&flags.InitialBookID, "initial", "i", flags.InitialBookID,
-		"The book id you want to start download. It should exceed 0.")
-	f.BoolVarP(&flags.Rename, "rename", "r", flags.Rename, "Rename the book file by book ID.")
-	f.IntVarP(&flags.Thread, "thread", "t", flags.Thread, "The number of concurrent download thead.")
-	f.IntVar(&flags.RateLimit, "ratelimit", flags.RateLimit, "The request per minutes.")
+	f.StringSliceVarP(&flags.Formats, "format", "f", flags.Formats, "The file formats you want to download")
+	f.BoolVarP(&flags.Extract, "extract", "e", flags.Extract, "Extract the archive file for filtering")
+	f.StringVarP(&flags.DownloadPath, "download", "d", flags.DownloadPath, "The book directory you want to use")
+	f.Int64VarP(&flags.InitialBookID, "initial", "i", flags.InitialBookID, "The book id you want to start download")
+	f.BoolVarP(&flags.Rename, "rename", "r", flags.Rename, "Rename the book file by book id")
+	f.IntVarP(&flags.Thread, "thread", "t", flags.Thread, "The number of download thead")
+	f.IntVar(&flags.RateLimit, "ratelimit", flags.RateLimit, "The allowed requests per minutes")
 
 	// Bind the required arguments
 	_ = telegramCmd.MarkFlagRequired("channelID")

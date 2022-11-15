@@ -41,7 +41,8 @@ const (
 )
 
 // New will create the basic driver service.
-func New(source Source, config *client.Config, properties map[string]string) (Driver, error) {
+func New(config *client.Config, properties map[string]string) (Driver, error) {
+	source := Source(properties["driver"])
 	switch source {
 	case ALIYUN:
 		return newAliyunDriver(config, properties)

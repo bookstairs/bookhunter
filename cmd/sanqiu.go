@@ -38,19 +38,15 @@ var sanqiuCmd = &cobra.Command{
 			Row("Thread", flags.Thread).
 			Row("Request Per Minute", flags.RateLimit).
 			Row("Aliyun RefreshToken", flags.HideSensitive(flags.RefreshToken)).
-			Row("Telecom Username", flags.HideSensitive(flags.TelecomUsername)).
-			Row("Telecom Password", flags.HideSensitive(flags.TelecomPassword)).
+			Row("Telecom Username", flags.HideSensitive(flags.Username)).
+			Row("Telecom Password", flags.HideSensitive(flags.Password)).
 			Print()
 
 		// Set the domain for using in the client.Client.
 		flags.Website = sanqiuWebsite
 
 		// Create the fetcher.
-		f, err := flags.NewFetcher(fetcher.SanQiu, map[string]string{
-			"refreshToken":    flags.RefreshToken,
-			"telecomUsername": flags.TelecomUsername,
-			"telecomPassword": flags.TelecomPassword,
-		})
+		f, err := flags.NewFetcher(fetcher.SanQiu, flags.NewDriverProperties())
 		log.Fatal(err)
 
 		// Wait all the threads have finished.
@@ -66,21 +62,17 @@ func init() {
 	f := sanqiuCmd.Flags()
 
 	// Common download flags.
-	f.StringSliceVarP(&flags.Formats, "format", "f", flags.Formats, "The file formats you want to download.")
-	f.BoolVarP(&flags.Extract, "extract", "e", flags.Extract, "Extract the archive file for filtering.")
-	f.StringVarP(&flags.DownloadPath, "download", "d", flags.DownloadPath,
-		"The book directory you want to use, default would be current working directory.")
-	f.Int64VarP(&flags.InitialBookID, "initial", "i", flags.InitialBookID,
-		"The book id you want to start download. It should exceed 0.")
-	f.BoolVarP(&flags.Rename, "rename", "r", flags.Rename, "Rename the book file by book ID.")
-	f.IntVarP(&flags.Thread, "thread", "t", flags.Thread, "The number of concurrent download thead.")
-	f.IntVar(&flags.RateLimit, "ratelimit", flags.RateLimit, "The request per minutes.")
+	f.StringSliceVarP(&flags.Formats, "format", "f", flags.Formats, "The file formats you want to download")
+	f.BoolVarP(&flags.Extract, "extract", "e", flags.Extract, "Extract the archive file for filtering")
+	f.StringVarP(&flags.DownloadPath, "download", "d", flags.DownloadPath, "The book directory you want to use")
+	f.Int64VarP(&flags.InitialBookID, "initial", "i", flags.InitialBookID, "The book id you want to start download")
+	f.BoolVarP(&flags.Rename, "rename", "r", flags.Rename, "Rename the book file by book id")
+	f.IntVarP(&flags.Thread, "thread", "t", flags.Thread, "The number of download thead")
+	f.IntVar(&flags.RateLimit, "ratelimit", flags.RateLimit, "The allowed requests per minutes")
 
 	// Drive ISP flags.
-	f.StringVar(&flags.RefreshToken, "refreshToken", flags.RefreshToken,
-		"We would try to download from the aliyun drive if you provide this token.")
-	f.StringVar(&flags.TelecomUsername, "telecomUsername", flags.TelecomUsername,
-		"Used to download file from telecom drive")
-	f.StringVar(&flags.TelecomPassword, "telecomPassword", flags.TelecomPassword,
-		"Used to download file from telecom drive")
+	f.StringVar(&flags.Driver, "source", flags.Driver, "The source (aliyun, telecom, lanzou) to download book")
+	f.StringVar(&flags.RefreshToken, "refreshToken", flags.RefreshToken, "Refresh token for aliyun drive")
+	f.StringVar(&flags.TelecomUsername, "telecomUsername", flags.TelecomUsername, "Telecom drive username")
+	f.StringVar(&flags.TelecomPassword, "telecomPassword", flags.TelecomPassword, "Telecom drive password")
 }

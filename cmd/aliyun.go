@@ -16,7 +16,7 @@ import (
 
 var aliyunCmd = &cobra.Command{
 	Use:   "aliyun",
-	Short: "A command line tool for acquiring the refresh token from aliyundrive with QR code login.",
+	Short: "A command line tool for acquiring the refresh token from aliyundrive with QR code login",
 	Run: func(cmd *cobra.Command, args []string) {
 		// Create the config path.
 		config := &client.Config{Host: "api.aliyundrive.com"}
