@@ -13,16 +13,9 @@ import (
 	"golang.org/x/term"
 )
 
-// login is used first time you execute the command line.
-func (t *Telegram) login() error {
-	return t.client.Run(context.Background(), func(ctx context.Context) error {
-		return t.authentication(ctx)
-	})
-}
-
-// authentication is used for log into the telegram with a session support.
+// Authentication is used for log into the telegram with a session support.
 // Every telegram execution will require this method.
-func (t *Telegram) authentication(ctx context.Context) error {
+func (t *Telegram) Authentication(ctx context.Context) error {
 	// Setting up authentication flow helper based on terminal auth.
 	flow := auth.NewFlow(&terminalAuth{mobile: t.mobile}, auth.SendCodeOptions{})
 	if err := t.client.Auth().IfNecessary(ctx, flow); err != nil {

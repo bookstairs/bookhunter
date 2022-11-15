@@ -15,7 +15,7 @@ var (
 )
 
 const (
-	debug = "[light_gray][DEBUG][reset]"
+	debug = "[dark_gray][DEBUG][reset]"
 	info  = "[green][INFO][reset]"
 	warn  = "[yellow][WARN][reset]"
 	fatal = "[red][FATAL][reset]"

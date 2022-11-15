@@ -5,27 +5,23 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
-	"time"
 
 	"github.com/gotd/contrib/middleware/floodwait"
-	"github.com/gotd/contrib/middleware/ratelimit"
 	"github.com/gotd/td/session"
 	client "github.com/gotd/td/telegram"
 	"github.com/gotd/td/telegram/dcs"
 	"github.com/gotd/td/tg"
-	"golang.org/x/time/rate"
 
 	"github.com/bookstairs/bookhunter/internal/driver"
 	"github.com/bookstairs/bookhunter/internal/telegram"
 )
 
-type telegramService struct {
-	config   *Config
+type telegramFetcher struct {
+	fetcher  *commonFetcher
 	telegram *telegram.Telegram
-	info     *telegram.ChannelInfo
 }
 
-func newTelegramService(config *Config) (service, error) {
+func newTelegramFetcher(config *Config) (Fetcher, error) {
 	// Create the session file.
 	path, err := config.ConfigPath()
 	if err != nil {
@@ -48,7 +44,7 @@ func newTelegramService(config *Config) (service, error) {
 	}
 
 	// Create the backend telegram client.
-	c := client.NewClient(
+	cl := client.NewClient(
 		int(appID),
 		appHash,
 		client.Options{
@@ -56,20 +52,34 @@ func newTelegramService(config *Config) (service, error) {
 			SessionStorage: &session.FileStorage{Path: sessionPath},
 			Middlewares: []client.Middleware{
 				floodwait.NewSimpleWaiter().WithMaxRetries(uint(3)),
-				ratelimit.New(rate.Every(time.Minute), config.RateLimit),
 			},
 		},
 	)
 
-	tel, err := telegram.New(channelID, mobile, appID, appHash, c)
-	if err != nil {
-		return nil, err
-	}
+	tel := telegram.New(channelID, mobile, appID, appHash, cl)
 
-	return &telegramService{
-		config:   config,
+	return &telegramFetcher{
+		fetcher: &commonFetcher{
+			Config: config,
+			service: &telegramService{
+				config:   config,
+				telegram: tel,
+			},
+		},
 		telegram: tel,
 	}, nil
+}
+
+func (t *telegramFetcher) Download() error {
+	return t.telegram.Execute(func() error {
+		return t.fetcher.Download()
+	})
+}
+
+type telegramService struct {
+	config   *Config
+	telegram *telegram.Telegram
+	info     *telegram.ChannelInfo
 }
 
 func (s *telegramService) size() (int64, error) {

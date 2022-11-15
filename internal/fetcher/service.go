@@ -27,8 +27,6 @@ func newService(c *Config) (service, error) {
 		return newTalebookService(c)
 	case SanQiu:
 		return newSanqiuService(c)
-	case Telegram:
-		return newTelegramService(c)
 	case SoBooks:
 		// TODO We are working on this feature now.
 		return nil, errors.New("we don't support sobooks now")
