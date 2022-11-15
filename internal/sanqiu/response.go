@@ -5,6 +5,8 @@ import (
 	"strings"
 
 	"github.com/go-resty/resty/v2"
+
+	"github.com/bookstairs/bookhunter/internal/log"
 )
 
 // ParseAPIResponse will remove the unneeded error str in JSON response and try to parse it.
@@ -12,6 +14,9 @@ func ParseAPIResponse(resp *resty.Response, result any) error {
 	// Remove error messages.
 	str := resp.String()
 	str = str[strings.LastIndex(str, "\n")+1:]
+
+	log.Debug("Response: ", str)
+
 	decoder := json.NewDecoder(strings.NewReader(str))
 
 	return decoder.Decode(result)

@@ -56,7 +56,7 @@ func (s *sanqiuService) size() (int64, error) {
 	}
 
 	books := make([]sanqiu.BookResp, 0, 1)
-	err = sanqiu.ParseAPIResponse(resp, books)
+	err = sanqiu.ParseAPIResponse(resp, &books)
 	if err != nil {
 		return 0, err
 	}
