@@ -3,7 +3,6 @@ package cmd
 import (
 	"strconv"
 	"strings"
-	"unicode"
 
 	"github.com/spf13/cobra"
 
@@ -12,25 +11,11 @@ import (
 	"github.com/bookstairs/bookhunter/internal/log"
 )
 
-const defaultZone = "+86"
-
 // telegramCmd used for download books from the telegram channel
 var telegramCmd = &cobra.Command{
 	Use:   "telegram",
 	Short: "A tool for downloading books from telegram channel",
 	Run: func(cmd *cobra.Command, args []string) {
-		// Validate the mobile number. Add default zone if need.
-		if argument.Mobile != "" {
-			if !strings.HasPrefix(argument.Mobile, "+") {
-				argument.Mobile = defaultZone + argument.Mobile
-			}
-			for i, c := range argument.Mobile {
-				if i > 0 && !unicode.IsDigit(c) {
-					log.Fatalf("Invalid mobile number: %s", argument.Mobile)
-				}
-			}
-		}
-
 		// Remove prefix for telegram.
 		argument.Website = argument.ChannelID
 		argument.ChannelID = strings.TrimPrefix(argument.ChannelID, "https://t.me/")
@@ -43,7 +28,6 @@ var telegramCmd = &cobra.Command{
 			Row("Proxy", argument.Proxy).
 			Row("UserAgent", argument.UserAgent).
 			Row("Channel ID", argument.ChannelID).
-			Row("Mobile", argument.HideSensitive(argument.Mobile)).
 			Row("AppID", argument.HideSensitive(strconv.FormatInt(argument.AppID, 10))).
 			Row("AppHash", argument.HideSensitive(argument.AppHash)).
 			Row("Formats", argument.Formats).
@@ -58,7 +42,6 @@ var telegramCmd = &cobra.Command{
 		// Create the fetcher.
 		f, err := argument.NewFetcher(fetcher.Telegram, map[string]string{
 			"channelID": argument.ChannelID,
-			"mobile":    argument.Mobile,
 			"reLogin":   strconv.FormatBool(argument.ReLogin),
 			"appID":     strconv.FormatInt(argument.AppID, 10),
 			"appHash":   argument.AppHash,
@@ -79,7 +62,6 @@ func init() {
 
 	// Telegram download arguments.
 	flags.StringVarP(&argument.ChannelID, "channelID", "k", argument.ChannelID, "The channelId for telegram.")
-	flags.StringVarP(&argument.Mobile, "mobile", "b", argument.Mobile, "The mobile number, default (+86).")
 	flags.BoolVar(&argument.ReLogin, "refresh", argument.ReLogin, "Refresh the login session.")
 	flags.Int64VarP(&argument.AppID, "appID", "", argument.AppID,
 		"The appID for telegram. Refer https://core.telegram.org/api/obtaining_api_id to create your own appID")

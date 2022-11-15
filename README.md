@@ -28,7 +28,11 @@ Available Commands:
 Flags:
   -h, --help   help for talebook
 
-Use "bookhunter talebook [command] --help" for more information about a command.
+Global Flags:
+  -c, --config string       The config path for bookhunter.
+      --proxy string        The request proxy.
+  -a, --user-agent string   The request user-agent. (default "Mozilla/5.0 (X11; Linux i686; rv:13.0) Gecko/13.0 Firefox/13.0")
+      --verbose             Print all the logs for debugging.
 ```
 
 ### Download books from Sanqiu
@@ -43,20 +47,23 @@ Usage:
   bookhunter sanqiu [flags]
 
 Flags:
-  -c, --cookie string         The cookie file name you want to use, it would be saved under the download directory. (default "cookies")
-      --debug                 Enable debug mode
-  -d, --download string       The book directory you want to use, default would be current working directory. (default "/Users/jianyun/GolandProjects/bookhunter")
-  -f, --format strings        The file formats you want to download. (default [EPUB,MOBI,PDF])
-  -h, --help                  help for sanqiu
-  -i, --initial int           The book id you want to start download. It should exceed 0. (default 1)
-  -g, --progress string       The download progress file name you want to use, it would be saved under the download directory. (default "progress")
-      --refreshToken string   The refreshToken for AliYun Drive.
-  -n, --rename                Rename the book file by book ID.
-  -r, --retry int             The max retry times for timeout download request. (default 5)
-  -t, --thread int            The number of download threads. (default 1)
-  -o, --timeout duration      The max pending time for download request. (default 10m0s)
-  -a, --user-agent string     Set User-Agent for download request. (default "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.51 Safari/537.36")
-  -w, --website string        The website for sanqiu. You don't need to override the default url. (default "https://www.sanqiu.mobi")
+  -d, --download string          The book directory you want to use, default would be current working directory. (default ".")
+  -e, --extract                  Extract the archive file for filtering.
+  -f, --format strings           The file formats you want to download. (default [epub,azw3,mobi,pdf,zip])
+  -h, --help                     help for sanqiu
+  -i, --initial int              The book id you want to start download. It should exceed 0. (default 1)
+      --ratelimit int            The request per minutes. (default 30)
+      --refreshToken string      We would try to download from the aliyun drive if you provide this token.
+  -r, --rename                   Rename the book file by book ID.
+      --telecomPassword string   Used to download file from telecom drive
+      --telecomUsername string   Used to download file from telecom drive
+  -t, --thread int               The number of concurrent download thead. (default 1)
+
+Global Flags:
+  -c, --config string       The config path for bookhunter.
+      --proxy string        The request proxy.
+  -a, --user-agent string   The request user-agent. (default "Mozilla/5.0 (X11; Linux i686; rv:13.0) Gecko/13.0 Firefox/13.0")
+      --verbose             Print all the logs for debugging.
 ```
 
 ### Download books from Telegram groups.
@@ -70,30 +77,35 @@ Usage:
   bookhunter telegram [flags]
 
 Flags:
-      --appHash appHash      The appHash for telegram. How to get appHash please refer to https://core.telegram.org/api/obtaining_api_id.
-      --appID appID          The appID for telegram. How to get appID please refer to https://core.telegram.org/api/obtaining_api_id.
-  -k, --channelID string     The channelId for telegram.
-  -c, --cookie string        The cookie file name you want to use, it would be saved under the download directory. (default "cookies")
-  -d, --download string      The book directory you want to use, default would be current working directory. (default "/Users/Yufan")
-  -f, --format strings       The file formats you want to download. (default [EPUB,MOBI,PDF])
-  -h, --help                 help for telegram
-  -i, --initial int          The book id you want to start download. It should exceed 0. (default 1)
-  -b, --mobile string        The mobile number for your telegram account, default (+86).
-  -g, --progress string      The download progress file name you want to use, it would be saved under the download directory. (default "progress")
-      --refresh              Refresh the login session.
-  -n, --rename               Rename the book file by book ID.
-  -r, --retry int            The max retry times for timeout download request. (default 5)
-  -s, --sessionPath string   The session file for telegram. (default "cookies")
-  -t, --thread int           The number of download threads. (default 1)
-  -o, --timeout duration     The max pending time for download request. (default 10m0s)
-  -a, --user-agent string    Set User-Agent for download request. (default "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.51 Safari/537.36")
+      --appHash string     The appHash for telegram. Refer to https://core.telegram.org/api/obtaining_api_id to create your own appHash
+      --appID int          The appID for telegram. Refer https://core.telegram.org/api/obtaining_api_id to create your own appID
+  -k, --channelID string   The channelId for telegram.
+  -d, --download string    The book directory you want to use, default would be current working directory. (default ".")
+  -e, --extract            Extract the archive file for filtering.
+  -f, --format strings     The file formats you want to download. (default [epub,azw3,mobi,pdf,zip])
+  -h, --help               help for telegram
+  -i, --initial int        The book id you want to start download. It should exceed 0. (default 1)
+      --ratelimit int      The request per minutes. (default 30)
+      --refresh            Refresh the login session.
+  -r, --rename             Rename the book file by book ID.
+  -t, --thread int         The number of concurrent download thead. (default 1)
+
+Global Flags:
+  -c, --config string       The config path for bookhunter.
+      --proxy string        The request proxy.
+  -a, --user-agent string   The request user-agent. (default "Mozilla/5.0 (X11; Linux i686; rv:13.0) Gecko/13.0 Firefox/13.0")
+      --verbose             Print all the logs for debugging.
 ```
 
-Example command: `bookhunter telegram --appID 12345 --appHash xxxxx -k https://t.me/MothLib`
+Example command: `bookhunter telegram --appID ****** --appHash ****** -k https://t.me/MothLib`
 
 Please refer [Creating your Telegram Application](https://core.telegram.org/api/obtaining_api_id) to obtain your `appID` and `appHash`.
 
 ### Download books from Sobooks.
+
+TODO
+
+### Download books from Tianlang Books.
 
 TODO
 
