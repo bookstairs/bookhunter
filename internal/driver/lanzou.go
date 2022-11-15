@@ -13,9 +13,8 @@ func newLanzouDriver(c *client.Config, _ map[string]string) (Driver, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &lanzouDriver{
-		driver: drive,
-	}, nil
+
+	return &lanzouDriver{driver: drive}, nil
 }
 
 type lanzouDriver struct {
@@ -34,9 +33,8 @@ func (l *lanzouDriver) Resolve(shareLink string, passcode string) ([]Share, erro
 	if resp.Code != 200 {
 		return nil, fmt.Errorf("parsed faild: %v", resp.Msg)
 	}
-	return []Share{
-		{FileName: resp.Data.Name, URL: resp.Data.URL, Properties: nil},
-	}, err
+
+	return []Share{{FileName: resp.Data.Name, URL: resp.Data.URL, Properties: nil}}, err
 }
 
 func (l *lanzouDriver) Download(share Share) (io.ReadCloser, int64, error) {

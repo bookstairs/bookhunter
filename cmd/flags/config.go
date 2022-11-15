@@ -80,6 +80,7 @@ func NewFetcher(category fetcher.Category, properties map[string]string) (fetche
 	})
 }
 
+// HideSensitive will replace the sensitive content with star but keep the original length.
 func HideSensitive(content string) string {
 	if content == "" {
 		return ""

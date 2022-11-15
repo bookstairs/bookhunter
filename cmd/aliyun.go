@@ -8,6 +8,7 @@ import (
 	"github.com/chyroc/go-aliyundrive"
 	"github.com/spf13/cobra"
 
+	"github.com/bookstairs/bookhunter/cmd/flags"
 	"github.com/bookstairs/bookhunter/internal/client"
 	"github.com/bookstairs/bookhunter/internal/log"
 )
@@ -37,7 +38,7 @@ var aliyunCmd = &cobra.Command{
 		ctx := context.Background()
 
 		// Valid the token, we will sign in with QR code if this token is expired.
-		_, err = ins.Auth.LoginByQrcode(ctx, &aliyundrive.LoginByQrcodeReq{})
+		user, err := ins.Auth.LoginByQrcode(ctx, &aliyundrive.LoginByQrcodeReq{})
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -49,6 +50,7 @@ var aliyunCmd = &cobra.Command{
 		}
 
 		log.Info("Successfully sign into aliyun drive.")
+		log.Infof("%s: %s", user.NickName, flags.HideSensitive(user.Phone))
 		log.Infof("Refresh Token: %s", token.RefreshToken)
 	},
 }

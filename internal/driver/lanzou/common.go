@@ -37,7 +37,7 @@ func NewDrive(config *client.Config) (*Drive, error) {
 	return &Drive{client: cl}, nil
 }
 
-func (l Drive) DownloadFile(downloadURL string) (io.ReadCloser, int64, error) {
+func (l *Drive) DownloadFile(downloadURL string) (io.ReadCloser, int64, error) {
 	log.Debugf("Start to download file from aliyun drive: %s", downloadURL)
 
 	resp, err := l.client.R().
