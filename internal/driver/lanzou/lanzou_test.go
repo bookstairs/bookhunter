@@ -3,8 +3,9 @@ package lanzou
 import (
 	"testing"
 
-	"github.com/go-resty/resty/v2"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/bookstairs/bookhunter/internal/client"
 )
 
 func TestParseLanzouUrl(t *testing.T) {
@@ -66,11 +67,14 @@ func TestParseLanzouUrl(t *testing.T) {
 			},
 		},
 	}
-	client := NewDefaultDrive(resty.New())
+	drive, _ := NewDrive(&client.Config{
+		HTTPS: true,
+		Host:  "lanzoux.com",
+	})
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			response, err := client.ResolveShareURL(tt.args.url, tt.args.pwd)
+			response, err := drive.ResolveShareURL(tt.args.url, tt.args.pwd)
 			assert.NoError(t, err, "Failed to resolve link")
 			assert.Equal(t, int64(200), response.Code, "Failed to resolve link: "+response.Msg)
 			assert.NotEmpty(t, response.Data)

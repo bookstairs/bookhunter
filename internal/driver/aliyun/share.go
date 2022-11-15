@@ -1,5 +1,7 @@
 package aliyun
 
+import "io"
+
 // AnonymousShare will try to access the share without the user information.
 func (ali *Aliyun) AnonymousShare(shareID string) (*ShareInfoResp, error) {
 	token, err := ali.AuthToken()
@@ -121,8 +123,9 @@ func (ali *Aliyun) DownloadURL(shareToken string, shareID string, fileID string)
 		SetAuthToken(token).
 		SetHeader("x-share-token", shareToken).
 		SetBody(&ShareLinkDownloadURLReq{
-			ShareID:   shareID,
-			FileID:    fileID,
+			ShareID: shareID,
+			FileID:  fileID,
+			// Only ten minutes valid
 			ExpireSec: 600,
 		}).
 		SetResult(&ShareLinkDownloadURLResp{}).
@@ -134,4 +137,12 @@ func (ali *Aliyun) DownloadURL(shareToken string, shareID string, fileID string)
 
 	res := resp.Result().(*ShareLinkDownloadURLResp)
 	return res.DownloadURL, nil
+}
+
+func (ali *Aliyun) DownloadFile(downloadURL string) (io.ReadCloser, int64, error) {
+	resp, err := ali.downloader.R().
+		SetDoNotParseResponse(true).
+		Get(downloadURL)
+	response := resp.RawResponse
+	return response.Body, response.ContentLength, err
 }

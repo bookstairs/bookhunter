@@ -17,6 +17,7 @@ var (
 
 type Aliyun struct {
 	client       *client.Client
+	downloader   *client.Client
 	tokenCache   *TokenResp
 	refreshToken string
 }
@@ -41,7 +42,21 @@ func New(c *client.Config, refreshToken string) (*Aliyun, error) {
 	// Set extra middleware for cleaning up the header.
 	cl.SetPreRequestHook(removeContentType)
 
-	return &Aliyun{client: cl, refreshToken: refreshToken}, nil
+	c2, err := client.New(&client.Config{
+		HTTPS:      true,
+		UserAgent:  c.UserAgent,
+		Proxy:      c.Proxy,
+		ConfigRoot: c.ConfigRoot,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return &Aliyun{
+		client:       cl,
+		downloader:   c2,
+		refreshToken: refreshToken,
+	}, nil
 }
 
 // removeContentType is used to remove the useless content type by setting.

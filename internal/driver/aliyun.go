@@ -44,9 +44,35 @@ func (a *aliyunDriver) Source() Source {
 }
 
 func (a *aliyunDriver) Resolve(shareLink string, passcode string) ([]Share, error) {
-	panic("TODO implement me")
+	c := a.client
+	token, err := c.ShareToken(shareLink, passcode)
+	if err != nil {
+		return nil, err
+	}
+	shareFiles, err := c.Share(shareLink, token.ShareToken)
+	if err != nil {
+		return nil, err
+	}
+	var shares []Share
+	for index := range shareFiles {
+		item := shareFiles[index]
+		shares = append(shares, Share{
+			FileName: item.Name,
+			URL:      item.FileID,
+			Properties: map[string]string{
+				"shareToken": token.ShareToken,
+				"shareID":    shareLink,
+			},
+		})
+	}
+	return shares, nil
 }
 
 func (a *aliyunDriver) Download(share Share) (io.ReadCloser, int64, error) {
-	panic("TODO implement me")
+	c := a.client
+	url, err := c.DownloadURL(share.Properties["shareToken"], share.Properties["shareID"], share.URL)
+	if err != nil {
+		return nil, 0, err
+	}
+	return c.DownloadFile(url)
 }

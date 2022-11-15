@@ -42,7 +42,7 @@ var sanqiuCmd = &cobra.Command{
 			Row("Telecom Password", argument.HideSensitive(argument.TelecomPassword)).
 			Print()
 
-		// Set the domain for using in resty.Client.
+		// Set the domain for using in client.Client.
 		argument.Website = sanqiuWebsite
 
 		// Create the fetcher.
