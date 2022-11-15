@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"time"
 
+	cookiejar "github.com/chyroc/persistent-cookiejar"
 	"github.com/go-resty/resty/v2"
 
 	"github.com/bookstairs/bookhunter/internal/log"
@@ -59,8 +60,9 @@ func (c *Config) newCookieJar() (http.CookieJar, error) {
 	if err != nil {
 		return nil, err
 	}
+	file := filepath.Join(configPath, cookieFile)
 
-	return newCookieJar(filepath.Join(configPath, cookieFile))
+	return cookiejar.New(&cookiejar.Options{Persistent: true, Filename: file})
 }
 
 func (c *Config) redirectPolicy() []any {
