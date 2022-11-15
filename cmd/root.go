@@ -34,6 +34,7 @@ func init() {
 	rootCmd.AddCommand(sanqiuCmd)
 	rootCmd.AddCommand(telegramCmd)
 	rootCmd.AddCommand(versionCmd)
+	rootCmd.AddCommand(aliyunCmd)
 
 	persistentFlags := rootCmd.PersistentFlags()
 
