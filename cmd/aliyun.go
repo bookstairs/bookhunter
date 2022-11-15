@@ -8,7 +8,6 @@ import (
 	"github.com/chyroc/go-aliyundrive"
 	"github.com/spf13/cobra"
 
-	"github.com/bookstairs/bookhunter/cmd/flags"
 	"github.com/bookstairs/bookhunter/internal/client"
 	"github.com/bookstairs/bookhunter/internal/log"
 )
@@ -17,19 +16,9 @@ var aliyunCmd = &cobra.Command{
 	Use:   "aliyun",
 	Short: "A command line tool for acquiring the refresh token from aliyundrive with QR code login.",
 	Run: func(cmd *cobra.Command, args []string) {
-		path := ""
-		if flags.ConfigRoot == "" {
-			root, err := client.DefaultConfigRoot()
-			if err != nil {
-				log.Fatal(err)
-			}
-			path = filepath.Join(root, "api.aliyundrive.com")
-		} else {
-			path = filepath.Join(flags.ConfigRoot, "api.aliyundrive.com")
-		}
-
-		// Create config directory.
-		err := os.MkdirAll(path, 0755)
+		// Create the config path.
+		config := &client.Config{Host: "api.aliyundrive.com"}
+		path, err := config.ConfigPath()
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -42,6 +31,7 @@ var aliyunCmd = &cobra.Command{
 		}
 		_ = open.Close()
 
+		// Create the aliyun client.
 		store := aliyundrive.NewFileStore(file)
 		ins := aliyundrive.New(aliyundrive.WithStore(store))
 		ctx := context.Background()
