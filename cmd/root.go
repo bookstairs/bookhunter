@@ -5,7 +5,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/bookstairs/bookhunter/internal/argument"
+	"github.com/bookstairs/bookhunter/cmd/flags"
 	"github.com/bookstairs/bookhunter/internal/log"
 )
 
@@ -38,8 +38,8 @@ func init() {
 	persistentFlags := rootCmd.PersistentFlags()
 
 	// Common flags.
-	persistentFlags.StringVarP(&argument.ConfigRoot, "config", "c", argument.ConfigRoot, "The config path for bookhunter.")
-	persistentFlags.StringVarP(&argument.Proxy, "proxy", "", argument.Proxy, "The request proxy.")
-	persistentFlags.StringVarP(&argument.UserAgent, "user-agent", "a", argument.UserAgent, "The request user-agent.")
-	persistentFlags.BoolVarP(&log.EnableDebug, "verbose", "", false, "Print all the logs for debugging.")
+	persistentFlags.StringVarP(&flags.ConfigRoot, "config", "c", flags.ConfigRoot, "The config path for bookhunter.")
+	persistentFlags.StringVar(&flags.Proxy, "proxy", flags.Proxy, "The request proxy.")
+	persistentFlags.StringVarP(&flags.UserAgent, "user-agent", "a", flags.UserAgent, "The request user-agent.")
+	persistentFlags.BoolVar(&log.EnableDebug, "verbose", false, "Print all the logs for debugging.")
 }

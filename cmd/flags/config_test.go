@@ -1,4 +1,4 @@
-package argument
+package flags
 
 import "testing"
 
