@@ -13,16 +13,13 @@ import (
 // talebookCmd used to download books from talebook
 var talebookCmd = &cobra.Command{
 	Use:   "talebook",
-	Short: "A command line base downloader for downloading books from talebook server.",
-	Long: `You can use this command to register account and download book.
-The url for talebook should be provided, the formats is also
-optional.`,
+	Short: "A tool for downloading books from talebook server.",
 }
 
 // talebookDownloadCmd represents the download command
 var talebookDownloadCmd = &cobra.Command{
 	Use:   "download",
-	Short: "Download the book from talebook.",
+	Short: "Download the books from talebook.",
 	Run: func(cmd *cobra.Command, args []string) {
 		// Print download configuration.
 		log.NewPrinter().
