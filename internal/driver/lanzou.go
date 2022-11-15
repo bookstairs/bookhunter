@@ -13,6 +13,10 @@ func newLanzouDriver(_ *client.Config, _ map[string]string) (Driver, error) {
 
 type lanzouDriver struct{}
 
+func (l *lanzouDriver) Source() Source {
+	return LANZOU
+}
+
 func (l *lanzouDriver) Resolve(shareLink string, passcode string) []Share {
 	panic("TODO implement me")
 }

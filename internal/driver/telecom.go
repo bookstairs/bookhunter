@@ -25,6 +25,10 @@ type telecomDriver struct {
 	client *telecom.Telecom
 }
 
+func (t *telecomDriver) Source() Source {
+	return TELECOM
+}
+
 func (t *telecomDriver) Resolve(shareLink string, passcode string) []Share {
 	panic("TODO implement me")
 }

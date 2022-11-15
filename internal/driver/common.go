@@ -23,6 +23,9 @@ type (
 
 	// Driver is used to resolve the links from a Source.
 	Driver interface {
+		// Source will return the driver identity.
+		Source() Source
+
 		// Resolve the given link and return the file name with the download link.
 		Resolve(shareLink string, passcode string) []Share
 
