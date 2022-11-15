@@ -8,7 +8,6 @@ import (
 	"os"
 	"strings"
 
-	"github.com/gotd/td/telegram"
 	"github.com/gotd/td/telegram/auth"
 	"github.com/gotd/td/tg"
 	"golang.org/x/term"
@@ -16,8 +15,8 @@ import (
 
 // login is used first time you execute the command line.
 func (t *Telegram) login() error {
-	return t.execute(func(_ context.Context, _ *telegram.Client) error {
-		return nil
+	return t.client.Run(context.Background(), func(ctx context.Context) error {
+		return t.authentication(ctx)
 	})
 }
 

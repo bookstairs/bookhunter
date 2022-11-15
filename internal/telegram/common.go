@@ -17,13 +17,21 @@ import (
 	"github.com/bookstairs/bookhunter/internal/fetcher"
 )
 
-type Telegram struct {
-	channelID string
-	mobile    string
-	appID     int64
-	appHash   string
-	client    *telegram.Client
-}
+type (
+	Telegram struct {
+		channelID string
+		mobile    string
+		appID     int64
+		appHash   string
+		client    *telegram.Client
+	}
+
+	ChannelInfo struct {
+		ID         int64
+		AccessHash int64
+		LastMsgID  int64
+	}
+)
 
 // New will create a telegram client.
 func New(config *fetcher.Config) (*Telegram, error) {
