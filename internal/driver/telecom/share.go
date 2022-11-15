@@ -2,6 +2,7 @@ package telecom
 
 import (
 	"fmt"
+	"io"
 	"strconv"
 	"strings"
 )
@@ -28,7 +29,7 @@ func (t *Telecom) ShareFiles(accessURL, accessCode string) (*ShareInfo, []ShareF
 	return info, files, nil
 }
 
-func (t *Telecom) DownloadURL(fileID string, shareID int64, shareCode string) (string, error) {
+func (t *Telecom) DownloadURL(shareCode, shareID, fileID string) (string, error) {
 	resp, err := t.client.R().
 		SetHeaders(map[string]string{
 			"accept":  "application/json;charset=UTF-8",
@@ -37,7 +38,7 @@ func (t *Telecom) DownloadURL(fileID string, shareID int64, shareCode string) (s
 		}).
 		SetQueryParams(map[string]string{
 			"fileId":  fileID,
-			"shareId": strconv.FormatInt(shareID, 10),
+			"shareId": shareID,
 		}).
 		SetResult(&ShareLink{}).
 		Get(webPrefix + "/api/open/file/getFileDownloadUrl.action")
@@ -49,16 +50,32 @@ func (t *Telecom) DownloadURL(fileID string, shareID int64, shareCode string) (s
 	return link.FileDownloadURL, nil
 }
 
-func (t *Telecom) shareInfo(accessURL string) (*ShareInfo, error) {
-	// Extract the share code.
-	shareCode := ""
-	if idx := strings.LastIndex(accessURL, "/"); idx > 0 {
-		rs := []rune(accessURL)
-		shareCode = string(rs[idx+1:])
-	} else {
-		return nil, fmt.Errorf("invalid share link, couldn't find share code: %s", accessURL)
+func (t *Telecom) DownloadFile(url string) (io.ReadCloser, error) {
+	resp, err := t.client.R().
+		SetDoNotParseResponse(true).
+		Get(url)
+	if err != nil {
+		return nil, err
 	}
 
+	return resp.RawBody(), nil
+}
+
+// ShareCode extract the share code.
+func (t *Telecom) ShareCode(accessURL string) (string, error) {
+	if idx := strings.LastIndex(accessURL, "/"); idx > 0 {
+		rs := []rune(accessURL)
+		return string(rs[idx+1:]), nil
+	} else {
+		return "", fmt.Errorf("invalid share link, couldn't find share code: %s", accessURL)
+	}
+}
+
+func (t *Telecom) shareInfo(accessURL string) (*ShareInfo, error) {
+	shareCode, err := t.ShareCode(accessURL)
+	if err != nil {
+		return nil, err
+	}
 	resp, err := t.client.R().
 		SetHeaders(map[string]string{
 			"accept":  "application/json;charset=UTF-8",
