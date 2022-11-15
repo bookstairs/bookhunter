@@ -14,6 +14,7 @@ require (
 	github.com/stretchr/testify v1.8.1
 	github.com/yi-ge/unzip v1.0.2
 	go.uber.org/ratelimit v0.2.0
+	golang.org/x/exp v0.0.0-20221114191408-850992195362
 )
 
 require (

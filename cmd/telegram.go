@@ -43,9 +43,9 @@ var telegramCmd = &cobra.Command{
 			Row("Proxy", argument.Proxy).
 			Row("UserAgent", argument.UserAgent).
 			Row("Channel ID", argument.ChannelID).
-			Row("Mobile", "******").
-			Row("AppID", argument.AppID).
-			Row("AppHash", argument.AppHash).
+			Row("Mobile", argument.HideSensitive(argument.Mobile)).
+			Row("AppID", argument.HideSensitive(strconv.FormatInt(argument.AppID, 10))).
+			Row("AppHash", argument.HideSensitive(argument.AppHash)).
 			Row("Formats", argument.Formats).
 			Row("Extract Archive", argument.Extract).
 			Row("Download Path", argument.DownloadPath).

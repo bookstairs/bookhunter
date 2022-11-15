@@ -2,6 +2,9 @@ package argument
 
 import (
 	"os"
+	"strings"
+
+	"golang.org/x/exp/utf8string"
 
 	"github.com/bookstairs/bookhunter/internal/client"
 	"github.com/bookstairs/bookhunter/internal/fetcher"
@@ -77,4 +80,24 @@ func NewFetcher(category fetcher.Category, properties map[string]string) (fetche
 		RateLimit:     RateLimit,
 		Properties:    properties,
 	})
+}
+
+func HideSensitive(content string) string {
+	if content == "" {
+		return ""
+	}
+
+	// Preserve only the prefix and suffix, replace others with *
+	s := utf8string.NewString(content)
+	c := s.RuneCount()
+
+	// Determine the visible length of the prefix and suffix.
+	l := 1
+	if c >= 9 {
+		l = 3
+	} else if c >= 6 {
+		l = 2
+	}
+
+	return s.Slice(0, l) + strings.Repeat("*", c-l*2) + s.Slice(c-l, c)
 }
