@@ -3,13 +3,14 @@ package driver
 import (
 	"errors"
 	"io"
+	"strings"
 
 	"github.com/bookstairs/bookhunter/internal/client"
 	"github.com/bookstairs/bookhunter/internal/driver/aliyun"
 )
 
 var (
-	ErrNoRefreshToken = errors.New("")
+	ErrNoRefreshToken = errors.New("aliyun drive need refreshToken")
 )
 
 // newAliyunDriver will create the aliyun driver.
@@ -44,12 +45,15 @@ func (a *aliyunDriver) Source() Source {
 }
 
 func (a *aliyunDriver) Resolve(shareLink string, passcode string) ([]Share, error) {
-	token, err := a.client.ShareToken(shareLink, passcode)
+	shareID := strings.TrimPrefix(shareLink, "https://www.aliyundrive.com/s/")
+	sharePwd := strings.TrimSpace(passcode)
+
+	token, err := a.client.ShareToken(shareID, sharePwd)
 	if err != nil {
 		return nil, err
 	}
 
-	files, err := a.client.Share(shareLink, token.ShareToken)
+	files, err := a.client.Share(shareID, token.ShareToken)
 	if err != nil {
 		return nil, err
 	}
@@ -63,7 +67,7 @@ func (a *aliyunDriver) Resolve(shareLink string, passcode string) ([]Share, erro
 			URL:      item.FileID,
 			Properties: map[string]any{
 				"shareToken": token.ShareToken,
-				"shareID":    shareLink,
+				"shareID":    shareID,
 				"fileID":     item.FileID,
 			},
 		}

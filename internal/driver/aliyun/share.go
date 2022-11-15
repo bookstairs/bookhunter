@@ -98,7 +98,7 @@ func (ali *Aliyun) listShareFiles(param *listShareFilesParam) ([]ShareFile, erro
 	return files, nil
 }
 
-func (ali *Aliyun) ShareToken(shareID string, sharePwd string) (*ShareTokenResp, error) {
+func (ali *Aliyun) ShareToken(shareID, sharePwd string) (*ShareTokenResp, error) {
 	token, err := ali.AuthToken()
 	if err != nil {
 		return nil, err

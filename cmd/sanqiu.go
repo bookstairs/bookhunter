@@ -75,4 +75,6 @@ func init() {
 	f.StringVar(&flags.RefreshToken, "refreshToken", flags.RefreshToken, "Refresh token for aliyun drive")
 	f.StringVar(&flags.TelecomUsername, "telecomUsername", flags.TelecomUsername, "Telecom drive username")
 	f.StringVar(&flags.TelecomPassword, "telecomPassword", flags.TelecomPassword, "Telecom drive password")
+
+	_ = sanqiuCmd.MarkFlagRequired("source")
 }
