@@ -22,11 +22,34 @@ Usage:
   bookhunter talebook [command]
 
 Available Commands:
-  download    Download the book from talebook.
+  download    Download the books from talebook.
   register    Register account on talebook.
 
 Flags:
   -h, --help   help for talebook
+
+Global Flags:
+  -c, --config string       The config path for bookhunter.
+      --proxy string        The request proxy.
+  -a, --user-agent string   The request user-agent. (default "Mozilla/5.0 (X11; Linux i686; rv:13.0) Gecko/13.0 Firefox/13.0")
+      --verbose             Print all the logs for debugging.
+```
+
+```shell
+Usage:
+  bookhunter talebook download [flags]
+
+Flags:
+  -d, --download string   The book directory you want to use, default would be current working directory. (default ".")
+  -f, --format strings    The file formats you want to download. (default [epub,azw3,mobi,pdf,zip])
+  -h, --help              help for download
+  -i, --initial int       The book id you want to start download. It should exceed 0. (default 1)
+  -p, --password string   The account password.
+      --ratelimit int     The request per minutes. (default 30)
+  -r, --rename            Rename the book file by book ID.
+  -t, --thread int        The number of concurrent download thead. (default 1)
+  -u, --username string   The account login name.
+  -w, --website string    The talebook website.
 
 Global Flags:
   -c, --config string       The config path for bookhunter.
