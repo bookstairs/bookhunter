@@ -24,7 +24,7 @@ func CreateProxy(proxyURL string) (dcs.DialFunc, error) {
 			return nil, err
 		}
 
-		dialer, err := proxy.FromURL(u, proxy.Direct)
+		dialer, err := FromURL(u, Direct)
 		if err != nil {
 			return nil, err
 		}
