@@ -1,56 +1,46 @@
 package telegram
 
 import (
-	"context"
 	"errors"
 	"fmt"
 	"strings"
 
-	"github.com/gotd/td/telegram"
 	"github.com/gotd/td/tg"
 
 	"github.com/bookstairs/bookhunter/internal/log"
 )
 
 func (t *Telegram) ChannelInfo() (*ChannelInfo, error) {
-	info := new(ChannelInfo)
-	err := t.execute(func(ctx context.Context, client *telegram.Client) error {
-		var channelID int64
-		var accessHash int64
-		var err error
+	var channelID int64
+	var accessHash int64
+	var err error
 
-		// Get the real channelID and accessHash.
-		if strings.HasPrefix(t.channelID, "joinchat/") {
-			channelID, accessHash, err = privateChannelInfo(ctx, client, strings.TrimPrefix(t.channelID, "joinchat/"))
-		} else {
-			channelID, accessHash, err = publicChannelInfo(ctx, client, t.channelID)
-		}
-		if err != nil {
-			return err
-		}
+	// Get the real channelID and accessHash.
+	if strings.HasPrefix(t.channelID, "joinchat/") {
+		channelID, accessHash, err = t.privateChannelInfo(strings.TrimPrefix(t.channelID, "joinchat/"))
+	} else {
+		channelID, accessHash, err = t.publicChannelInfo(t.channelID)
+	}
+	if err != nil {
+		return nil, err
+	}
 
-		// Query the last message ID.
-		lastMsgID, err := queryLastMsgID(ctx, client, channelID, accessHash)
-		if err != nil {
-			return err
-		}
+	// Query the last message ID.
+	lastMsgID, err := t.queryLastMsgID(channelID, accessHash)
+	if err != nil {
+		return nil, err
+	}
 
-		// Create the channel info.
-		info = &ChannelInfo{
-			ID:         channelID,
-			AccessHash: accessHash,
-			LastMsgID:  lastMsgID,
-		}
-
-		return nil
-	})
-
-	return info, err
+	return &ChannelInfo{
+		ID:         channelID,
+		AccessHash: accessHash,
+		LastMsgID:  lastMsgID,
+	}, nil
 }
 
 // privateChannelInfo queries access hash for the private channel.
-func privateChannelInfo(ctx context.Context, client *telegram.Client, hash string) (id int64, access int64, err error) {
-	invite, err := client.API().MessagesCheckChatInvite(ctx, hash)
+func (t *Telegram) privateChannelInfo(hash string) (id int64, access int64, err error) {
+	invite, err := t.client.API().MessagesCheckChatInvite(t.ctx, hash)
 	if err != nil {
 		return
 	}
@@ -77,8 +67,8 @@ func privateChannelInfo(ctx context.Context, client *telegram.Client, hash strin
 }
 
 // publicChannelInfo queries the public channel by its name.
-func publicChannelInfo(ctx context.Context, client *telegram.Client, name string) (id, access int64, err error) {
-	username, err := client.API().ContactsResolveUsername(ctx, name)
+func (t *Telegram) publicChannelInfo(name string) (id, access int64, err error) {
+	username, err := t.client.API().ContactsResolveUsername(t.ctx, name)
 	if err != nil {
 		return
 	}
@@ -102,7 +92,7 @@ func publicChannelInfo(ctx context.Context, client *telegram.Client, name string
 }
 
 // queryLastMsgID from the given channel info.
-func queryLastMsgID(ctx context.Context, client *telegram.Client, channelID, access int64) (int64, error) {
+func (t *Telegram) queryLastMsgID(channelID, access int64) (int64, error) {
 	request := &tg.MessagesSearchRequest{
 		Peer: &tg.InputPeerChannel{
 			ChannelID:  channelID,
@@ -115,7 +105,7 @@ func queryLastMsgID(ctx context.Context, client *telegram.Client, channelID, acc
 	}
 
 	last := -1
-	search, err := client.API().MessagesSearch(ctx, request)
+	search, err := t.client.API().MessagesSearch(t.ctx, request)
 	if err != nil {
 		return 0, err
 	}

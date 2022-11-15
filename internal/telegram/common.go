@@ -14,6 +14,7 @@ type (
 		appID     int64
 		appHash   string
 		client    *telegram.Client
+		ctx       context.Context
 	}
 
 	ChannelInfo struct {
@@ -33,31 +34,24 @@ type (
 )
 
 // New will create a telegram client.
-func New(channelID string, mobile string, appID int64, appHash string, client *telegram.Client) (*Telegram, error) {
-	t := &Telegram{
+func New(channelID string, mobile string, appID int64, appHash string, client *telegram.Client) *Telegram {
+	return &Telegram{
 		channelID: channelID,
 		mobile:    mobile,
 		appID:     appID,
 		appHash:   appHash,
 		client:    client,
 	}
-
-	// Try to sign in with the mobile.
-	if err := t.login(); err != nil {
-		return nil, err
-	}
-
-	return t, nil
 }
 
-// Every telegram execution should be wrapped in a client Run session.
-// We have to expose this method for internal usage.
-func (t *Telegram) execute(f func(context.Context, *telegram.Client) error) error {
+func (t *Telegram) Execute(f func() error) error {
 	return t.client.Run(context.Background(), func(ctx context.Context) error {
-		if err := t.authentication(ctx); err != nil {
+		if err := t.Authentication(ctx); err != nil {
 			return err
 		}
 
-		return f(ctx, t.client)
+		t.ctx = ctx
+
+		return f()
 	})
 }
