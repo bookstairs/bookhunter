@@ -45,8 +45,10 @@ func (l *Drive) removeNotes(html string) string {
 }
 
 func (l *Drive) resolveFileShareURL(parsedURI string, pwd string) (*ResponseData, error) {
-	get, _ := l.client.R().Get(parsedURI)
-
+	get, err := l.client.R().Get(parsedURI)
+	if err != nil {
+		return nil, err
+	}
 	firstPage := get.String()
 	firstPage = l.removeNotes(firstPage)
 
@@ -78,21 +80,25 @@ func (l *Drive) resolveFileShareURL(parsedURI string, pwd string) (*ResponseData
 
 		query, _ := url.ParseQuery(params)
 
-		_, _ = l.client.R().
+		_, err = l.client.R().
 			SetHeader("referer", l.client.BaseURL+parsedURI).
 			SetHeader("Content-Type", "application/x-www-form-urlencoded").
 			SetResult(result).
 			SetFormDataFromValues(query).
 			Post(urlpath)
-
+		if err != nil {
+			return nil, err
+		}
 		return l.parseDom(result)
 	}
 
 	// Share without password
 	allString = find2Re.FindStringSubmatch(firstPage)
 	if len(allString) == 2 {
-		dom, _ := l.client.R().Get(allString[1])
-
+		dom, err := l.client.R().Get(allString[1])
+		if err != nil {
+			return nil, err
+		}
 		data := make(map[string]string)
 
 		var re = regexp.MustCompile(`(?m)var\s+(\w+)\s+=\s+'(.*)';`)
@@ -102,7 +108,7 @@ func (l *Drive) resolveFileShareURL(parsedURI string, pwd string) (*ResponseData
 		title := l.extractRegex(find2TitleRe, firstPage)
 
 		result := &Dom{}
-		_, _ = l.client.R().
+		_, err = l.client.R().
 			SetHeader("origin", l.client.BaseURL).
 			SetHeader("referer", l.client.BaseURL+parsedURI).
 			SetHeader("Content-Type", "application/x-www-form-urlencoded").
@@ -116,7 +122,9 @@ func (l *Drive) resolveFileShareURL(parsedURI string, pwd string) (*ResponseData
 				"ves":        "1",
 			}).
 			Post("/ajaxm.php")
-
+		if err != nil {
+			return nil, err
+		}
 		lanzouDom, err := l.parseDom(result)
 		if lanzouDom != nil {
 			lanzouDom.Name = title
@@ -224,7 +232,10 @@ func (l *Drive) resolveFileItemShareURL(parsedURI string, pwd string) (*[]Respon
 	}
 
 	result := &FileList{}
-	_, _ = l.client.R().SetFormData(formData).SetResult(result).Post("/filemoreajax.php")
+	_, err := l.client.R().SetFormData(formData).SetResult(result).Post("/filemoreajax.php")
+	if err != nil {
+		return nil, err
+	}
 	data := make([]ResponseData, len(result.Text))
 	for i, file := range result.Text {
 		respData, err := l.resolveFileShareURL("/"+file.ID, pwd)

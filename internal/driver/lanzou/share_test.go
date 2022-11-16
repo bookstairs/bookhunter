@@ -74,8 +74,8 @@ func TestParseLanzouUrl(t *testing.T) {
 		},
 	}
 
-	drive, _ := NewDrive(&client.Config{})
-
+	drive, err := NewDrive(&client.Config{})
+	assert.NoError(t, err, "Failed to create lanzou")
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			response, err := drive.ResolveShareURL(tt.args.url, tt.args.pwd)

@@ -90,6 +90,12 @@ func (c *Config) baseURL() string {
 	return "http://" + c.Host
 }
 
+func (c *Client) SetHost(host string) *Client {
+	c.Config.Host = host
+	c.Client.SetBaseURL(c.Config.baseURL())
+	return c
+}
+
 // DefaultConfigRoot will generate the default config path based on the user and his running environment.
 func DefaultConfigRoot() (string, error) {
 	home, err := os.UserHomeDir()
