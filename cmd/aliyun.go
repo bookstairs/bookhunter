@@ -22,14 +22,14 @@ var aliyunCmd = &cobra.Command{
 		config := &client.Config{Host: "api.aliyundrive.com"}
 		path, err := config.ConfigPath()
 		if err != nil {
-			log.Fatal(err)
+			log.Exit(err)
 		}
 
 		// Create the session file if it's not existed.
 		file := filepath.Join(path, "session.json")
 		open, err := os.OpenFile(file, os.O_RDONLY|os.O_CREATE, 0666)
 		if err != nil {
-			log.Fatal(err)
+			log.Exit(err)
 		}
 		_ = open.Close()
 
@@ -42,13 +42,13 @@ var aliyunCmd = &cobra.Command{
 		fmt.Println()
 		user, err := ins.Auth.LoginByQrcode(ctx, &aliyundrive.LoginByQrcodeReq{})
 		if err != nil {
-			log.Fatal(err)
+			log.Exit(err)
 		}
 
 		// Access the token from the storage.
 		token, err := store.Get(ctx, "")
 		if err != nil {
-			log.Fatal(err)
+			log.Exit(err)
 		}
 
 		log.Info("Successfully sign into aliyun drive.")

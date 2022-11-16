@@ -59,24 +59,20 @@ func Warn(v ...any) {
 
 // Fatalf would print the log with in fatal level. And exit the program.
 func Fatalf(format string, v ...any) {
-	if l := len(v); l > 0 {
-		if a := v[l-1]; a == nil {
-			return
-		}
-	}
 	printLog(fatal, fmt.Sprintf(format, v...))
-	os.Exit(-1)
 }
 
 // Fatal would print the log with in fatal level. And exit the program.
 func Fatal(v ...any) {
-	if l := len(v); l > 0 {
-		if a := v[l-1]; a == nil {
-			return
-		}
-	}
 	printLog(fatal, formatArgs(v...))
-	os.Exit(-1)
+}
+
+// Exit will print the error with fatal level and os.Exit if the error isn't nil.
+func Exit(err error) {
+	if err != nil {
+		Fatal(err.Error())
+		os.Exit(-1)
+	}
 }
 
 // formatArgs will format all the arguments.

@@ -47,11 +47,11 @@ var sanqiuCmd = &cobra.Command{
 
 		// Create the fetcher.
 		f, err := flags.NewFetcher(fetcher.SanQiu, flags.NewDriverProperties())
-		log.Fatal(err)
+		log.Exit(err)
 
 		// Wait all the threads have finished.
 		err = f.Download()
-		log.Fatal(err)
+		log.Exit(err)
 
 		// Finished all the tasks.
 		log.Info("Successfully download all the books.")

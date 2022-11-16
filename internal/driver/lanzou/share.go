@@ -151,11 +151,11 @@ func (l *Drive) parseDom(result *Dom) (*ResponseData, error) {
 	rr, err := request.SetHeaders(header).
 		Get(result.Dom + "/file/" + result.URL)
 	if rr.StatusCode() != 302 && err != nil {
-		log.Fatal("解析链接失败", err)
+		log.Fatalf("解析链接失败 %v", err)
 	}
 
 	if strings.Contains(rr.String(), "网络异常") {
-		log.Fatal("访问过多，被限制，解限功能待实现", err)
+		log.Fatalf("访问过多，被限制，解限功能待实现 %v", err)
 	}
 
 	location := rr.Header().Get("location")

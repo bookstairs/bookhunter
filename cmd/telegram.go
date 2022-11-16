@@ -48,11 +48,11 @@ var telegramCmd = &cobra.Command{
 			"appID":     strconv.FormatInt(flags.AppID, 10),
 			"appHash":   flags.AppHash,
 		})
-		log.Fatal(err)
+		log.Exit(err)
 
 		// Wait all the threads have finished.
 		err = f.Download()
-		log.Fatal(err)
+		log.Exit(err)
 
 		// Finished all the tasks.
 		log.Info("Successfully download all the telegram books.")

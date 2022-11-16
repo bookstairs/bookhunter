@@ -1,6 +1,8 @@
 package cmd
 
 import (
+	"fmt"
+
 	"github.com/spf13/cobra"
 
 	"github.com/bookstairs/bookhunter/cmd/flags"
@@ -44,11 +46,11 @@ var talebookDownloadCmd = &cobra.Command{
 			"username": flags.Username,
 			"password": flags.Password,
 		})
-		log.Fatal(err)
+		log.Exit(err)
 
 		// Start download the books.
 		err = f.Download()
-		log.Fatal(err)
+		log.Exit(err)
 
 		// Finished all the tasks.
 		log.Info("Successfully download all the books.")
@@ -77,11 +79,11 @@ You can use this register command for creating account`,
 
 		// Create client config.
 		config, err := client.NewConfig(flags.Website, flags.UserAgent, flags.Proxy, flags.ConfigRoot)
-		log.Fatal(err)
+		log.Exit(err)
 
 		// Create http client.
 		c, err := client.New(config)
-		log.Fatal(err)
+		log.Exit(err)
 
 		// Execute the register request.
 		resp, err := c.R().
@@ -94,13 +96,13 @@ You can use this register command for creating account`,
 			SetResult(&talebook.CommonResp{}).
 			ForceContentType("application/json").
 			Post("/api/user/sign_up")
-		log.Fatal(err)
+		log.Exit(err)
 
 		result := resp.Result().(*talebook.CommonResp)
 		if result.Err == talebook.SuccessStatus {
 			log.Info("Register success.")
 		} else {
-			log.Fatalf("Register failed, reason: %s", result.Err)
+			log.Exit(fmt.Errorf("register failed, reason: %s", result.Err))
 		}
 	},
 }
