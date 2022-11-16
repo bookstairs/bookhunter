@@ -45,6 +45,10 @@ var (
 	ReLogin   = false
 	AppID     = int64(0)
 	AppHash   = ""
+
+	// Tianlang secret key.
+
+	TianlangSecretKey = "359198"
 )
 
 // NewFetcher will create the fetcher by the command line arguments.

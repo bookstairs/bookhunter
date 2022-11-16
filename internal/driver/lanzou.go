@@ -1,7 +1,6 @@
 package driver
 
 import (
-	"errors"
 	"io"
 
 	"github.com/bookstairs/bookhunter/internal/client"
@@ -14,7 +13,7 @@ func newLanzouDriver(c *client.Config, _ map[string]string) (Driver, error) {
 		return nil, err
 	}
 
-	return &lanzouDriver{driver: drive}, errors.New("we don't support lanzou currently")
+	return &lanzouDriver{driver: drive}, nil
 }
 
 type lanzouDriver struct {

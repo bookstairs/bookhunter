@@ -9,23 +9,21 @@ import (
 )
 
 const (
-	lowestSanqiuBookID = 163
-	sanqiuWebsite      = "https://www.sanqiu.mobi"
+	lowestTianlangBookID = 61
+	tianlangWebsite      = "https://www.tianlangbooks.com"
 )
 
-// sanqiuCmd used for download books from sanqiu.mobi
-var sanqiuCmd = &cobra.Command{
-	Use:   "sanqiu",
-	Short: "A tool for downloading books from sanqiu.mobi",
+var tianlangCmd = &cobra.Command{
+	Use:   "tianlang",
+	Short: "A tool for downloading books from tianlangbooks.com",
 	Run: func(cmd *cobra.Command, args []string) {
-		// Set the default start index.
-		if flags.InitialBookID < lowestSanqiuBookID {
-			flags.InitialBookID = lowestSanqiuBookID
+		if flags.InitialBookID < lowestTianlangBookID {
+			flags.InitialBookID = lowestTianlangBookID
 		}
 
 		// Print download configuration.
 		log.NewPrinter().
-			Title("Sanqiu Download Information").
+			Title("Tianlang Download Information").
 			Head(log.DefaultHead...).
 			Row("Config Path", flags.ConfigRoot).
 			Row("Proxy", flags.Proxy).
@@ -37,16 +35,19 @@ var sanqiuCmd = &cobra.Command{
 			Row("Rename File", flags.Rename).
 			Row("Thread", flags.Thread).
 			Row("Request Per Minute", flags.RateLimit).
+			Row("Secret key", flags.TianlangSecretKey).
 			Row("Aliyun RefreshToken", flags.HideSensitive(flags.RefreshToken)).
 			Row("Telecom Username", flags.HideSensitive(flags.Username)).
 			Row("Telecom Password", flags.HideSensitive(flags.Password)).
 			Print()
 
 		// Set the domain for using in the client.Client.
-		flags.Website = sanqiuWebsite
+		flags.Website = tianlangWebsite
 
 		// Create the fetcher.
-		f, err := flags.NewFetcher(fetcher.SanQiu, flags.NewDriverProperties())
+		properties := flags.NewDriverProperties()
+		properties["secretKey"] = flags.TianlangSecretKey
+		f, err := flags.NewFetcher(fetcher.TianLang, properties)
 		log.Exit(err)
 
 		// Wait all the threads have finished.
@@ -59,7 +60,7 @@ var sanqiuCmd = &cobra.Command{
 }
 
 func init() {
-	f := sanqiuCmd.Flags()
+	f := tianlangCmd.Flags()
 
 	// Common download flags.
 	f.StringSliceVarP(&flags.Formats, "format", "f", flags.Formats, "The file formats you want to download")
@@ -70,11 +71,14 @@ func init() {
 	f.IntVarP(&flags.Thread, "thread", "t", flags.Thread, "The number of download thead")
 	f.IntVar(&flags.RateLimit, "ratelimit", flags.RateLimit, "The allowed requests per minutes")
 
+	// Tianlang books flags.
+	f.StringVar(&flags.TianlangSecretKey, "secretKey", flags.TianlangSecretKey, "The secret key for tianlang")
+
 	// Drive ISP flags.
 	f.StringVar(&flags.Driver, "source", flags.Driver, "The source (aliyun, telecom, lanzou) to download book")
 	f.StringVar(&flags.RefreshToken, "refreshToken", flags.RefreshToken, "Refresh token for aliyun drive")
 	f.StringVar(&flags.TelecomUsername, "telecomUsername", flags.TelecomUsername, "Telecom drive username")
 	f.StringVar(&flags.TelecomPassword, "telecomPassword", flags.TelecomPassword, "Telecom drive password")
 
-	_ = sanqiuCmd.MarkFlagRequired("source")
+	_ = tianlangCmd.MarkFlagRequired("source")
 }

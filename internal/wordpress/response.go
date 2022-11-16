@@ -1,4 +1,4 @@
-package sanqiu
+package wordpress
 
 import (
 	"encoding/json"
@@ -9,21 +9,28 @@ import (
 	"github.com/bookstairs/bookhunter/internal/log"
 )
 
-// ParseAPIResponse will remove the unneeded error str in JSON response and try to parse it.
-func ParseAPIResponse(resp *resty.Response, result any) error {
+// ParsePosts will remove the unneeded error str in JSON response and try to parse it.
+func ParsePosts(resp *resty.Response) ([]Post, error) {
 	// Remove error messages.
 	str := resp.String()
 	str = str[strings.LastIndex(str, "\n")+1:]
-
 	log.Debug("Response: ", str)
 
+	// Decode the WordPress posts.
+	posts := make([]Post, 0, 1)
 	decoder := json.NewDecoder(strings.NewReader(str))
+	err := decoder.Decode(&posts)
 
-	return decoder.Decode(result)
+	return posts, err
 }
 
-// BookResp is the response for /wp-json/wp/v2/posts
-type BookResp struct {
+type ShareLink struct {
+	URL  string // The url to access the download page.
+	Code string // The passcode for querying the file content.
+}
+
+// Post is the response for /wp-json/wp/v2/posts
+type Post struct {
 	ID      int64  `json:"id"`
 	Date    string `json:"date"`
 	DateGmt string `json:"date_gmt"`

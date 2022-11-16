@@ -27,12 +27,10 @@ func newService(c *Config) (service, error) {
 		return newTalebookService(c)
 	case SanQiu:
 		return newSanqiuService(c)
-	case SoBooks:
-		// TODO We are working on this feature now.
-		return nil, errors.New("we don't support sobooks now")
 	case TianLang:
-		// TODO We are working on this feature now.
-		return nil, errors.New("we don't support tianlang now")
+		return newTianlangService(c)
+	case SoBooks:
+		return nil, errors.New("TODO we don't support sobooks now")
 	default:
 		return nil, fmt.Errorf("no such fetcher service [%s] supported", c.Category)
 	}

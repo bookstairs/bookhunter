@@ -30,11 +30,15 @@ func Execute() {
 }
 
 func init() {
+	// Download commands.
 	rootCmd.AddCommand(talebookCmd)
 	rootCmd.AddCommand(sanqiuCmd)
+	rootCmd.AddCommand(tianlangCmd)
 	rootCmd.AddCommand(telegramCmd)
-	rootCmd.AddCommand(versionCmd)
+
+	// Tool commands.
 	rootCmd.AddCommand(aliyunCmd)
+	rootCmd.AddCommand(versionCmd)
 
 	persistentFlags := rootCmd.PersistentFlags()
 
