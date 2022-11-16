@@ -3,7 +3,6 @@ package fetcher
 import (
 	"os"
 	"path/filepath"
-	"strconv"
 	"sync"
 
 	"github.com/yi-ge/unzip"
@@ -11,7 +10,6 @@ import (
 	"github.com/bookstairs/bookhunter/internal/driver"
 	"github.com/bookstairs/bookhunter/internal/file"
 	"github.com/bookstairs/bookhunter/internal/log"
-	"github.com/bookstairs/bookhunter/internal/naming"
 	"github.com/bookstairs/bookhunter/internal/progress"
 )
 
@@ -30,6 +28,7 @@ type commonFetcher struct {
 	*Config
 	service  service
 	progress progress.Progress
+	creator  file.Creator
 	errs     chan error
 }
 
@@ -62,6 +61,9 @@ func (f *commonFetcher) Download() error {
 	if err != nil {
 		return err
 	}
+
+	// Create the file creator.
+	f.creator = file.NewCreator(f.Rename, f.DownloadPath)
 
 	// Create the download thread and save the files.
 	f.errs = make(chan error, f.Thread)
@@ -132,33 +134,8 @@ thread:
 
 // downloadFile in a thread.
 func (f *commonFetcher) downloadFile(bookID int64, format Format, share driver.Share) error {
-	// Rename if it was required.
-	prefix := strconv.FormatInt(bookID, 10)
-	if f.Rename {
-		share.FileName = prefix + "." + string(format)
-	} else {
-		share.FileName = prefix + "_" + share.FileName
-	}
-
-	// Escape the file name for avoiding the illegal characters.
-	// Ref: https://en.wikipedia.org/wiki/Filename#Reserved_characters_and_words
-	share.FileName = naming.EscapeFilename(share.FileName)
-
-	// Generate the file path.
-	path := filepath.Join(f.DownloadPath, share.FileName)
-
-	// Remove the exist file.
-	if _, err := os.Stat(path); err == nil {
-		if err := os.Remove(path); err != nil {
-			return err
-		}
-	}
-
-	// Add download progress, no need to close.
-	bar := log.NewProgressBar(bookID, f.progress.Size(), share.FileName, share.Size)
-
 	// Create the file writer.
-	writer, err := file.NewWriter(path, bar)
+	writer, err := f.creator.NewWriter(bookID, f.progress.Size(), share.FileName, string(format), share.Size)
 	if err != nil {
 		return err
 	}
@@ -171,6 +148,7 @@ func (f *commonFetcher) downloadFile(bookID int64, format Format, share driver.S
 
 	// Extract the archives. We only support the zip file now.
 	if format.Archive() && f.Extract {
+		path := writer.Path()
 		u := unzip.New(path, f.DownloadPath)
 		return u.Extract()
 	}

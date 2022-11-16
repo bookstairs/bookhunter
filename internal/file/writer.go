@@ -3,40 +3,90 @@ package file
 import (
 	"io"
 	"os"
+	"path/filepath"
+	"strconv"
 
 	"github.com/schollz/progressbar/v3"
+
+	"github.com/bookstairs/bookhunter/internal/log"
+	"github.com/bookstairs/bookhunter/internal/naming"
 )
 
-type Writer interface {
-	io.Writer
-	io.Closer
-	SetSize(int64)
+type Creator interface {
+	NewWriter(id, total int64, name string, format string, size int64) (Writer, error)
 }
 
-type progressWriter struct {
-	bar  *progressbar.ProgressBar
-	file *os.File
+func NewCreator(rename bool, downloadPath string) Creator {
+	return &creator{rename: rename, downloadPath: downloadPath}
 }
 
-func (p *progressWriter) Close() error {
-	_ = p.bar.Close()
-	return p.file.Close()
+type creator struct {
+	rename       bool
+	downloadPath string
 }
 
-func (p *progressWriter) Write(b []byte) (n int, err error) {
-	_, _ = p.bar.Write(b)
-	return p.file.Write(b)
-}
+func (c *creator) NewWriter(id, total int64, name string, format string, size int64) (Writer, error) {
+	// Rename if it was required.
+	filename := strconv.FormatInt(id, 10)
+	if c.rename {
+		filename = filename + "." + format
+	} else {
+		filename = filename + "_" + name
+	}
 
-func (p *progressWriter) SetSize(i int64) {
-	p.bar.ChangeMax64(i)
-}
+	// Escape the file name for avoiding the illegal characters.
+	// Ref: https://en.wikipedia.org/wiki/Filename#Reserved_characters_and_words
+	filename = naming.EscapeFilename(filename)
 
-func NewWriter(path string, bar *progressbar.ProgressBar) (Writer, error) {
+	// Generate the file path.
+	path := filepath.Join(c.downloadPath, filename)
+
+	// Remove the exist file.
+	if _, err := os.Stat(path); err == nil {
+		if err := os.Remove(path); err != nil {
+			return nil, err
+		}
+	}
+
+	// Add download progress, no need to close.
+	bar := log.NewProgressBar(id, total, name, size)
+
+	// Create file io. and remember to close it manually.
 	file, err := os.Create(path)
 	if err != nil {
 		return nil, err
 	}
 
-	return &progressWriter{file: file, bar: bar}, nil
+	return &writer{file: file, bar: bar, path: path}, nil
+}
+
+type Writer interface {
+	io.Writer
+	io.Closer
+	Path() string
+	SetSize(int64)
+}
+
+type writer struct {
+	bar  *progressbar.ProgressBar
+	file *os.File
+	path string
+}
+
+func (p *writer) Path() string {
+	return p.path
+}
+
+func (p *writer) Close() error {
+	_ = p.bar.Close()
+	return p.file.Close()
+}
+
+func (p *writer) Write(b []byte) (n int, err error) {
+	_, _ = p.bar.Write(b)
+	return p.file.Write(b)
+}
+
+func (p *writer) SetSize(i int64) {
+	p.bar.ChangeMax64(i)
 }

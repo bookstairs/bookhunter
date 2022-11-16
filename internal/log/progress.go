@@ -7,7 +7,7 @@ import (
 	"github.com/schollz/progressbar/v3"
 )
 
-// NewProgressBar is used to print a beautiful download progress.
+// NewProgressBar is used to print beautiful download progress.
 func NewProgressBar(index, total int64, filename string, bytes int64) *progressbar.ProgressBar {
 	title := fmt.Sprintf("%s %s [%d/%d] %s", logTime(), info, index, total, filename)
 
