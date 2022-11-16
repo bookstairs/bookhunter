@@ -143,6 +143,11 @@ func (f *commonFetcher) downloadFile(bookID int64, format Format, share driver.S
 	if err != nil {
 		return err
 	}
+
+	// Remove the archive file.
+	if format.Archive() && f.Extract {
+		defer func() { _ = os.Remove(writer.Path()) }()
+	}
 	defer func() { _ = writer.Close() }()
 
 	// Write file content.
@@ -154,6 +159,7 @@ func (f *commonFetcher) downloadFile(bookID int64, format Format, share driver.S
 	if format.Archive() && f.Extract {
 		path := writer.Path()
 		u := unzip.New(path, f.DownloadPath)
+
 		return u.Extract()
 	}
 
