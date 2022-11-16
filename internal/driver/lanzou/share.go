@@ -26,9 +26,10 @@ func (l *Drive) ResolveShareURL(shareURL string, pwd string) ([]ResponseData, er
 		return []ResponseData{*fileShareURL}, err
 	} else if l.IsDirURL(shareURL) {
 		return l.resolveFileItemShareURL(parsedURI, pwd)
+	} else {
+		log.Warnf("Unexpected share url, try to download by using directory share API. %s", shareURL)
+		return l.resolveFileItemShareURL(parsedURI, pwd)
 	}
-
-	return nil, fmt.Errorf("unsupport share url %v", shareURL)
 }
 
 func (l *Drive) IsDirURL(shareURL string) bool {

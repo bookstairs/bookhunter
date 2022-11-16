@@ -23,7 +23,7 @@ var (
 
 	sanqiuPasscodeRe = regexp.MustCompile(".*?([a-zA-Z0-9]+).*?")
 
-	tianLangLinkRe     = regexp.MustCompile(`(?m)location\.href\s?=\s?"(http.*?)";`)
+	tianLangLinkRe     = regexp.MustCompile(`(?m)location\.href\s?=\s?"(http.*?)(\n?)";`)
 	tianlangPasscodeRe = regexp.MustCompile("密码.*?([a-zA-Z0-9]+).*?")
 )
 
@@ -97,7 +97,8 @@ func (w *wordpressService) formats(id int64) (map[Format]driver.Share, error) {
 
 		shares, err := w.driver.Resolve(link.URL, link.Code)
 		if err != nil {
-			return nil, err
+			log.Warnf("Error in resolve the share link for book %d, %v", id, err)
+			break
 		}
 
 		res := make(map[Format]driver.Share)

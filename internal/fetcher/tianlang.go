@@ -78,7 +78,7 @@ func extractTianLangLink(c *client.Client, url string) (string, error) {
 		return "", err
 	}
 	submatch := tianLangLinkRe.FindStringSubmatch(response.String())
-	if len(submatch) != 2 {
+	if len(submatch) < 2 {
 		return "", fmt.Errorf("invalid tianlang share link: %s", url)
 	}
 
