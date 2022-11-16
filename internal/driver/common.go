@@ -32,7 +32,7 @@ type (
 		Resolve(shareLink string, passcode string) ([]Share, error)
 
 		// Download the given link.
-		Download(share Share) (io.ReadCloser, error)
+		Download(share Share) (io.ReadCloser, int64, error)
 	}
 )
 

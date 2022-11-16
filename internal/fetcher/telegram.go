@@ -1,7 +1,6 @@
 package fetcher
 
 import (
-	"io"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -14,6 +13,7 @@ import (
 	"github.com/gotd/td/tg"
 
 	"github.com/bookstairs/bookhunter/internal/driver"
+	"github.com/bookstairs/bookhunter/internal/file"
 	"github.com/bookstairs/bookhunter/internal/telegram"
 )
 
@@ -103,13 +103,13 @@ func (s *telegramService) formats(id int64) (map[Format]driver.Share, error) {
 	}
 
 	res := make(map[Format]driver.Share)
-	for _, file := range files {
-		res[Format(file.Format)] = driver.Share{
-			FileName: file.Name,
-			Size:     file.Size,
+	for _, f := range files {
+		res[Format(f.Format)] = driver.Share{
+			FileName: f.Name,
+			Size:     f.Size,
 			Properties: map[string]any{
-				"fileID":   file.ID,
-				"document": file.Document,
+				"fileID":   f.ID,
+				"document": f.Document,
 			},
 		}
 	}
@@ -117,8 +117,8 @@ func (s *telegramService) formats(id int64) (map[Format]driver.Share, error) {
 	return res, nil
 }
 
-func (s *telegramService) fetch(_ int64, f Format, share driver.Share, writer io.Writer) error {
-	file := &telegram.File{
+func (s *telegramService) fetch(_ int64, f Format, share driver.Share, writer file.Writer) error {
+	o := &telegram.File{
 		ID:       share.Properties["fileID"].(int64),
 		Name:     share.FileName,
 		Format:   string(f),
@@ -126,5 +126,5 @@ func (s *telegramService) fetch(_ int64, f Format, share driver.Share, writer io
 		Document: share.Properties["document"].(*tg.InputDocumentFileLocation),
 	}
 
-	return s.telegram.DownloadFile(file, writer)
+	return s.telegram.DownloadFile(o, writer)
 }

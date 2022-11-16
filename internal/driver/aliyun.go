@@ -78,15 +78,17 @@ func (a *aliyunDriver) Resolve(shareLink string, passcode string) ([]Share, erro
 	return shares, nil
 }
 
-func (a *aliyunDriver) Download(share Share) (io.ReadCloser, error) {
+func (a *aliyunDriver) Download(share Share) (io.ReadCloser, int64, error) {
 	shareToken := share.Properties["shareToken"].(string)
 	shareID := share.Properties["shareID"].(string)
 	fileID := share.Properties["fileID"].(string)
 
 	url, err := a.client.DownloadURL(shareToken, shareID, fileID)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 
-	return a.client.DownloadFile(url)
+	file, err := a.client.DownloadFile(url)
+
+	return file, 0, err
 }

@@ -6,9 +6,12 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"github.com/bookstairs/bookhunter/internal/client"
+	"github.com/bookstairs/bookhunter/internal/log"
 )
 
 func TestParseLanzouUrl(t *testing.T) {
+	log.EnableDebug = true
+
 	type args struct {
 		url string
 		pwd string
@@ -65,20 +68,28 @@ func TestParseLanzouUrl(t *testing.T) {
 				url: "https://sobooks.lanzoum.com/ihOex0fiodri",
 				pwd: "",
 			},
+		}, {
+			name: "test lanzou file list",
+			args: args{
+				url: "https://wwx.lanzoui.com/b04azyong",
+				pwd: "7drb",
+			},
 		},
 	}
 
-	drive, _ := NewDrive(&client.Config{})
+	drive, err := NewDrive(&client.Config{})
+	assert.NoError(t, err, "Failed to create lanzou")
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			response, err := drive.ResolveShareURL(tt.args.url, tt.args.pwd)
 			assert.NoError(t, err, "Failed to resolve link")
-			assert.Equal(t, int64(200), response.Code, "Failed to resolve link: "+response.Msg)
-			assert.NotEmpty(t, response.Data)
-			assert.NotNil(t, response.Data)
-			assert.NotNil(t, response.Data.URL)
-			assert.NotNil(t, response.Data.Name)
+			assert.NotEmpty(t, response)
+
+			for _, item := range response {
+				assert.NotEmpty(t, item.URL)
+				assert.NotEmpty(t, item.Name)
+			}
 		})
 	}
 }

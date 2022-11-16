@@ -10,6 +10,7 @@ import (
 
 	"github.com/bookstairs/bookhunter/internal/client"
 	"github.com/bookstairs/bookhunter/internal/driver"
+	"github.com/bookstairs/bookhunter/internal/file"
 	"github.com/bookstairs/bookhunter/internal/log"
 	"github.com/bookstairs/bookhunter/internal/talebook"
 )
@@ -133,7 +134,7 @@ func (t *talebookService) formats(id int64) (map[Format]driver.Share, error) {
 	}
 }
 
-func (t *talebookService) fetch(_ int64, _ Format, share driver.Share, writer io.Writer) error {
+func (t *talebookService) fetch(_ int64, _ Format, share driver.Share, writer file.Writer) error {
 	resp, err := t.client.R().
 		SetDoNotParseResponse(true).
 		Get(share.URL)

@@ -54,7 +54,7 @@ func (t *telecomDriver) Resolve(shareLink string, passcode string) ([]Share, err
 	return shares, nil
 }
 
-func (t *telecomDriver) Download(share Share) (io.ReadCloser, error) {
+func (t *telecomDriver) Download(share Share) (io.ReadCloser, int64, error) {
 	shareCode := share.Properties["shareCode"].(string)
 	shareID := share.Properties["shareID"].(string)
 	fileID := share.Properties["fileID"].(string)
@@ -62,11 +62,11 @@ func (t *telecomDriver) Download(share Share) (io.ReadCloser, error) {
 	// Resolve the link.
 	url, err := t.client.DownloadURL(shareCode, shareID, fileID)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 
 	// Download the file.
 	file, err := t.client.DownloadFile(url)
 
-	return file, err
+	return file, 0, err
 }

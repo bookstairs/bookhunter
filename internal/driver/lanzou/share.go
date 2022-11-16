@@ -13,13 +13,17 @@ import (
 	"github.com/bookstairs/bookhunter/internal/log"
 )
 
-func (l *Drive) ResolveShareURL(shareURL string, pwd string) (*Response, error) {
+func (l *Drive) ResolveShareURL(shareURL string, pwd string) ([]ResponseData, error) {
 	// 移除url前部的主机
 	rawURL, _ := url.Parse(shareURL)
 	parsedURI := rawURL.RequestURI()
 
 	if l.IsFileURL(shareURL) {
-		return l.resolveFileShareURL(parsedURI, pwd)
+		fileShareURL, err := l.resolveFileShareURL(parsedURI, pwd)
+		if err != nil {
+			return nil, err
+		}
+		return []ResponseData{*fileShareURL}, err
 	} else if l.IsDirURL(shareURL) {
 		return l.resolveFileItemShareURL(parsedURI, pwd)
 	}
@@ -41,10 +45,12 @@ func (l *Drive) removeNotes(html string) string {
 	return html
 }
 
-func (l *Drive) resolveFileShareURL(parsedURI string, pwd string) (*Response, error) {
-	get, _ := l.client.R().Get(parsedURI)
-
-	firstPage := get.String()
+func (l *Drive) resolveFileShareURL(parsedURI string, pwd string) (*ResponseData, error) {
+	resp, err := l.client.R().Get(parsedURI)
+	if err != nil {
+		return nil, err
+	}
+	firstPage := resp.String()
 	firstPage = l.removeNotes(firstPage)
 
 	// 参考https://github.com/zaxtyson/LanZouCloud-API 中对acwScV2的处理
@@ -75,21 +81,25 @@ func (l *Drive) resolveFileShareURL(parsedURI string, pwd string) (*Response, er
 
 		query, _ := url.ParseQuery(params)
 
-		_, _ = l.client.R().
+		_, err = l.client.R().
 			SetHeader("referer", l.client.BaseURL+parsedURI).
 			SetHeader("Content-Type", "application/x-www-form-urlencoded").
 			SetResult(result).
 			SetFormDataFromValues(query).
 			Post(urlpath)
-
+		if err != nil {
+			return nil, err
+		}
 		return l.parseDom(result)
 	}
 
 	// Share without password
 	allString = find2Re.FindStringSubmatch(firstPage)
 	if len(allString) == 2 {
-		dom, _ := l.client.R().Get(allString[1])
-
+		dom, err := l.client.R().Get(allString[1])
+		if err != nil {
+			return nil, err
+		}
 		data := make(map[string]string)
 
 		var re = regexp.MustCompile(`(?m)var\s+(\w+)\s+=\s+'(.*)';`)
@@ -99,7 +109,7 @@ func (l *Drive) resolveFileShareURL(parsedURI string, pwd string) (*Response, er
 		title := l.extractRegex(find2TitleRe, firstPage)
 
 		result := &Dom{}
-		_, _ = l.client.R().
+		_, err = l.client.R().
 			SetHeader("origin", l.client.BaseURL).
 			SetHeader("referer", l.client.BaseURL+parsedURI).
 			SetHeader("Content-Type", "application/x-www-form-urlencoded").
@@ -113,10 +123,12 @@ func (l *Drive) resolveFileShareURL(parsedURI string, pwd string) (*Response, er
 				"ves":        "1",
 			}).
 			Post("/ajaxm.php")
-
+		if err != nil {
+			return nil, err
+		}
 		lanzouDom, err := l.parseDom(result)
 		if lanzouDom != nil {
-			lanzouDom.Data.Name = title
+			lanzouDom.Name = title
 		}
 		return lanzouDom, err
 	}
@@ -124,14 +136,14 @@ func (l *Drive) resolveFileShareURL(parsedURI string, pwd string) (*Response, er
 	return nil, fmt.Errorf("解析页面失败")
 }
 
-func (l *Drive) parseDom(result *Dom) (*Response, error) {
+func (l *Drive) parseDom(result *Dom) (*ResponseData, error) {
 	if result.Zt != 1 {
 		return nil, fmt.Errorf("解析直链失败")
 	}
 
 	var header = map[string]string{
 		"Accept-Language": "zh-CN,zh;q=0.9,en;q=0.8",
-		"Referer":         "https://" + hostname(),
+		"Referer":         "https://" + l.client.Host,
 	}
 
 	request := resty.New().SetRedirectPolicy(resty.NoRedirectPolicy()).
@@ -149,12 +161,9 @@ func (l *Drive) parseDom(result *Dom) (*Response, error) {
 	location := rr.Header().Get("location")
 
 	title, _ := result.Inf.(string)
-	return &Response{
-		Code: 200,
-		Data: ResponseData{
-			Name: title,
-			URL:  location,
-		},
+	return &ResponseData{
+		Name: title,
+		URL:  location,
 	}, nil
 }
 
@@ -207,7 +216,7 @@ func (l *Drive) extractRegex(reg *regexp.Regexp, str string) string {
 	return ""
 }
 
-func (l *Drive) resolveFileItemShareURL(parsedURI string, pwd string) (*Response, error) {
+func (l *Drive) resolveFileItemShareURL(parsedURI string, pwd string) ([]ResponseData, error) {
 	resp, _ := l.client.R().Get(parsedURI)
 	str := resp.String()
 	formData := map[string]string{
@@ -224,23 +233,18 @@ func (l *Drive) resolveFileItemShareURL(parsedURI string, pwd string) (*Response
 	}
 
 	result := &FileList{}
-	_, _ = l.client.R().SetFormData(formData).SetResult(result).Post("/filemoreajax.php")
-
-	if len(result.Text) > 0 {
-		u := ""
-
-		for _, file := range result.Text {
-			if strings.Contains(file.NameAll, "epub") {
-				u = "/" + file.ID
-			}
-		}
-
-		if u == "" {
-			u = "/" + result.Text[0].ID
-		}
-
-		return l.resolveFileShareURL(u, pwd)
+	_, err := l.client.R().SetFormData(formData).SetResult(result).Post("/filemoreajax.php")
+	if err != nil {
+		return nil, err
 	}
-
-	return nil, fmt.Errorf("获取连接失败")
+	data := make([]ResponseData, len(result.Text))
+	for i, file := range result.Text {
+		respData, err := l.resolveFileShareURL("/"+file.ID, pwd)
+		if err != nil {
+			return nil, err
+		}
+		respData.Name = file.NameAll
+		data[i] = *respData
+	}
+	return data, nil
 }

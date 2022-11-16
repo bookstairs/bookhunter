@@ -24,14 +24,9 @@ var (
 )
 
 type (
-	Response struct {
-		Code int64        `json:"code"`
-		Data ResponseData `json:"data"`
-		Msg  string       `json:"msg"`
-	}
-
 	ResponseData struct {
 		Name string `json:"name"`
+		Size string `json:"size"`
 		URL  string `json:"url"`
 	}
 
