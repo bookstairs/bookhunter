@@ -16,10 +16,10 @@ require (
 	github.com/spf13/cobra v1.6.1
 	github.com/stretchr/testify v1.8.1
 	github.com/tickstep/cloudpan189-api v0.0.9
-	github.com/yi-ge/unzip v1.0.2
 	go.uber.org/ratelimit v0.2.0
 	golang.org/x/net v0.2.0
 	golang.org/x/term v0.2.0
+	golang.org/x/text v0.4.0
 )
 
 require (

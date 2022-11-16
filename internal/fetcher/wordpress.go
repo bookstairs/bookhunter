@@ -121,7 +121,7 @@ func (w *wordpressService) formats(id int64) (map[Format]driver.Share, error) {
 	return map[Format]driver.Share{}, nil
 }
 
-func (w *wordpressService) fetch(i int64, format Format, share driver.Share, writer file.Writer) error {
+func (w *wordpressService) fetch(_ int64, _ Format, share driver.Share, writer file.Writer) error {
 	content, size, err := w.driver.Download(share)
 	if err != nil {
 		return err

@@ -5,12 +5,11 @@ import (
 	"path/filepath"
 	"sync"
 
-	"github.com/yi-ge/unzip"
-
 	"github.com/bookstairs/bookhunter/internal/driver"
 	"github.com/bookstairs/bookhunter/internal/file"
 	"github.com/bookstairs/bookhunter/internal/log"
 	"github.com/bookstairs/bookhunter/internal/progress"
+	"github.com/bookstairs/bookhunter/internal/unzip"
 )
 
 const (

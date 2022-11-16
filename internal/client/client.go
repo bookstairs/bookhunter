@@ -151,7 +151,7 @@ func New(c *Config) (*Client, error) {
 		SetRetryWaitTime(3*time.Second).
 		SetRetryMaxWaitTime(10*time.Second).
 		SetAllowGetMethodPayload(true).
-		SetTimeout(1*time.Minute).
+		SetTimeout(5*time.Minute).
 		SetContentLength(true).
 		SetDebug(log.EnableDebug).
 		SetDisableWarn(true).
