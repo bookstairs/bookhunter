@@ -3,9 +3,9 @@ package fetcher
 import (
 	"errors"
 	"fmt"
-	"io"
 
 	"github.com/bookstairs/bookhunter/internal/driver"
+	"github.com/bookstairs/bookhunter/internal/file"
 )
 
 // service is a real implementation for fetcher.
@@ -17,7 +17,7 @@ type service interface {
 	formats(int64) (map[Format]driver.Share, error)
 
 	// fetch the given book ID.
-	fetch(int64, Format, driver.Share, io.Writer) error
+	fetch(int64, Format, driver.Share, file.Writer) error
 }
 
 // newService is the endpoint for creating all the supported download service.

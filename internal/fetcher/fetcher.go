@@ -1,7 +1,6 @@
 package fetcher
 
 import (
-	"io"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -10,6 +9,7 @@ import (
 	"github.com/yi-ge/unzip"
 
 	"github.com/bookstairs/bookhunter/internal/driver"
+	"github.com/bookstairs/bookhunter/internal/file"
 	"github.com/bookstairs/bookhunter/internal/log"
 	"github.com/bookstairs/bookhunter/internal/naming"
 	"github.com/bookstairs/bookhunter/internal/progress"
@@ -154,19 +154,18 @@ func (f *commonFetcher) downloadFile(bookID int64, format Format, share driver.S
 		}
 	}
 
+	// Add download progress, no need to close.
+	bar := log.NewProgressBar(bookID, f.progress.Size(), share.FileName, share.Size)
+
 	// Create the file writer.
-	writer, err := os.Create(path)
+	writer, err := file.NewWriter(path, bar)
 	if err != nil {
 		return err
 	}
 	defer func() { _ = writer.Close() }()
 
-	// Add download progress.
-	bar := log.NewProgressBar(bookID, f.progress.Size(), share.FileName, share.Size)
-	defer func() { _ = bar.Close() }()
-
 	// Write file content.
-	if err := f.service.fetch(bookID, format, share, io.MultiWriter(writer, bar)); err != nil {
+	if err := f.service.fetch(bookID, format, share, writer); err != nil {
 		return err
 	}
 

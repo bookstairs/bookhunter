@@ -90,10 +90,9 @@ func (c *Config) baseURL() string {
 	return "http://" + c.Host
 }
 
-func (c *Client) SetHost(host string) *Client {
-	c.Config.Host = host
-	c.Client.SetBaseURL(c.Config.baseURL())
-	return c
+func (c *Client) SetDefaultHostname(host string) {
+	c.Host = host
+	c.Client.SetBaseURL(c.baseURL())
 }
 
 // DefaultConfigRoot will generate the default config path based on the user and his running environment.

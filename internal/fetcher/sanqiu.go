@@ -7,6 +7,7 @@ import (
 
 	"github.com/bookstairs/bookhunter/internal/client"
 	"github.com/bookstairs/bookhunter/internal/driver"
+	"github.com/bookstairs/bookhunter/internal/file"
 	"github.com/bookstairs/bookhunter/internal/log"
 	"github.com/bookstairs/bookhunter/internal/naming"
 	"github.com/bookstairs/bookhunter/internal/sanqiu"
@@ -111,12 +112,17 @@ func (s *sanqiuService) formats(id int64) (map[Format]driver.Share, error) {
 	return map[Format]driver.Share{}, nil
 }
 
-func (s *sanqiuService) fetch(_ int64, _ Format, share driver.Share, writer io.Writer) error {
-	content, err := s.driver.Download(share)
+func (s *sanqiuService) fetch(_ int64, _ Format, share driver.Share, writer file.Writer) error {
+	content, size, err := s.driver.Download(share)
 	if err != nil {
 		return err
 	}
 	defer func() { _ = content.Close() }()
+
+	// Set download progress if required.
+	if size > 0 {
+		writer.SetSize(size)
+	}
 
 	// Save the download content info files.
 	_, err = io.Copy(writer, content)

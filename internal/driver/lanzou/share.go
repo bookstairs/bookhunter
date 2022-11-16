@@ -13,16 +13,17 @@ import (
 	"github.com/bookstairs/bookhunter/internal/log"
 )
 
-func (l *Drive) ResolveShareURL(shareURL string, pwd string) (*[]ResponseData, error) {
+func (l *Drive) ResolveShareURL(shareURL string, pwd string) ([]ResponseData, error) {
 	// 移除url前部的主机
 	rawURL, _ := url.Parse(shareURL)
 	parsedURI := rawURL.RequestURI()
 
 	if l.IsFileURL(shareURL) {
 		fileShareURL, err := l.resolveFileShareURL(parsedURI, pwd)
-		return &[]ResponseData{
-			*fileShareURL,
-		}, err
+		if err != nil {
+			return nil, err
+		}
+		return []ResponseData{*fileShareURL}, err
 	} else if l.IsDirURL(shareURL) {
 		return l.resolveFileItemShareURL(parsedURI, pwd)
 	}
@@ -45,11 +46,11 @@ func (l *Drive) removeNotes(html string) string {
 }
 
 func (l *Drive) resolveFileShareURL(parsedURI string, pwd string) (*ResponseData, error) {
-	get, err := l.client.R().Get(parsedURI)
+	resp, err := l.client.R().Get(parsedURI)
 	if err != nil {
 		return nil, err
 	}
-	firstPage := get.String()
+	firstPage := resp.String()
 	firstPage = l.removeNotes(firstPage)
 
 	// 参考https://github.com/zaxtyson/LanZouCloud-API 中对acwScV2的处理
@@ -142,7 +143,7 @@ func (l *Drive) parseDom(result *Dom) (*ResponseData, error) {
 
 	var header = map[string]string{
 		"Accept-Language": "zh-CN,zh;q=0.9,en;q=0.8",
-		"Referer":         "https://" + hostname(),
+		"Referer":         "https://" + l.client.Host,
 	}
 
 	request := resty.New().SetRedirectPolicy(resty.NoRedirectPolicy()).
@@ -215,7 +216,7 @@ func (l *Drive) extractRegex(reg *regexp.Regexp, str string) string {
 	return ""
 }
 
-func (l *Drive) resolveFileItemShareURL(parsedURI string, pwd string) (*[]ResponseData, error) {
+func (l *Drive) resolveFileItemShareURL(parsedURI string, pwd string) ([]ResponseData, error) {
 	resp, _ := l.client.R().Get(parsedURI)
 	str := resp.String()
 	formData := map[string]string{
@@ -245,5 +246,5 @@ func (l *Drive) resolveFileItemShareURL(parsedURI string, pwd string) (*[]Respon
 		respData.Name = file.NameAll
 		data[i] = *respData
 	}
-	return &data, nil
+	return data, nil
 }

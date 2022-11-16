@@ -26,6 +26,7 @@ var (
 type (
 	ResponseData struct {
 		Name string `json:"name"`
+		Size string `json:"size"`
 		URL  string `json:"url"`
 	}
 

@@ -30,8 +30,8 @@ func (l *lanzouDriver) Resolve(shareLink string, passcode string) ([]Share, erro
 	if err != nil {
 		return nil, err
 	}
-	shareList := make([]Share, len(*resp))
-	for i, item := range *resp {
+	shareList := make([]Share, len(resp))
+	for i, item := range resp {
 		shareList[i] = Share{
 			FileName: item.Name,
 			URL:      item.URL,
@@ -40,6 +40,6 @@ func (l *lanzouDriver) Resolve(shareLink string, passcode string) ([]Share, erro
 	return shareList, err
 }
 
-func (l *lanzouDriver) Download(share Share) (io.ReadCloser, error) {
+func (l *lanzouDriver) Download(share Share) (io.ReadCloser, int64, error) {
 	return l.driver.DownloadFile(share.URL)
 }
