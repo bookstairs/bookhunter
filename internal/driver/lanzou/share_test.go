@@ -65,6 +65,12 @@ func TestParseLanzouUrl(t *testing.T) {
 				url: "https://sobooks.lanzoum.com/ihOex0fiodri",
 				pwd: "",
 			},
+		}, {
+			name: "test lanzou file list",
+			args: args{
+				url: "https://wwx.lanzoui.com/b04azyong",
+				pwd: "7drb",
+			},
 		},
 	}
 
@@ -74,11 +80,12 @@ func TestParseLanzouUrl(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			response, err := drive.ResolveShareURL(tt.args.url, tt.args.pwd)
 			assert.NoError(t, err, "Failed to resolve link")
-			assert.Equal(t, int64(200), response.Code, "Failed to resolve link: "+response.Msg)
-			assert.NotEmpty(t, response.Data)
-			assert.NotNil(t, response.Data)
-			assert.NotNil(t, response.Data.URL)
-			assert.NotNil(t, response.Data.Name)
+			assert.NotEmpty(t, response)
+
+			for _, item := range *response {
+				assert.NotEmpty(t, item.URL)
+				assert.NotEmpty(t, item.Name)
+			}
 		})
 	}
 }

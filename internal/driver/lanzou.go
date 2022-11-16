@@ -2,7 +2,6 @@ package driver
 
 import (
 	"errors"
-	"fmt"
 	"io"
 
 	"github.com/bookstairs/bookhunter/internal/client"
@@ -31,16 +30,14 @@ func (l *lanzouDriver) Resolve(shareLink string, passcode string) ([]Share, erro
 	if err != nil {
 		return nil, err
 	}
-	if resp.Code != 200 {
-		return nil, fmt.Errorf("parsed faild: %v", resp.Msg)
+	shareList := make([]Share, len(*resp))
+	for i, item := range *resp {
+		shareList[i] = Share{
+			FileName: item.Name,
+			URL:      item.URL,
+		}
 	}
-
-	share := Share{
-		FileName: resp.Data.Name,
-		URL:      resp.Data.URL,
-	}
-
-	return []Share{share}, err
+	return shareList, err
 }
 
 func (l *lanzouDriver) Download(share Share) (io.ReadCloser, error) {

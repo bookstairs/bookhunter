@@ -13,13 +13,16 @@ import (
 	"github.com/bookstairs/bookhunter/internal/log"
 )
 
-func (l *Drive) ResolveShareURL(shareURL string, pwd string) (*Response, error) {
+func (l *Drive) ResolveShareURL(shareURL string, pwd string) (*[]ResponseData, error) {
 	// 移除url前部的主机
 	rawURL, _ := url.Parse(shareURL)
 	parsedURI := rawURL.RequestURI()
 
 	if l.IsFileURL(shareURL) {
-		return l.resolveFileShareURL(parsedURI, pwd)
+		fileShareURL, err := l.resolveFileShareURL(parsedURI, pwd)
+		return &[]ResponseData{
+			*fileShareURL,
+		}, err
 	} else if l.IsDirURL(shareURL) {
 		return l.resolveFileItemShareURL(parsedURI, pwd)
 	}
@@ -41,7 +44,7 @@ func (l *Drive) removeNotes(html string) string {
 	return html
 }
 
-func (l *Drive) resolveFileShareURL(parsedURI string, pwd string) (*Response, error) {
+func (l *Drive) resolveFileShareURL(parsedURI string, pwd string) (*ResponseData, error) {
 	get, _ := l.client.R().Get(parsedURI)
 
 	firstPage := get.String()
@@ -116,7 +119,7 @@ func (l *Drive) resolveFileShareURL(parsedURI string, pwd string) (*Response, er
 
 		lanzouDom, err := l.parseDom(result)
 		if lanzouDom != nil {
-			lanzouDom.Data.Name = title
+			lanzouDom.Name = title
 		}
 		return lanzouDom, err
 	}
@@ -124,7 +127,7 @@ func (l *Drive) resolveFileShareURL(parsedURI string, pwd string) (*Response, er
 	return nil, fmt.Errorf("解析页面失败")
 }
 
-func (l *Drive) parseDom(result *Dom) (*Response, error) {
+func (l *Drive) parseDom(result *Dom) (*ResponseData, error) {
 	if result.Zt != 1 {
 		return nil, fmt.Errorf("解析直链失败")
 	}
@@ -149,12 +152,9 @@ func (l *Drive) parseDom(result *Dom) (*Response, error) {
 	location := rr.Header().Get("location")
 
 	title, _ := result.Inf.(string)
-	return &Response{
-		Code: 200,
-		Data: ResponseData{
-			Name: title,
-			URL:  location,
-		},
+	return &ResponseData{
+		Name: title,
+		URL:  location,
 	}, nil
 }
 
@@ -207,7 +207,7 @@ func (l *Drive) extractRegex(reg *regexp.Regexp, str string) string {
 	return ""
 }
 
-func (l *Drive) resolveFileItemShareURL(parsedURI string, pwd string) (*Response, error) {
+func (l *Drive) resolveFileItemShareURL(parsedURI string, pwd string) (*[]ResponseData, error) {
 	resp, _ := l.client.R().Get(parsedURI)
 	str := resp.String()
 	formData := map[string]string{
@@ -225,22 +225,14 @@ func (l *Drive) resolveFileItemShareURL(parsedURI string, pwd string) (*Response
 
 	result := &FileList{}
 	_, _ = l.client.R().SetFormData(formData).SetResult(result).Post("/filemoreajax.php")
-
-	if len(result.Text) > 0 {
-		u := ""
-
-		for _, file := range result.Text {
-			if strings.Contains(file.NameAll, "epub") {
-				u = "/" + file.ID
-			}
+	data := make([]ResponseData, len(result.Text))
+	for i, file := range result.Text {
+		respData, err := l.resolveFileShareURL("/"+file.ID, pwd)
+		if err != nil {
+			return nil, err
 		}
-
-		if u == "" {
-			u = "/" + result.Text[0].ID
-		}
-
-		return l.resolveFileShareURL(u, pwd)
+		respData.Name = file.NameAll
+		data[i] = *respData
 	}
-
-	return nil, fmt.Errorf("获取连接失败")
+	return &data, nil
 }
