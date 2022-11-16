@@ -80,8 +80,11 @@ func (f *commonFetcher) Download() error {
 	wait.Wait()
 
 	// Acquire the download errors.
-	for e := range f.errs {
-		return e
+	select {
+	case err := <-f.errs:
+		return err
+	default:
+		log.Debug("All the fetch thread have been finished.")
 	}
 
 	return nil
@@ -94,6 +97,7 @@ thread:
 		bookID := f.progress.AcquireBookID()
 		if bookID == progress.NoBookToDownload {
 			// Finish this thread.
+			log.Debugf("No book to download in [%s] service.", f.Category)
 			break thread
 		}
 
@@ -106,7 +110,7 @@ thread:
 			f.errs <- err
 			break thread
 		}
-		log.Debugf("Book id %d formats: %v", bookID, formats)
+		log.Debugf("Book id %d formats: %v.", bookID, formats)
 
 		// Filter the formats.
 		formats = f.filterFormats(formats)
