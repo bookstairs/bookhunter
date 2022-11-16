@@ -30,7 +30,6 @@ type commonFetcher struct {
 	*Config
 	service  service
 	progress progress.Progress
-	wait     sync.WaitGroup
 	errs     chan error
 }
 
@@ -68,18 +67,19 @@ func (f *commonFetcher) Download() error {
 	f.errs = make(chan error, f.Thread)
 	defer close(f.errs)
 
+	var wait sync.WaitGroup
 	for i := 0; i < f.Thread; i++ {
-		f.wait.Add(1)
-		go f.startDownload()
+		wait.Add(1)
+		go func() {
+			defer wait.Done()
+			f.startDownload()
+		}()
 	}
+	wait.Wait()
 
-	f.wait.Wait()
-
-	// Acquire the download error.
+	// Acquire the download errors.
 	for e := range f.errs {
-		if e != nil {
-			return e
-		}
+		return e
 	}
 
 	return nil
@@ -87,12 +87,12 @@ func (f *commonFetcher) Download() error {
 
 // startDownload will start a download thread.
 func (f *commonFetcher) startDownload() {
+thread:
 	for {
 		bookID := f.progress.AcquireBookID()
 		if bookID == progress.NoBookToDownload {
 			// Finish this thread.
-			f.finishDownload(nil)
-			break
+			break thread
 		}
 
 		// Start download the given book ID.
@@ -101,8 +101,8 @@ func (f *commonFetcher) startDownload() {
 		// Acquire the available file formats
 		formats, err := f.service.formats(bookID)
 		if err != nil {
-			f.finishDownload(err)
-			break
+			f.errs <- err
+			break thread
 		}
 		log.Debugf("Book id %d formats: %v", bookID, formats)
 
@@ -116,16 +116,16 @@ func (f *commonFetcher) startDownload() {
 		for format, share := range formats {
 			err := f.downloadFile(bookID, format, share)
 			if err != nil {
-				f.finishDownload(err)
-				break
+				f.errs <- err
+				break thread
 			}
 		}
 
 		// Save the download progress
 		err = f.progress.SaveBookID(bookID)
 		if err != nil {
-			f.finishDownload(err)
-			break
+			f.errs <- err
+			break thread
 		}
 	}
 }
@@ -191,12 +191,4 @@ func (f *commonFetcher) filterFormats(formats map[Format]driver.Share) map[Forma
 		}
 	}
 	return fs
-}
-
-// finishDownload will exist the download thread.
-func (f *commonFetcher) finishDownload(err error) {
-	if err != nil {
-		f.errs <- err
-	}
-	f.wait.Done()
 }
