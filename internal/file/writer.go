@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+	"unicode/utf8"
 
 	"github.com/schollz/progressbar/v3"
 
@@ -49,7 +50,12 @@ func (c *creator) NewWriter(id, total int64, name string, format string, size in
 	}
 
 	// Add download progress, no need to close.
-	bar := log.NewProgressBar(id, total, name, size)
+	display := name
+	if utf8.RuneCountInString(display) > 30 {
+		// Trim the display size for better printing.
+		display = string([]rune(display)[:30]) + "..."
+	}
+	bar := log.NewProgressBar(id, total, display, size)
 
 	// Create file io. and remember to close it manually.
 	file, err := os.Create(path)
