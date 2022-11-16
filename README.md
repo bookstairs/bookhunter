@@ -1,7 +1,7 @@
 # ⏬ bookhunter
 
-Downloading books from [talebook](https://github.com/talebook/talebook), [www.sanqiu.mobi](https://www.sanqiu.mobi/) and
-Telegram Channels. This is a totally rewritten fork compared to
+Downloading books from [talebook](https://github.com/talebook/talebook), [www.sanqiu.mobi](https://www.sanqiu.mobi/)
+, [www.tianlangbooks.com](www.tianlangbooks.com) and Telegram Channels. This is a totally rewritten fork compared to
 its [original version](https://github.com/hellojukay/dl-talebook).
 
 ## 🚧 Development
@@ -38,6 +38,7 @@ by your running environment.
 * [Login Aliyundrive to get the refreshToken](#login-aliyundrive-to-get-the-refreshtoken)
 * [Register account in Talebook](#register-account-in-talebook)
 * [Download books from Talebook](#download-books-from-talebook)
+* [Download books from Tianlang](#download-books-from-tianlang)
 * [Download books from Sanqiu](#download-books-from-sanqiu)
 * [Download books from Telegram groups.](#download-books-from-telegram-groups)
 
@@ -88,6 +89,34 @@ Flags:
   -t, --thread int        The number of download thead (default 1)
   -u, --username string   The talebook username
   -w, --website string    The talebook link
+
+Global Flags:
+  -c, --config string       The config path for bookhunter
+      --proxy string        The request proxy
+  -a, --user-agent string   The request user-agent (default "Mozilla/5.0 (X11; Linux i686; rv:13.0) Gecko/13.0 Firefox/13.0")
+      --verbose             Print all the logs for debugging
+```
+
+### Download books from Tianlang
+
+```text
+Usage:
+  bookhunter tianlang [flags]
+
+Flags:
+  -d, --download string          The book directory you want to use (default "/Users/Yufan/Developer/Go/bookstairs/bookhunter")
+  -e, --extract                  Extract the archive file for filtering
+  -f, --format strings           The file formats you want to download (default [epub,azw3,mobi,pdf,zip])
+  -h, --help                     help for tianlang
+  -i, --initial int              The book id you want to start download (default 1)
+      --ratelimit int            The allowed requests per minutes (default 30)
+      --refreshToken string      Refresh token for aliyun drive
+  -r, --rename                   Rename the book file by book id
+      --secretKey string         The secret key for tianlang (default "359198")
+      --source string            The source (aliyun, telecom, lanzou) to download book (default "telecom")
+      --telecomPassword string   Telecom drive password
+      --telecomUsername string   Telecom drive username
+  -t, --thread int               The number of download thead (default 1)
 
 Global Flags:
   -c, --config string       The config path for bookhunter
