@@ -104,7 +104,7 @@ Usage:
   bookhunter tianlang [flags]
 
 Flags:
-  -d, --download string          The book directory you want to use (default "/Users/Yufan/Developer/Go/bookstairs/bookhunter")
+  -d, --download string          The book directory you want to use (default ".")
   -e, --extract                  Extract the archive file for filtering
   -f, --format strings           The file formats you want to download (default [epub,azw3,mobi,pdf,zip])
   -h, --help                     help for tianlang
