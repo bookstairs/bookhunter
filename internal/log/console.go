@@ -10,15 +10,14 @@ import (
 )
 
 var (
-	ansiStdout  = ansi.NewAnsiStdout()
 	EnableDebug = false // EnableDebug will enable the disabled debug log level.
-)
 
-const (
-	debug = "[dark_gray][DEBUG][reset]"
-	info  = "[green][INFO] [reset]"
-	warn  = "[yellow][WARN] [reset]"
-	fatal = "[red][FATAL][reset]"
+	ansiStdout = ansi.NewAnsiStdout()
+
+	debug = colorstring.Color("[dark_gray][DEBUG][reset]")
+	info  = colorstring.Color("[green][INFO] [reset]")
+	warn  = colorstring.Color("[yellow][WARN] [reset]")
+	fatal = colorstring.Color("[red][FATAL][reset]")
 )
 
 // Debugf would print the log with in debug level. The debug was disabled by default.
@@ -33,38 +32,38 @@ func Debugf(format string, v ...any) {
 // // You should use EnableDebug to enable it.
 func Debug(v ...any) {
 	if EnableDebug {
-		printLog(debug, formatArgs(v...))
+		printLog(debug, v...)
 	}
 }
 
-// Infof would print the log with in info level.
+// Infof would print the log with info level.
 func Infof(format string, v ...any) {
 	printLog(info, fmt.Sprintf(format, v...))
 }
 
-// Info would print the log with in info level.
+// Info would print the log with info level.
 func Info(v ...any) {
-	printLog(info, formatArgs(v...))
+	printLog(info, v...)
 }
 
-// Warnf would print the log with in warn level.
+// Warnf would print the log with warn level.
 func Warnf(format string, v ...any) {
 	printLog(warn, fmt.Sprintf(format, v...))
 }
 
-// Warn would print the log with in warn level.
+// Warn would print the log with warn level.
 func Warn(v ...any) {
-	printLog(warn, formatArgs(v...))
+	printLog(warn, v...)
 }
 
-// Fatalf would print the log with in fatal level. And exit the program.
+// Fatalf would print the log with fatal level. And exit the program.
 func Fatalf(format string, v ...any) {
 	printLog(fatal, fmt.Sprintf(format, v...))
 }
 
-// Fatal would print the log with in fatal level. And exit the program.
+// Fatal would print the log with fatal level. And exit the program.
 func Fatal(v ...any) {
-	printLog(fatal, formatArgs(v...))
+	printLog(fatal, v...)
 }
 
 // Exit will print the error with fatal level and os.Exit if the error isn't nil.
@@ -75,18 +74,9 @@ func Exit(err error) {
 	}
 }
 
-// formatArgs will format all the arguments.
-func formatArgs(args ...any) string {
-	if len(args) == 0 {
-		return ""
-	} else {
-		return fmt.Sprint(args...)
-	}
-}
-
 // printLog would print a colorful log level and log time.
-func printLog(level, log string) {
-	_, _ = fmt.Fprintln(ansiStdout, logTime(), colorstring.Color(level), log)
+func printLog(level string, args ...any) {
+	_, _ = fmt.Fprintln(ansiStdout, logTime(), level, fmt.Sprint(args...))
 }
 
 // logTime will print the current time
