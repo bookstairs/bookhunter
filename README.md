@@ -1,8 +1,8 @@
 # ⏬ bookhunter
 
-Downloading books from [talebook](https://github.com/talebook/talebook), [www.sanqiu.mobi](https://www.sanqiu.mobi/)
-, [www.tianlangbooks.com](www.tianlangbooks.com) and Telegram Channels. This is a totally rewritten fork compared to
-its [original version](https://github.com/hellojukay/dl-talebook).
+Downloading books from [talebook](https://github.com/talebook/talebook), [三秋书屋](https://www.sanqiu.mobi/)
+, [天浪书屋](https://www.tianlangbooks.com), [SoBooks](https://sobooks.cc) and Telegram Channels. This is a totally
+rewritten fork compared to its [original version](https://github.com/hellojukay/dl-talebook).
 
 ## 🚧 Development
 
@@ -39,6 +39,7 @@ by your running environment.
 * [Register account in Talebook](#register-account-in-talebook)
 * [Download books from Talebook](#download-books-from-talebook)
 * [Download books from Tianlang](#download-books-from-tianlang)
+* [Download books from SoBooks](#download-books-from-sobooks)
 * [Download books from Sanqiu](#download-books-from-sanqiu)
 * [Download books from Telegram groups.](#download-books-from-telegram-groups)
 
