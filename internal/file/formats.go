@@ -22,14 +22,6 @@ func (f Format) Archive() bool {
 	return f == ZIP
 }
 
-func inArchive(filename string) bool {
-	ext, ok := Extension(filename)
-	if !ok {
-		return false
-	}
-	return ext.Archive()
-}
-
 func isLetter(s string) bool {
 	for _, r := range s {
 		if !unicode.IsLetter(r) {

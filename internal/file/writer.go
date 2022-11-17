@@ -67,7 +67,7 @@ func (c *creator) NewWriter(id, total int64, name string, format Format, size in
 		file:     file,
 		name:     filename,
 		download: c.downloadPath,
-		extract:  c.extract,
+		extract:  c.extract && format.Archive(),
 		formats:  c.formats,
 		bar:      bar,
 	}, nil
@@ -96,7 +96,7 @@ func (p *writer) Close() error {
 	}
 
 	// Extract the file if user enabled this.
-	if p.extract && inArchive(p.name) {
+	if p.extract {
 		if err := p.decompress(); err != nil {
 			log.Fatal(err)
 			return nil
