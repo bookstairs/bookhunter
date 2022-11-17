@@ -84,7 +84,8 @@ func (w *wordpressService) size() (int64, error) {
 func (w *wordpressService) formats(id int64) (map[file.Format]driver.Share, error) {
 	links, err := w.resolver(w.client, id)
 	if err != nil {
-		return nil, err
+		log.Fatalf("Error in find downloadable links %v", err)
+		return map[file.Format]driver.Share{}, nil
 	}
 
 	log.Debugf("Available download links: %v", links)
