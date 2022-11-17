@@ -19,7 +19,7 @@ var (
 )
 
 const (
-	cookieFile       = "cookies.json"
+	CookieFile       = "cookies.json"
 	DefaultUserAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko)" +
 		" Chrome/107.0.0.0 Safari/537.36 Edg/107.0.1418.42"
 )
@@ -61,7 +61,7 @@ func (c *Config) newCookieJar() (http.CookieJar, error) {
 		return nil, err
 	}
 
-	return newCookieJar(filepath.Join(configPath, cookieFile))
+	return newCookieJar(filepath.Join(configPath, CookieFile))
 }
 
 func (c *Config) redirectPolicy() []any {

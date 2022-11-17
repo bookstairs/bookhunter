@@ -2,6 +2,8 @@ package fetcher
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 
@@ -14,60 +16,79 @@ import (
 )
 
 func newTianlangService(config *Config) (service, error) {
-	return newWordpressService(config, func(c *client.Client, id int64) (map[driver.Source]wordpress.ShareLink, error) {
-		resp, err := c.R().
-			SetPathParam("id", strconv.FormatInt(id, 10)).
-			SetFormData(map[string]string{
-				"secret_key": config.Property("secretKey"),
-				"Submit":     "提交",
-			}).
-			ForceContentType("application/x-www-form-urlencoded").
-			Post("/{id}.html")
+	resolver := func(c *client.Client, id int64) (map[driver.Source]wordpress.ShareLink, error) {
+		return tianlangLinkResolver(config, c, id)
+	}
+
+	if err := cleanStaleCookies(config); err != nil {
+		return nil, err
+	}
+
+	return newWordpressService(config, resolver)
+}
+
+func cleanStaleCookies(config *Config) error {
+	path, err := config.Config.ConfigPath()
+	if err != nil {
+		return err
+	}
+
+	return os.Remove(filepath.Join(path, client.CookieFile))
+}
+
+func tianlangLinkResolver(config *Config, c *client.Client, id int64) (map[driver.Source]wordpress.ShareLink, error) {
+	resp, err := c.R().
+		SetPathParam("id", strconv.FormatInt(id, 10)).
+		SetFormData(map[string]string{
+			"secret_key": config.Property("secretKey"),
+			"Submit":     "提交",
+		}).
+		ForceContentType("application/x-www-form-urlencoded").
+		Post("/{id}.html")
+	if err != nil {
+		return nil, err
+	}
+
+	content := resp.String()
+	log.Debugf("Get website content for book %d\n\n%s", id, content)
+
+	doc, err := goquery.NewDocumentFromReader(strings.NewReader(content))
+	if err != nil {
+		return nil, err
+	}
+
+	// Find all the links.
+	links := map[driver.Source]wordpress.ShareLink{}
+	doc.Find(".secret-password-content > p").Each(func(i int, selection *goquery.Selection) {
+		find := selection.Find("a")
+		href, exists := find.Attr("href")
+		if !exists {
+			return
+		}
+		text := selection.Text()
+
+		for linkType, name := range driveNamings {
+			if strings.Contains(text, name) {
+				href, err = extractTianLangLink(c, href)
+				links[linkType] = wordpress.ShareLink{URL: href}
+			}
+		}
 		if err != nil {
-			return nil, err
+			return
 		}
 
-		content := resp.String()
-		log.Debugf("Get website content for book %d\n\n%s", id, content)
-
-		doc, err := goquery.NewDocumentFromReader(strings.NewReader(content))
-		if err != nil {
-			return nil, err
+		for linkType, link := range links {
+			name := driveNamings[linkType]
+			if strings.Contains(text, name) {
+				if match := tianlangPasscodeRe.FindStringSubmatch(text); len(match) == 2 {
+					link.Code = match[1]
+					links[linkType] = link
+				}
+			}
 		}
-
-		// Find all the links.
-		links := map[driver.Source]wordpress.ShareLink{}
-		doc.Find(".secret-password-content > p").Each(func(i int, selection *goquery.Selection) {
-			find := selection.Find("a")
-			href, exists := find.Attr("href")
-			if !exists {
-				return
-			}
-			text := selection.Text()
-
-			for linkType, name := range driveNamings {
-				if strings.Contains(text, name) {
-					href, err = extractTianLangLink(c, href)
-					links[linkType] = wordpress.ShareLink{URL: href}
-				}
-			}
-			if err != nil {
-				return
-			}
-
-			for linkType, link := range links {
-				name := driveNamings[linkType]
-				if strings.Contains(text, name) {
-					if match := tianlangPasscodeRe.FindStringSubmatch(text); len(match) == 2 {
-						link.Code = match[1]
-						links[linkType] = link
-					}
-				}
-			}
-		})
-
-		return links, err
 	})
+
+	return links, err
 }
 
 func extractTianLangLink(c *client.Client, url string) (string, error) {

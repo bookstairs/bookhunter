@@ -125,6 +125,30 @@ Global Flags:
       --verbose             Print all the logs for debugging
 ```
 
+### Download books from SoBooks
+
+```text
+Usage:
+  bookhunter sobooks [flags]
+
+Flags:
+      --code string       The secret code for SoBooks (default "844283")
+  -d, --download string   The book directory you want to use (default ".")
+  -e, --extract           Extract the archive file for filtering
+  -f, --format strings    The file formats you want to download (default [epub,azw3,mobi,pdf,zip])
+  -h, --help              help for sobooks
+  -i, --initial int       The book id you want to start download (default 1)
+      --ratelimit int     The allowed requests per minutes (default 30)
+  -r, --rename            Rename the book file by book id
+  -t, --thread int        The number of download thead (default 1)
+
+Global Flags:
+  -c, --config string       The config path for bookhunter
+      --proxy string        The request proxy
+  -a, --user-agent string   The request user-agent (default "Mozilla/5.0 (X11; Linux i686; rv:13.0) Gecko/13.0 Firefox/13.0")
+      --verbose             Print all the logs for debugging
+```
+
 ### Download books from Sanqiu
 
 ```text

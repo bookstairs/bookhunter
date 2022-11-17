@@ -37,7 +37,7 @@ type (
 	}
 )
 
-func newWordpressService(config *Config, resolver shareLinkResolver) (service, error) {
+func newWordpressService(config *Config, r shareLinkResolver) (service, error) {
 	// Create the resty client for HTTP handing.
 	c, err := client.New(config.Config)
 	if err != nil {
@@ -54,7 +54,7 @@ func newWordpressService(config *Config, resolver shareLinkResolver) (service, e
 		config:   config,
 		client:   c,
 		driver:   d,
-		resolver: resolver,
+		resolver: r,
 	}, nil
 }
 
