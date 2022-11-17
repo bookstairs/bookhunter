@@ -1,7 +1,6 @@
 package fetcher
 
 import (
-	"errors"
 	"fmt"
 
 	"github.com/bookstairs/bookhunter/internal/driver"
@@ -27,10 +26,10 @@ func newService(c *Config) (service, error) {
 		return newTalebookService(c)
 	case SanQiu:
 		return newSanqiuService(c)
+	case SoBooks:
+		return newSobooksService(c)
 	case TianLang:
 		return newTianlangService(c)
-	case SoBooks:
-		return nil, errors.New("TODO we don't support sobooks now")
 	default:
 		return nil, fmt.Errorf("no such fetcher service [%s] supported", c.Category)
 	}

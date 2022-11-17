@@ -14,6 +14,7 @@ import (
 
 var (
 	ErrOverrideRedirectHandler = errors.New("couldn't override the existed redirect handler")
+	ErrFileNotExist            = errors.New("current file does not exist")
 )
 
 type Category string // The fetcher service identity.

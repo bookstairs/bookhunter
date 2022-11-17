@@ -1,6 +1,7 @@
 package lanzou
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -73,8 +74,9 @@ func (l *Drive) resolveFileShareURL(parsedURI string, pwd string) (*ResponseData
 	}
 
 	// Share with password
-	allString := find1Re.FindStringSubmatch(firstPage)
-	if len(allString) == 3 {
+	if strings.Contains(firstPage, "id=\"pwdload\"") ||
+		strings.Contains(firstPage, "id=\"passwddiv\"") {
+		allString := find1Re.FindStringSubmatch(firstPage)
 		urlpath := allString[1]
 		params := allString[2] + pwd
 
@@ -92,11 +94,9 @@ func (l *Drive) resolveFileShareURL(parsedURI string, pwd string) (*ResponseData
 			return nil, err
 		}
 		return l.parseDom(result)
-	}
+	} else {
+		allString := find2Re.FindStringSubmatch(firstPage)
 
-	// Share without password
-	allString = find2Re.FindStringSubmatch(firstPage)
-	if len(allString) == 2 {
 		dom, err := l.client.R().Get(allString[1])
 		if err != nil {
 			return nil, err
@@ -133,8 +133,6 @@ func (l *Drive) resolveFileShareURL(parsedURI string, pwd string) (*ResponseData
 		}
 		return lanzouDom, err
 	}
-
-	return nil, fmt.Errorf("解析页面失败")
 }
 
 func (l *Drive) parseDom(result *Dom) (*ResponseData, error) {
@@ -238,13 +236,28 @@ func (l *Drive) resolveFileItemShareURL(parsedURI string, pwd string) ([]Respons
 	if err != nil {
 		return nil, err
 	}
-	data := make([]ResponseData, len(result.Text))
-	for i, file := range result.Text {
-		respData, err := l.resolveFileShareURL("/"+file.ID, pwd)
+
+	if result.Zt != 1 {
+		log.Warnf("lanzou 文件列表解析失败  %v  %v %v", parsedURI, pwd, result.Info)
+		return []ResponseData{}, nil
+	}
+
+	item, ok := result.Text.([]interface{})
+
+	if !ok {
+		log.Warnf("lanzou 文件列表解析失败  %v  %v %v", parsedURI, pwd, result)
+		return nil, errors.New("lanzou 文件列表解析失败")
+	}
+
+	data := make([]ResponseData, len(item))
+	for i, d := range item {
+		file := d.(map[string]interface{})
+
+		respData, err := l.resolveFileShareURL("/"+file["id"].(string), pwd)
 		if err != nil {
 			return nil, err
 		}
-		respData.Name = file.NameAll
+		respData.Name = file["name_all"].(string)
 		data[i] = *respData
 	}
 	return data, nil
