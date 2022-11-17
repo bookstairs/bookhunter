@@ -30,11 +30,8 @@ func (p *writer) decompress() error {
 	_ = os.MkdirAll(p.download, 0755)
 
 	for _, f := range r.File {
-		ext, ok := Extension(f.Name)
-		if ok && p.formats[ext] {
-			if err := p.extractAndWriteFile(f); err != nil {
-				return err
-			}
+		if err := p.extractAndWriteFile(f); err != nil {
+			return err
 		}
 	}
 
@@ -53,7 +50,14 @@ func (p *writer) extractAndWriteFile(f *zip.File) error {
 		}
 	}()
 
-	path, err := sanitizeArchivePath(p.download, encodingFilename(f.Name))
+	filename := encodingFilename(f.Name)
+	ext, ok := Extension(filename)
+	if !ok || !p.formats[ext] {
+		// No need to extract this file. Skip.
+		return nil
+	}
+
+	path, err := sanitizeArchivePath(p.download, filename)
 	if err != nil {
 		return err
 	}
