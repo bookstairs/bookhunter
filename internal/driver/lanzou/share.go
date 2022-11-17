@@ -76,6 +76,9 @@ func (l *Drive) resolveFileShareURL(parsedURI string, pwd string) (*ResponseData
 	// Share with password
 	if strings.Contains(firstPage, "id=\"pwdload\"") ||
 		strings.Contains(firstPage, "id=\"passwddiv\"") {
+		if pwd == "" {
+			return nil, fmt.Errorf("缺少密码 %v", parsedURI)
+		}
 		allString := find1Re.FindStringSubmatch(firstPage)
 		urlpath := allString[1]
 		params := allString[2] + pwd
@@ -94,7 +97,7 @@ func (l *Drive) resolveFileShareURL(parsedURI string, pwd string) (*ResponseData
 			return nil, err
 		}
 		return l.parseDom(result)
-	} else {
+	} else if find2Re.MatchString(firstPage) {
 		allString := find2Re.FindStringSubmatch(firstPage)
 
 		dom, err := l.client.R().Get(allString[1])
@@ -133,6 +136,7 @@ func (l *Drive) resolveFileShareURL(parsedURI string, pwd string) (*ResponseData
 		}
 		return lanzouDom, err
 	}
+	return nil, fmt.Errorf("解析页面失败")
 }
 
 func (l *Drive) parseDom(result *Dom) (*ResponseData, error) {
@@ -148,7 +152,7 @@ func (l *Drive) parseDom(result *Dom) (*ResponseData, error) {
 	request := resty.New().SetRedirectPolicy(resty.NoRedirectPolicy()).
 		R()
 	rr, err := request.SetHeaders(header).
-		Get(result.Dom + "/file/" + result.URL)
+		Get(result.Dom + "/file/" + result.URL.(string))
 	if rr.StatusCode() != 302 && err != nil {
 		log.Fatalf("解析链接失败 %v", err)
 	}

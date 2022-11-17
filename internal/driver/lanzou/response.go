@@ -31,15 +31,18 @@ type (
 	}
 
 	Dom struct {
-		Zt  int         `json:"zt"`
-		Dom string      `json:"dom"`
-		URL string      `json:"url"`
+		Zt  int    `json:"zt"`
+		Dom string `json:"dom"`
+		// URL 可能为string或int
+		URL interface{} `json:"url"`
+		// Inf 可能为string或int
 		Inf interface{} `json:"inf"`
 	}
 
 	FileList struct {
-		Zt   int         `json:"zt"`
-		Info string      `json:"info"`
+		Zt   int    `json:"zt"`
+		Info string `json:"info"`
+		// Text 可能为int或数组
 		Text interface{} `json:"text"`
 	}
 
