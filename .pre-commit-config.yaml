@@ -9,7 +9,7 @@ repos:
     hooks:
       - id: goimports
         name: goimports
-        entry: goimports.sh
+        entry: scripts/goimports.sh
         language: script
         types: [ go ]
         pass_filenames: true

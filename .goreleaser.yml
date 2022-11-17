@@ -6,12 +6,10 @@ before:
 
 builds:
   - id: bookhunter
+    binary: bookhunter
     ldflags:
       - -s -w
-      - -X github.com/bookstairs/bookhunter/cmd.gitMajor={{ .Major }}
-      - -X github.com/bookstairs/bookhunter/cmd.gitMinor={{ .Minor }}
       - -X github.com/bookstairs/bookhunter/cmd.gitVersion={{ .Version }}
-      - -X github.com/bookstairs/bookhunter/cmd.gitCommit={{ .Commit }}
       - -X github.com/bookstairs/bookhunter/cmd.gitTreeState=clean
       - -X github.com/bookstairs/bookhunter/cmd.buildDate={{ .Date }}
     env:
@@ -24,6 +22,14 @@ builds:
       - "386"
       - amd64
       - arm64
+    ignore:
+      - goos: darwin
+        goarch: "386"
+      - goos: windows
+        goarch: arm64
+    hooks:
+      post:
+        - scripts/compress.sh "{{ .Path }}"
 
 scoop:
   bucket:
@@ -85,6 +91,9 @@ archives:
     format_overrides:
       - goos: windows
         format: zip
+
+release:
+  draft: true
 
 snapshot:
   name_template: "{{ incminor .Version }}-next"
