@@ -9,7 +9,6 @@ import (
 	"github.com/bookstairs/bookhunter/internal/driver"
 	"github.com/bookstairs/bookhunter/internal/file"
 	"github.com/bookstairs/bookhunter/internal/log"
-	"github.com/bookstairs/bookhunter/internal/naming"
 	"github.com/bookstairs/bookhunter/internal/wordpress"
 )
 
@@ -82,7 +81,7 @@ func (w *wordpressService) size() (int64, error) {
 	return posts[0].ID, nil
 }
 
-func (w *wordpressService) formats(id int64) (map[Format]driver.Share, error) {
+func (w *wordpressService) formats(id int64) (map[file.Format]driver.Share, error) {
 	links, err := w.resolver(w.client, id)
 	if err != nil {
 		return nil, err
@@ -101,11 +100,11 @@ func (w *wordpressService) formats(id int64) (map[Format]driver.Share, error) {
 			break
 		}
 
-		res := make(map[Format]driver.Share)
+		res := make(map[file.Format]driver.Share)
 		for _, share := range shares {
-			if ext, has := naming.Extension(share.FileName); has {
-				if format, err := ParseFormat(ext); err == nil {
-					res[format] = share
+			if ext, has := file.LinkExtension(share.FileName); has {
+				if IsValidFormat(ext) {
+					res[ext] = share
 				} else {
 					log.Debugf("The file name %s don't have valid extension %s", share.FileName, ext)
 				}
@@ -118,10 +117,10 @@ func (w *wordpressService) formats(id int64) (map[Format]driver.Share, error) {
 	}
 
 	log.Debugf("No downloadable files found in this book id %d.", id)
-	return map[Format]driver.Share{}, nil
+	return map[file.Format]driver.Share{}, nil
 }
 
-func (w *wordpressService) fetch(_ int64, _ Format, share driver.Share, writer file.Writer) error {
+func (w *wordpressService) fetch(_ int64, _ file.Format, share driver.Share, writer file.Writer) error {
 	content, size, err := w.driver.Download(share)
 	if err != nil {
 		return err

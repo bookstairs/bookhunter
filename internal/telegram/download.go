@@ -7,13 +7,13 @@ import (
 	"github.com/gotd/td/telegram/downloader"
 	"github.com/gotd/td/tg"
 
-	"github.com/bookstairs/bookhunter/internal/naming"
+	"github.com/bookstairs/bookhunter/internal/file"
 )
 
-func (t *Telegram) DownloadFile(file *File, writer io.Writer) error {
+func (t *Telegram) DownloadFile(f *File, writer io.Writer) error {
 	tool := downloader.NewDownloader()
-	thread := int(math.Ceil(float64(file.Size) / (512 * 1024)))
-	_, err := tool.Download(t.client.API(), file.Document).WithThreads(thread).Stream(t.ctx, writer)
+	thread := int(math.Ceil(float64(f.Size) / (512 * 1024)))
+	_, err := tool.Download(t.client.API(), f.Document).WithThreads(thread).Stream(t.ctx, writer)
 
 	return err
 }
@@ -41,8 +41,8 @@ func (t *Telegram) ParseMessage(info *ChannelInfo, msgID int64) ([]File, error) 
 	messages := history.(*tg.MessagesChannelMessages)
 	for i := len(messages.Messages) - 1; i >= 0; i-- {
 		message := messages.Messages[i]
-		if file, ok := parseFile(message); ok {
-			files = append(files, *file)
+		if f, ok := parseFile(message); ok {
+			files = append(files, *f)
 		}
 	}
 
@@ -75,7 +75,7 @@ func parseFile(message tg.MessageClass) (*File, bool) {
 	if fileName == "" {
 		return nil, false
 	}
-	format, _ := naming.Extension(fileName)
+	format, _ := file.Extension(fileName)
 
 	return &File{
 		ID:       int64(msg.ID),

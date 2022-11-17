@@ -96,15 +96,15 @@ func (s *telegramService) size() (int64, error) {
 	return info.LastMsgID, nil
 }
 
-func (s *telegramService) formats(id int64) (map[Format]driver.Share, error) {
+func (s *telegramService) formats(id int64) (map[file.Format]driver.Share, error) {
 	files, err := s.telegram.ParseMessage(s.info, id)
 	if err != nil {
 		return nil, err
 	}
 
-	res := make(map[Format]driver.Share)
+	res := make(map[file.Format]driver.Share)
 	for _, f := range files {
-		res[Format(f.Format)] = driver.Share{
+		res[f.Format] = driver.Share{
 			FileName: f.Name,
 			Size:     f.Size,
 			Properties: map[string]any{
@@ -117,11 +117,11 @@ func (s *telegramService) formats(id int64) (map[Format]driver.Share, error) {
 	return res, nil
 }
 
-func (s *telegramService) fetch(_ int64, f Format, share driver.Share, writer file.Writer) error {
+func (s *telegramService) fetch(_ int64, f file.Format, share driver.Share, writer file.Writer) error {
 	o := &telegram.File{
 		ID:       share.Properties["fileID"].(int64),
 		Name:     share.FileName,
-		Format:   string(f),
+		Format:   f,
 		Size:     share.Size,
 		Document: share.Properties["document"].(*tg.InputDocumentFileLocation),
 	}

@@ -5,6 +5,8 @@ import (
 
 	"github.com/gotd/td/telegram"
 	"github.com/gotd/td/tg"
+
+	"github.com/bookstairs/bookhunter/internal/file"
 )
 
 type (
@@ -27,7 +29,7 @@ type (
 	File struct {
 		ID       int64
 		Name     string
-		Format   string
+		Format   file.Format
 		Size     int64
 		Document *tg.InputDocumentFileLocation
 	}

@@ -1,4 +1,4 @@
-package naming
+package file
 
 import "strings"
 

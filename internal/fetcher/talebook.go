@@ -103,7 +103,7 @@ func (t *talebookService) size() (int64, error) {
 	return bookID, nil
 }
 
-func (t *talebookService) formats(id int64) (map[Format]driver.Share, error) {
+func (t *talebookService) formats(id int64) (map[file.Format]driver.Share, error) {
 	resp, err := t.client.R().
 		SetResult(&talebook.BookResp{}).
 		SetPathParam("bookID", strconv.FormatInt(id, 10)).
@@ -115,15 +115,15 @@ func (t *talebookService) formats(id int64) (map[Format]driver.Share, error) {
 	result := resp.Result().(*talebook.BookResp)
 	switch result.Err {
 	case talebook.SuccessStatus:
-		formats := make(map[Format]driver.Share)
-		for _, file := range result.Book.Files {
-			format, err := ParseFormat(strings.ToLower(file.Format))
+		formats := make(map[file.Format]driver.Share)
+		for _, f := range result.Book.Files {
+			format, err := ParseFormat(strings.ToLower(f.Format))
 			if err != nil {
 				return nil, err
 			}
 			formats[format] = driver.Share{
 				FileName: fmt.Sprintf("%s.%s", result.Book.Title, format),
-				URL:      file.Href,
+				URL:      f.Href,
 			}
 		}
 		return formats, nil
@@ -134,7 +134,7 @@ func (t *talebookService) formats(id int64) (map[Format]driver.Share, error) {
 	}
 }
 
-func (t *talebookService) fetch(_ int64, _ Format, share driver.Share, writer file.Writer) error {
+func (t *talebookService) fetch(_ int64, _ file.Format, share driver.Share, writer file.Writer) error {
 	resp, err := t.client.R().
 		SetDoNotParseResponse(true).
 		Get(share.URL)

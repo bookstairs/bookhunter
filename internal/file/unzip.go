@@ -1,4 +1,4 @@
-package unzip
+package file
 
 import (
 	"archive/zip"
@@ -13,27 +13,11 @@ import (
 	"golang.org/x/text/transform"
 )
 
-// Encoding to use. Since this implements the encoding.Encoding
-// interface from golang.org/x/text/encoding you can trivially
-// change this out for any of the other implemented encoders,
-// e.g. `traditionalchinese.Big5`, `charmap.Windows1252`,
-// `korean.EUCKR`, etc.
 var encoding = simplifiedchinese.GB18030
 
-// Unzip - struct
-type Unzip struct {
-	Src  string
-	Dest string
-}
-
-// New - Create a new Unzip.
-func New(src string, dest string) Unzip {
-	return Unzip{src, dest}
-}
-
-// Extract - Extract zip file.
-func (uz Unzip) Extract() error {
-	r, err := zip.OpenReader(uz.Src)
+// decompress - extract zip file.
+func (p *writer) decompress() error {
+	r, err := zip.OpenReader(p.filePath())
 	if err != nil {
 		return err
 	}
@@ -43,12 +27,14 @@ func (uz Unzip) Extract() error {
 		}
 	}()
 
-	_ = os.MkdirAll(uz.Dest, 0755)
+	_ = os.MkdirAll(p.download, 0755)
 
 	for _, f := range r.File {
-		err := uz.extractAndWriteFile(f)
-		if err != nil {
-			return err
+		ext, ok := Extension(f.Name)
+		if ok && p.formats[ext] {
+			if err := p.extractAndWriteFile(f); err != nil {
+				return err
+			}
 		}
 	}
 
@@ -56,7 +42,7 @@ func (uz Unzip) Extract() error {
 }
 
 // Closure to address file descriptors issue with all the deferred Close() methods.
-func (uz Unzip) extractAndWriteFile(f *zip.File) error {
+func (p *writer) extractAndWriteFile(f *zip.File) error {
 	rc, err := f.Open()
 	if err != nil {
 		return err
@@ -67,12 +53,12 @@ func (uz Unzip) extractAndWriteFile(f *zip.File) error {
 		}
 	}()
 
-	path, err := sanitizeArchivePath(uz.Dest, encodingFilename(f.Name))
+	path, err := sanitizeArchivePath(p.download, encodingFilename(f.Name))
 	if err != nil {
 		return err
 	}
 
-	if !strings.HasPrefix(path, filepath.Clean(uz.Dest)+string(os.PathSeparator)) {
+	if !strings.HasPrefix(path, filepath.Clean(p.download)+string(os.PathSeparator)) {
 		return fmt.Errorf("%s: illegal file path", path)
 	}
 

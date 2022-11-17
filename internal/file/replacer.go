@@ -1,6 +1,6 @@
 //go:build !windows
 
-package naming
+package file
 
 import "strings"
 

@@ -14,10 +14,10 @@ type service interface {
 	size() (int64, error)
 
 	// formats will query the available downloadable file formats.
-	formats(int64) (map[Format]driver.Share, error)
+	formats(int64) (map[file.Format]driver.Share, error)
 
 	// fetch the given book ID.
-	fetch(int64, Format, driver.Share, file.Writer) error
+	fetch(int64, file.Format, driver.Share, file.Writer) error
 }
 
 // newService is the endpoint for creating all the supported download service.

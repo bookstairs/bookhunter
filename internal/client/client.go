@@ -20,7 +20,8 @@ var (
 
 const (
 	cookieFile       = "cookies.json"
-	DefaultUserAgent = "Mozilla/5.0 (X11; Linux i686; rv:13.0) Gecko/13.0 Firefox/13.0"
+	DefaultUserAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko)" +
+		" Chrome/107.0.0.0 Safari/537.36 Edg/107.0.1418.42"
 )
 
 // Client is the wrapper for resty.Client we may provide extra method on this wrapper.

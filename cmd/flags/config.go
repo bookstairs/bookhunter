@@ -6,6 +6,7 @@ import (
 
 	"github.com/bookstairs/bookhunter/internal/client"
 	"github.com/bookstairs/bookhunter/internal/fetcher"
+	"github.com/bookstairs/bookhunter/internal/file"
 )
 
 var (
@@ -25,11 +26,11 @@ var (
 	// Common download flags.
 
 	Formats = []string{
-		string(fetcher.EPUB),
-		string(fetcher.AZW3),
-		string(fetcher.MOBI),
-		string(fetcher.PDF),
-		string(fetcher.ZIP),
+		string(file.EPUB),
+		string(file.AZW3),
+		string(file.MOBI),
+		string(file.PDF),
+		string(file.ZIP),
 	}
 	Extract         = false
 	DownloadPath, _ = os.Getwd()
