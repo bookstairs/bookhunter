@@ -1,6 +1,7 @@
 package fetcher
 
 import (
+	"crypto/tls"
 	"io"
 	"net/http"
 	"net/url"
@@ -41,7 +42,7 @@ func newSobooksService(config *Config) (service, error) {
 		Value:  config.Property("code"),
 		Path:   "/",
 		Domain: config.Host,
-	})
+	}).SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true}) //nolint:gosec
 
 	if err != nil {
 		return nil, err

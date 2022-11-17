@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	lowestsobooksBookID = 18000
+	lowestSobooksBookID = 18000
 	sobooksWebsite      = "https://sobooks.net"
 )
 
@@ -20,8 +20,8 @@ var sobooksCmd = &cobra.Command{
 	Short: "A tool for downloading books from sobooks.net",
 	Run: func(cmd *cobra.Command, args []string) {
 		// Set the default start index.
-		if flags.InitialBookID < lowestsobooksBookID {
-			flags.InitialBookID = lowestsobooksBookID
+		if flags.InitialBookID < lowestSobooksBookID {
+			flags.InitialBookID = lowestSobooksBookID
 		}
 
 		// Print download configuration.
