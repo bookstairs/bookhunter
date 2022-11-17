@@ -33,7 +33,8 @@ func cleanStaleCookies(config *Config) error {
 		return err
 	}
 
-	return os.Remove(filepath.Join(path, client.CookieFile))
+	_ = os.Remove(filepath.Join(path, client.CookieFile))
+	return nil
 }
 
 func tianlangLinkResolver(config *Config, c *client.Client, id int64) (map[driver.Source]wordpress.ShareLink, error) {
