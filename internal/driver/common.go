@@ -40,6 +40,10 @@ const (
 	ALIYUN  Source = "aliyun"
 	LANZOU  Source = "lanzou"
 	TELECOM Source = "telecom"
+	BAIDU   Source = "baidu"
+	CTFILE  Source = "ctfile"
+	QUARK   Source = "quark"
+	DIRECT  Source = "direct"
 )
 
 // New will create the basic driver service.

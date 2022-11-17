@@ -38,17 +38,19 @@ type (
 	}
 
 	FileList struct {
-		Zt   int    `json:"zt"`
-		Info string `json:"info"`
-		Text []struct {
-			Icon    string `json:"icon"`
-			T       int    `json:"t"`
-			ID      string `json:"id"`
-			NameAll string `json:"name_all"`
-			Size    string `json:"size"`
-			Time    string `json:"time"`
-			Duan    string `json:"duan"`
-			PIco    int    `json:"p_ico"`
-		} `json:"text"`
+		Zt   int         `json:"zt"`
+		Info string      `json:"info"`
+		Text interface{} `json:"text"`
+	}
+
+	FileItem []struct {
+		Icon    string `json:"icon"`
+		T       int    `json:"t"`
+		ID      string `json:"id"`
+		NameAll string `json:"name_all"`
+		Size    string `json:"size"`
+		Time    string `json:"time"`
+		Duan    string `json:"duan"`
+		PIco    int    `json:"p_ico"`
 	}
 )

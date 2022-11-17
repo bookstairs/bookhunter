@@ -119,7 +119,7 @@ thread:
 		// Download the file by formats one by one.
 		for format, share := range formats {
 			err := f.downloadFile(bookID, format, share)
-			if err != nil {
+			if err != nil && err != ErrFileNotExist {
 				f.errs <- err
 				break thread
 			}

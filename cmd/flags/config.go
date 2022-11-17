@@ -50,6 +50,10 @@ var (
 	// Tianlang secret key.
 
 	TianlangSecretKey = "359198"
+
+	// SoBooks configurations.
+
+	SoBooksCode = "844283"
 )
 
 // NewFetcher will create the fetcher by the command line arguments.
