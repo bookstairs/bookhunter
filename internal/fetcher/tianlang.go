@@ -32,7 +32,10 @@ func cleanStaleCookies(config *Config) error {
 	if err != nil {
 		return err
 	}
-
+	_, err = os.Stat(filepath.Join(path, client.CookieFile))
+	if err != nil {
+		return nil
+	}
 	_ = os.Remove(filepath.Join(path, client.CookieFile))
 	return nil
 }
