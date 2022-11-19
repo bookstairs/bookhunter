@@ -67,7 +67,7 @@ func (p *writer) extractAndWriteFile(f *zip.File) error {
 	}
 
 	if f.FileInfo().IsDir() {
-		_ = os.MkdirAll(path, f.Mode())
+		_ = os.MkdirAll(path, 0755)
 	} else {
 		mode := f.FileHeader.Mode()
 		if mode&os.ModeType == os.ModeSymlink {
@@ -77,8 +77,9 @@ func (p *writer) extractAndWriteFile(f *zip.File) error {
 			}
 			_ = writeSymbolicLink(path, string(data))
 		} else {
-			_ = os.MkdirAll(filepath.Dir(path), f.Mode())
-			outFile, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, f.Mode())
+			_ = os.MkdirAll(filepath.Dir(path), 0755)
+			_ = os.Remove(path)
+			outFile, err := os.Create(path)
 			if err != nil {
 				return err
 			}
