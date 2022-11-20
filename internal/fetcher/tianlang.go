@@ -2,8 +2,6 @@ package fetcher
 
 import (
 	"fmt"
-	"os"
-	"path/filepath"
 	"strconv"
 	"strings"
 
@@ -20,21 +18,7 @@ func newTianlangService(config *Config) (service, error) {
 		return tianlangLinkResolver(config, c, id)
 	}
 
-	if err := cleanStaleCookies(config); err != nil {
-		return nil, err
-	}
-
 	return newWordpressService(config, resolver)
-}
-
-func cleanStaleCookies(config *Config) error {
-	path, err := config.Config.ConfigPath()
-	if err != nil {
-		return err
-	}
-
-	_ = os.Remove(filepath.Join(path, client.CookieFile))
-	return nil
 }
 
 func tianlangLinkResolver(config *Config, c *client.Client, id int64) (map[driver.Source]wordpress.ShareLink, error) {
