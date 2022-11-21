@@ -28,7 +28,7 @@ func newTelegramFetcher(config *Config) (Fetcher, error) {
 	if err != nil {
 		return nil, err
 	}
-	sessionPath := filepath.Join(path, "session.json")
+	sessionPath := filepath.Join(path, "session.db")
 	if refresh, _ := strconv.ParseBool(config.Property("reLogin")); refresh {
 		_ = os.Remove(sessionPath)
 	}
