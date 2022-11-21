@@ -7,6 +7,64 @@ type ErrorResp struct {
 	Message string `json:"message"`
 }
 
+type QRCodeResp struct {
+	Content struct {
+		Data struct {
+			TitleMsg    string `json:"title_msg"`
+			T           int64  `json:"t"`
+			CodeContent string `json:"codeContent"`
+			Ck          string `json:"ck"`
+			ResultCode  int    `json:"resultCode"`
+		} `json:"data"`
+	} `json:"content"`
+}
+
+type QueryQRCodeResp struct {
+	Content struct {
+		Data struct {
+			QrCodeStatus         string `json:"qrCodeStatus"`
+			ResultCode           int    `json:"resultCode"`
+			LoginResult          string `json:"loginResult"`
+			LoginSucResultAction string `json:"loginSucResultAction"`
+			BizAction            struct {
+				PdsLoginResult struct {
+					Role           string        `json:"role"`
+					IsFirstLogin   bool          `json:"isFirstLogin"`
+					NeedLink       bool          `json:"needLink"`
+					LoginType      string        `json:"loginType"`
+					NickName       string        `json:"nickName"`
+					NeedRpVerify   bool          `json:"needRpVerify"`
+					Avatar         string        `json:"avatar"`
+					AccessToken    string        `json:"accessToken"`
+					UserName       string        `json:"userName"`
+					UserID         string        `json:"userId"`
+					DefaultDriveID string        `json:"defaultDriveId"`
+					ExistLink      []interface{} `json:"existLink"`
+					ExpiresIn      int           `json:"expiresIn"`
+					ExpireTime     time.Time     `json:"expireTime"`
+					RequestID      string        `json:"requestId"`
+					DataPinSetup   bool          `json:"dataPinSetup"`
+					State          string        `json:"state"`
+					TokenType      string        `json:"tokenType"`
+					DataPinSaved   bool          `json:"dataPinSaved"`
+					RefreshToken   string        `json:"refreshToken"`
+					Status         string        `json:"status"`
+				} `json:"pds_login_result"`
+			} `json:"-"`
+			St          string `json:"st"`
+			LoginType   string `json:"loginType"`
+			BizExt      string `json:"bizExt"`
+			LoginScene  string `json:"loginScene"`
+			AppEntrance string `json:"appEntrance"`
+			Smartlock   bool   `json:"smartlock"`
+		} `json:"data"`
+	} `json:"content"`
+}
+
+type ConfirmLoginResp struct {
+	Goto string `json:"goto"`
+}
+
 type TokenReq struct {
 	GrantType    string `json:"grant_type"`
 	RefreshToken string `json:"refresh_token"`

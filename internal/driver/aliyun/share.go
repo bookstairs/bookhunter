@@ -8,13 +8,7 @@ import (
 
 // AnonymousShare will try to access the share without the user information.
 func (ali *Aliyun) AnonymousShare(shareID string) (*ShareInfoResp, error) {
-	token, err := ali.AuthToken()
-	if err != nil {
-		return nil, err
-	}
-
-	resp, err := ali.client.R().
-		SetAuthToken(token).
+	resp, err := ali.R().
 		SetBody(&ShareInfoReq{ShareID: shareID}).
 		SetResult(&ShareInfoResp{}).
 		SetError(&ErrorResp{}).
@@ -36,13 +30,7 @@ func (ali *Aliyun) Share(shareID string, shareToken string) ([]ShareFile, error)
 }
 
 func (ali *Aliyun) listShareFiles(param *listShareFilesParam) ([]ShareFile, error) {
-	token, err := ali.AuthToken()
-	if err != nil {
-		return nil, err
-	}
-
-	resp, err := ali.client.R().
-		SetAuthToken(token).
+	resp, err := ali.R().
 		SetHeader("x-share-token", param.shareToken).
 		SetBody(&ShareFileListReq{
 			ShareID:        param.shareID,
@@ -99,13 +87,7 @@ func (ali *Aliyun) listShareFiles(param *listShareFilesParam) ([]ShareFile, erro
 }
 
 func (ali *Aliyun) ShareToken(shareID, sharePwd string) (*ShareTokenResp, error) {
-	token, err := ali.AuthToken()
-	if err != nil {
-		return nil, err
-	}
-
-	resp, err := ali.client.R().
-		SetAuthToken(token).
+	resp, err := ali.R().
 		SetBody(&ShareTokenReq{ShareID: shareID, SharePwd: sharePwd}).
 		SetResult(&ShareTokenResp{}).
 		SetError(&ErrorResp{}).
@@ -118,13 +100,7 @@ func (ali *Aliyun) ShareToken(shareID, sharePwd string) (*ShareTokenResp, error)
 }
 
 func (ali *Aliyun) DownloadURL(shareToken, shareID, fileID string) (string, error) {
-	token, err := ali.AuthToken()
-	if err != nil {
-		return "", err
-	}
-
-	resp, err := ali.client.R().
-		SetAuthToken(token).
+	resp, err := ali.R().
 		SetHeader("x-share-token", shareToken).
 		SetBody(&ShareLinkDownloadURLReq{
 			ShareID: shareID,
@@ -146,7 +122,7 @@ func (ali *Aliyun) DownloadURL(shareToken, shareID, fileID string) (string, erro
 func (ali *Aliyun) DownloadFile(downloadURL string) (io.ReadCloser, error) {
 	log.Debugf("Start to download file from aliyun drive: %s", downloadURL)
 
-	resp, err := ali.client.R().
+	resp, err := ali.R().
 		SetDoNotParseResponse(true).
 		Get(downloadURL)
 	if err != nil {

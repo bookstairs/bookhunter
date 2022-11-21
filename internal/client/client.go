@@ -96,7 +96,7 @@ func DefaultConfigRoot() (string, error) {
 }
 
 func mkdir(path string) (string, error) {
-	if err := os.MkdirAll(path, 0755); err != nil {
+	if err := os.MkdirAll(path, 0o755); err != nil {
 		return "", err
 	}
 
@@ -120,7 +120,7 @@ func NewConfig(rawURL, userAgent, proxy, configRoot string) (*Config, error) {
 			return nil, err
 		}
 	} else {
-		if err := os.MkdirAll(configRoot, 0755); err != nil {
+		if err := os.MkdirAll(configRoot, 0o755); err != nil {
 			return nil, err
 		}
 	}

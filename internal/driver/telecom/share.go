@@ -34,7 +34,7 @@ func (t *Telecom) ShareFiles(accessURL, accessCode string) (*ShareInfo, []ShareF
 }
 
 func (t *Telecom) DownloadURL(shareCode, shareID, fileID string) (string, error) {
-	resp, err := t.client.R().
+	resp, err := t.R().
 		SetHeaders(map[string]string{
 			"accept":  "application/json;charset=UTF-8",
 			"origin":  "https://cloud.189.cn",
@@ -56,7 +56,7 @@ func (t *Telecom) DownloadURL(shareCode, shareID, fileID string) (string, error)
 }
 
 func (t *Telecom) DownloadFile(url string) (io.ReadCloser, error) {
-	resp, err := t.client.R().
+	resp, err := t.R().
 		SetDoNotParseResponse(true).
 		Get(url)
 	if err != nil {
@@ -81,7 +81,7 @@ func (t *Telecom) shareInfo(accessURL string) (*ShareInfo, error) {
 	if err != nil {
 		return nil, err
 	}
-	resp, err := t.client.R().
+	resp, err := t.R().
 		SetHeaders(map[string]string{
 			"accept":  "application/json;charset=UTF-8",
 			"origin":  "https://cloud.189.cn",
@@ -98,7 +98,7 @@ func (t *Telecom) shareInfo(accessURL string) (*ShareInfo, error) {
 }
 
 func (t *Telecom) listShareFiles(code, fileID string, shareID int64, mode int) ([]ShareFile, error) {
-	resp, err := t.client.R().
+	resp, err := t.R().
 		SetQueryParams(map[string]string{
 			"fileId":     fileID,
 			"shareId":    strconv.FormatInt(shareID, 10),
@@ -120,7 +120,7 @@ func (t *Telecom) listShareFiles(code, fileID string, shareID int64, mode int) (
 }
 
 func (t *Telecom) listShareFolders(code, fileID, shareDirFileID string, shareID int64, mode int) ([]ShareFile, error) {
-	resp, err := t.client.R().
+	resp, err := t.R().
 		SetQueryParams(map[string]string{
 			"fileId":         fileID,
 			"shareDirFileId": shareDirFileID,

@@ -11,7 +11,7 @@ const (
 )
 
 type Telecom struct {
-	client   *client.Client
+	*client.Client
 	appToken *AppLoginToken
 }
 
@@ -28,7 +28,7 @@ func New(c *client.Config, username, password string) (*Telecom, error) {
 	}
 
 	cl.SetHeader("Accept", "application/json;charset=UTF-8")
-	t := &Telecom{client: cl}
+	t := &Telecom{Client: cl}
 
 	if username == "" || password == "" {
 		return nil, errors.New("no username or password provide, we may not able to download from telecom disk")

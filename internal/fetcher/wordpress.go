@@ -30,8 +30,8 @@ type (
 	shareLinkResolver func(*client.Client, int64) (map[driver.Source]wordpress.ShareLink, error)
 
 	wordpressService struct {
+		*client.Client
 		config   *Config
-		client   *client.Client
 		driver   driver.Driver
 		resolver shareLinkResolver
 	}
@@ -52,14 +52,14 @@ func newWordpressService(config *Config, r shareLinkResolver) (service, error) {
 
 	return &wordpressService{
 		config:   config,
-		client:   c,
+		Client:   c,
 		driver:   d,
 		resolver: r,
 	}, nil
 }
 
 func (w *wordpressService) size() (int64, error) {
-	resp, err := w.client.R().
+	resp, err := w.R().
 		SetQueryParams(map[string]string{
 			"orderby":  "id",
 			"order":    "desc",
@@ -82,7 +82,7 @@ func (w *wordpressService) size() (int64, error) {
 }
 
 func (w *wordpressService) formats(id int64) (map[file.Format]driver.Share, error) {
-	links, err := w.resolver(w.client, id)
+	links, err := w.resolver(w.Client, id)
 	if err != nil {
 		log.Fatalf("Error in find downloadable links %v", err)
 		return map[file.Format]driver.Share{}, nil

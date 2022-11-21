@@ -8,7 +8,7 @@ import (
 )
 
 func newLanzouDriver(c *client.Config, _ map[string]string) (Driver, error) {
-	drive, err := lanzou.NewDrive(c)
+	drive, err := lanzou.New(c)
 	if err != nil {
 		return nil, err
 	}
@@ -17,7 +17,7 @@ func newLanzouDriver(c *client.Config, _ map[string]string) (Driver, error) {
 }
 
 type lanzouDriver struct {
-	driver *lanzou.Drive
+	driver *lanzou.Lanzou
 }
 
 func (l *lanzouDriver) Source() Source {

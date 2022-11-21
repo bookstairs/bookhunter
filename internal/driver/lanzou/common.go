@@ -8,8 +8,8 @@ import (
 	"github.com/bookstairs/bookhunter/internal/log"
 )
 
-type Drive struct {
-	client *client.Client
+type Lanzou struct {
+	*client.Client
 }
 
 var (
@@ -39,7 +39,7 @@ func checkOrSwitchHostname(c *client.Client) error {
 	return fmt.Errorf("no available lanzou hostname")
 }
 
-func NewDrive(config *client.Config) (*Drive, error) {
+func New(config *client.Config) (*Lanzou, error) {
 	cl, err := client.New(&client.Config{
 		HTTPS:      true,
 		Host:       availableHostnames[0],
@@ -59,13 +59,13 @@ func NewDrive(config *client.Config) (*Drive, error) {
 		return nil, err
 	}
 
-	return &Drive{client: cl}, nil
+	return &Lanzou{Client: cl}, nil
 }
 
-func (l *Drive) DownloadFile(downloadURL string) (io.ReadCloser, int64, error) {
+func (l *Lanzou) DownloadFile(downloadURL string) (io.ReadCloser, int64, error) {
 	log.Debugf("Start to download file from aliyun drive: %s", downloadURL)
 
-	resp, err := l.client.R().
+	resp, err := l.R().
 		SetDoNotParseResponse(true).
 		Get(downloadURL)
 	if err != nil {

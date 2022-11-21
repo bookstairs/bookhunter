@@ -29,7 +29,7 @@ var (
 
 type talebookService struct {
 	config *Config
-	client *client.Client
+	*client.Client
 }
 
 func newTalebookService(config *Config) (service, error) {
@@ -72,12 +72,12 @@ func newTalebookService(config *Config) (service, error) {
 
 	return &talebookService{
 		config: config,
-		client: c,
+		Client: c,
 	}, nil
 }
 
 func (t *talebookService) size() (int64, error) {
-	resp, err := t.client.R().
+	resp, err := t.R().
 		SetResult(&talebook.BooksResp{}).
 		Get("/api/recent")
 	if err != nil {
@@ -104,7 +104,7 @@ func (t *talebookService) size() (int64, error) {
 }
 
 func (t *talebookService) formats(id int64) (map[file.Format]driver.Share, error) {
-	resp, err := t.client.R().
+	resp, err := t.R().
 		SetResult(&talebook.BookResp{}).
 		SetPathParam("bookID", strconv.FormatInt(id, 10)).
 		Get("/api/book/{bookID}")
@@ -135,7 +135,7 @@ func (t *talebookService) formats(id int64) (map[file.Format]driver.Share, error
 }
 
 func (t *talebookService) fetch(_ int64, _ file.Format, share driver.Share, writer file.Writer) error {
-	resp, err := t.client.R().
+	resp, err := t.R().
 		SetDoNotParseResponse(true).
 		Get(share.URL)
 	if err != nil {

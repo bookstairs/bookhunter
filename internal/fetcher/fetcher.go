@@ -55,7 +55,7 @@ func (f *commonFetcher) Download() error {
 	}
 
 	// Create the download directory if it's not existed.
-	err = os.MkdirAll(f.DownloadPath, 0755)
+	err = os.MkdirAll(f.DownloadPath, 0o755)
 	if err != nil {
 		return err
 	}

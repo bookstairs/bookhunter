@@ -16,7 +16,7 @@ func (t *Telecom) login(username, password string) error {
 
 	// Refresh the cookies.
 	if loginUser := cloudpan.RefreshCookieToken(appToken.SessionKey); loginUser != "" {
-		t.client.SetCookie(&http.Cookie{
+		t.SetCookie(&http.Cookie{
 			Name:   "COOKIE_LOGIN_USER",
 			Value:  loginUser,
 			Domain: "cloud.189.cn",

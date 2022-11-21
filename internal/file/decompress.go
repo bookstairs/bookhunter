@@ -27,7 +27,7 @@ func (p *writer) decompress() error {
 		}
 	}()
 
-	_ = os.MkdirAll(p.download, 0755)
+	_ = os.MkdirAll(p.download, 0o755)
 
 	for _, f := range r.File {
 		if err := p.extractAndWriteFile(f); err != nil {
@@ -67,7 +67,7 @@ func (p *writer) extractAndWriteFile(f *zip.File) error {
 	}
 
 	if f.FileInfo().IsDir() {
-		_ = os.MkdirAll(path, 0755)
+		_ = os.MkdirAll(path, 0o755)
 	} else {
 		mode := f.FileHeader.Mode()
 		if mode&os.ModeType == os.ModeSymlink {
@@ -77,7 +77,7 @@ func (p *writer) extractAndWriteFile(f *zip.File) error {
 			}
 			_ = writeSymbolicLink(path, string(data))
 		} else {
-			_ = os.MkdirAll(filepath.Dir(path), 0755)
+			_ = os.MkdirAll(filepath.Dir(path), 0o755)
 			_ = os.Remove(path)
 			outFile, err := os.Create(path)
 			if err != nil {
@@ -91,7 +91,7 @@ func (p *writer) extractAndWriteFile(f *zip.File) error {
 
 			// G110: Potential DoS vulnerability via decompression bomb.
 			for {
-				_, err := io.CopyN(outFile, rc, 1024)
+				_, err := io.CopyN(outFile, rc, bytes.MinRead)
 				if err != nil {
 					if err == io.EOF {
 						break
@@ -106,7 +106,7 @@ func (p *writer) extractAndWriteFile(f *zip.File) error {
 }
 
 func writeSymbolicLink(filePath string, targetPath string) error {
-	err := os.MkdirAll(filepath.Dir(filePath), 0755)
+	err := os.MkdirAll(filepath.Dir(filePath), 0o755)
 	if err != nil {
 		return err
 	}

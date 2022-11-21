@@ -29,7 +29,7 @@ const (
 
 type sobooksService struct {
 	config *Config
-	client *client.Client
+	*client.Client
 	driver driver.Driver
 }
 
@@ -56,13 +56,13 @@ func newSobooksService(config *Config) (service, error) {
 
 	return &sobooksService{
 		config: config,
-		client: c,
+		Client: c,
 		driver: d,
 	}, nil
 }
 
 func (s *sobooksService) size() (int64, error) {
-	resp, err := s.client.R().
+	resp, err := s.R().
 		Get("/")
 	if err != nil {
 		return 0, err
@@ -93,9 +93,9 @@ func (s *sobooksService) size() (int64, error) {
 }
 
 func (s *sobooksService) formats(id int64) (map[file.Format]driver.Share, error) {
-	resp, err := s.client.R().
+	resp, err := s.R().
 		SetPathParam("bookId", strconv.FormatInt(id, 10)).
-		SetHeader("referer", s.client.BaseURL).
+		SetHeader("referer", s.BaseURL).
 		Get("/books/{bookId}.html")
 	if err != nil {
 		return nil, err
@@ -154,7 +154,7 @@ func (s *sobooksService) fetch(_ int64, _ file.Format, share driver.Share, write
 		u.Host = sobooksCloudIP
 	}
 
-	resp, err := s.client.R().
+	resp, err := s.R().
 		SetDoNotParseResponse(true).
 		SetHeader("Host", host).
 		Get(u.String())

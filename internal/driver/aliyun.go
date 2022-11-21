@@ -1,7 +1,6 @@
 package driver
 
 import (
-	"errors"
 	"io"
 	"strings"
 
@@ -9,26 +8,10 @@ import (
 	"github.com/bookstairs/bookhunter/internal/driver/aliyun"
 )
 
-var (
-	ErrNoRefreshToken = errors.New("aliyun drive need refreshToken")
-)
-
 // newAliyunDriver will create the aliyun driver.
 func newAliyunDriver(c *client.Config, properties map[string]string) (Driver, error) {
-	// Get the refreshToken.
-	token, exist := properties["refreshToken"]
-	if !exist || token == "" {
-		return nil, ErrNoRefreshToken
-	}
-
 	// Create the aliyun client.
-	a, err := aliyun.New(c, token)
-	if err != nil {
-		return nil, err
-	}
-
-	// Check if the refresh token is valid at the beginning.
-	_, err = a.AuthToken()
+	a, err := aliyun.New(c, properties["refreshToken"])
 	if err != nil {
 		return nil, err
 	}

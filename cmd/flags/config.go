@@ -56,9 +56,13 @@ var (
 	SoBooksCode = "844283"
 )
 
+func NewClientConfig() (*client.Config, error) {
+	return client.NewConfig(Website, UserAgent, Proxy, ConfigRoot)
+}
+
 // NewFetcher will create the fetcher by the command line arguments.
 func NewFetcher(category fetcher.Category, properties map[string]string) (fetcher.Fetcher, error) {
-	cc, err := client.NewConfig(Website, UserAgent, Proxy, ConfigRoot)
+	cc, err := NewClientConfig()
 	if err != nil {
 		return nil, err
 	}

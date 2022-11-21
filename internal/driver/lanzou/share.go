@@ -14,7 +14,7 @@ import (
 	"github.com/bookstairs/bookhunter/internal/log"
 )
 
-func (l *Drive) ResolveShareURL(shareURL string, pwd string) ([]ResponseData, error) {
+func (l *Lanzou) ResolveShareURL(shareURL string, pwd string) ([]ResponseData, error) {
 	// 移除url前部的主机
 	rawURL, _ := url.Parse(shareURL)
 	parsedURI := rawURL.RequestURI()
@@ -33,22 +33,22 @@ func (l *Drive) ResolveShareURL(shareURL string, pwd string) ([]ResponseData, er
 	}
 }
 
-func (l *Drive) IsDirURL(shareURL string) bool {
+func (l *Lanzou) IsDirURL(shareURL string) bool {
 	return dirURLRe.MatchString(shareURL)
 }
 
-func (l *Drive) IsFileURL(shareURL string) bool {
+func (l *Lanzou) IsFileURL(shareURL string) bool {
 	return fileURLRe.MatchString(shareURL)
 }
 
-func (l *Drive) removeNotes(html string) string {
+func (l *Lanzou) removeNotes(html string) string {
 	html = htmlNoteRe.ReplaceAllString(html, "")
 	html = jsNoteRe.ReplaceAllString(html, "$1")
 	return html
 }
 
-func (l *Drive) resolveFileShareURL(parsedURI string, pwd string) (*ResponseData, error) {
-	resp, err := l.client.R().Get(parsedURI)
+func (l *Lanzou) resolveFileShareURL(parsedURI string, pwd string) (*ResponseData, error) {
+	resp, err := l.R().Get(parsedURI)
 	if err != nil {
 		return nil, err
 	}
@@ -60,12 +60,12 @@ func (l *Drive) resolveFileShareURL(parsedURI string, pwd string) (*ResponseData
 		// 在页面被过多访问或其他情况下，有时候会先返回一个加密的页面，其执行计算出一个acw_sc__v2后放入页面后再重新访问页面才能获得正常页面
 		// 若该页面进行了js加密，则进行解密，计算acw_sc__v2，并加入cookie
 		acwScV2 := l.calcAcwScV2(firstPage)
-		l.client.SetCookie(&http.Cookie{
+		l.SetCookie(&http.Cookie{
 			Name:  "acw_sc__v2",
 			Value: acwScV2,
 		})
 		log.Infof("Set Cookie: acw_sc__v2=%v", acwScV2)
-		get, _ := l.client.R().Get(parsedURI)
+		get, _ := l.R().Get(parsedURI)
 		firstPage = get.String()
 	}
 
@@ -87,8 +87,8 @@ func (l *Drive) resolveFileShareURL(parsedURI string, pwd string) (*ResponseData
 
 		query, _ := url.ParseQuery(params)
 
-		_, err = l.client.R().
-			SetHeader("referer", l.client.BaseURL+parsedURI).
+		_, err = l.R().
+			SetHeader("referer", l.BaseURL+parsedURI).
 			SetHeader("Content-Type", "application/x-www-form-urlencoded").
 			SetResult(result).
 			SetFormDataFromValues(query).
@@ -100,7 +100,7 @@ func (l *Drive) resolveFileShareURL(parsedURI string, pwd string) (*ResponseData
 	} else if find2Re.MatchString(firstPage) {
 		allString := find2Re.FindStringSubmatch(firstPage)
 
-		dom, err := l.client.R().Get(allString[1])
+		dom, err := l.R().Get(allString[1])
 		if err != nil {
 			return nil, err
 		}
@@ -113,9 +113,9 @@ func (l *Drive) resolveFileShareURL(parsedURI string, pwd string) (*ResponseData
 		title := l.extractRegex(find2TitleRe, firstPage)
 
 		result := &Dom{}
-		_, err = l.client.R().
-			SetHeader("origin", l.client.BaseURL).
-			SetHeader("referer", l.client.BaseURL+parsedURI).
+		_, err = l.R().
+			SetHeader("origin", l.BaseURL).
+			SetHeader("referer", l.BaseURL+parsedURI).
 			SetHeader("Content-Type", "application/x-www-form-urlencoded").
 			SetResult(result).
 			SetFormData(map[string]string{
@@ -139,14 +139,14 @@ func (l *Drive) resolveFileShareURL(parsedURI string, pwd string) (*ResponseData
 	return nil, fmt.Errorf("解析页面失败")
 }
 
-func (l *Drive) parseDom(result *Dom) (*ResponseData, error) {
+func (l *Lanzou) parseDom(result *Dom) (*ResponseData, error) {
 	if result.Zt != 1 {
 		return nil, fmt.Errorf("解析直链失败")
 	}
 
 	var header = map[string]string{
 		"Accept-Language": "zh-CN,zh;q=0.9,en;q=0.8",
-		"Referer":         "https://" + l.client.Host,
+		"Referer":         "https://" + l.Host,
 	}
 
 	request := resty.New().SetRedirectPolicy(resty.NoRedirectPolicy()).
@@ -170,14 +170,14 @@ func (l *Drive) parseDom(result *Dom) (*ResponseData, error) {
 	}, nil
 }
 
-func (l *Drive) calcAcwScV2(htmlText string) string {
+func (l *Lanzou) calcAcwScV2(htmlText string) string {
 	arg1Re := regexp.MustCompile(`arg1='([0-9A-Z]+)'`)
 	arg1 := l.extractRegex(arg1Re, htmlText)
 	acwScV2 := l.hexXor(l.unbox(arg1), "3000176000856006061501533003690027800375")
 	return acwScV2
 }
 
-func (l *Drive) unbox(arg string) string {
+func (l *Lanzou) unbox(arg string) string {
 	v1 := []int{15, 35, 29, 24, 33, 16, 1, 38, 10, 9, 19, 31, 40, 27, 22, 23, 25, 13, 6, 11,
 		39, 18, 20, 8, 14, 21, 32, 26, 2, 30, 7, 4, 17, 5, 3, 28, 34, 37, 12, 36}
 	v2 := make([]string, len(v1))
@@ -198,7 +198,7 @@ func min(x, y int) int {
 	return y
 }
 
-func (l *Drive) hexXor(arg string, args string) string {
+func (l *Lanzou) hexXor(arg string, args string) string {
 	a := min(len(arg), len(args))
 	res := ""
 	for idx := 0; idx < a; idx += 2 {
@@ -211,7 +211,7 @@ func (l *Drive) hexXor(arg string, args string) string {
 	return res
 }
 
-func (l *Drive) extractRegex(reg *regexp.Regexp, str string) string {
+func (l *Lanzou) extractRegex(reg *regexp.Regexp, str string) string {
 	matches := reg.FindStringSubmatch(str)
 	if len(matches) >= 2 {
 		return matches[1]
@@ -219,8 +219,8 @@ func (l *Drive) extractRegex(reg *regexp.Regexp, str string) string {
 	return ""
 }
 
-func (l *Drive) resolveFileItemShareURL(parsedURI string, pwd string) ([]ResponseData, error) {
-	resp, _ := l.client.R().Get(parsedURI)
+func (l *Lanzou) resolveFileItemShareURL(parsedURI string, pwd string) ([]ResponseData, error) {
+	resp, _ := l.R().Get(parsedURI)
 	str := resp.String()
 	formData := map[string]string{
 		"lx":  l.extractRegex(lxReg, str),
@@ -236,7 +236,7 @@ func (l *Drive) resolveFileItemShareURL(parsedURI string, pwd string) ([]Respons
 	}
 
 	result := &FileList{}
-	_, err := l.client.R().SetFormData(formData).SetResult(result).Post("/filemoreajax.php")
+	_, err := l.R().SetFormData(formData).SetResult(result).Post("/filemoreajax.php")
 	if err != nil {
 		return nil, err
 	}

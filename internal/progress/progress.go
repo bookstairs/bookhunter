@@ -80,7 +80,7 @@ func NewProgress(start, size int64, rate int, path string) (Progress, error) {
 		}
 	} else {
 		// Load Progress from file.
-		if file, err = os.OpenFile(path, os.O_RDWR, 0644); err != nil {
+		if file, err = os.OpenFile(path, os.O_RDWR, 0o644); err != nil {
 			return nil, err
 		}
 		if progress, err = loadStorage(file); err != nil {
@@ -158,7 +158,7 @@ func (storage *bitProgress) SaveBookID(bookID int64) error {
 	storage.assigned.Set(i)
 	storage.progress.Set(i)
 
-	if file, err := os.OpenFile(storage.file, os.O_RDWR, 0644); err != nil {
+	if file, err := os.OpenFile(storage.file, os.O_RDWR, 0o644); err != nil {
 		return err
 	} else {
 		defer func() { _ = file.Close() }()

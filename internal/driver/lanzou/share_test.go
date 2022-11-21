@@ -83,7 +83,7 @@ func TestParseLanzouUrl(t *testing.T) {
 		},
 	}
 
-	drive, err := NewDrive(&client.Config{})
+	drive, err := New(&client.Config{})
 	assert.NoError(t, err, "Failed to create lanzou")
 
 	for _, tt := range tests {
