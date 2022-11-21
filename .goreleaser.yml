@@ -7,10 +7,12 @@ before:
 builds:
   - id: bookhunter
     binary: bookhunter
+    gcflags:
+      - all=-l -B
     ldflags:
       - -s -w
       - -X github.com/bookstairs/bookhunter/cmd.gitVersion={{ .Version }}
-      - -X github.com/bookstairs/bookhunter/cmd.gitTreeState=clean
+      - -X github.com/bookstairs/bookhunter/cmd.gitCommit={{ .Commit }}
       - -X github.com/bookstairs/bookhunter/cmd.buildDate={{ .Date }}
     env:
       - CGO_ENABLED=0
