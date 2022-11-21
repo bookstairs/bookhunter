@@ -14,7 +14,7 @@ import (
 	"github.com/bookstairs/bookhunter/internal/log"
 )
 
-func (l *Lanzou) ResolveShareURL(shareURL string, pwd string) ([]ResponseData, error) {
+func (l *Lanzou) ResolveShareURL(shareURL, pwd string) ([]ResponseData, error) {
 	// 移除url前部的主机
 	rawURL, _ := url.Parse(shareURL)
 	parsedURI := rawURL.RequestURI()
@@ -47,7 +47,7 @@ func (l *Lanzou) removeNotes(html string) string {
 	return html
 }
 
-func (l *Lanzou) resolveFileShareURL(parsedURI string, pwd string) (*ResponseData, error) {
+func (l *Lanzou) resolveFileShareURL(parsedURI, pwd string) (*ResponseData, error) {
 	resp, err := l.R().Get(parsedURI)
 	if err != nil {
 		return nil, err
@@ -198,7 +198,7 @@ func min(x, y int) int {
 	return y
 }
 
-func (l *Lanzou) hexXor(arg string, args string) string {
+func (l *Lanzou) hexXor(arg, args string) string {
 	a := min(len(arg), len(args))
 	res := ""
 	for idx := 0; idx < a; idx += 2 {
@@ -219,7 +219,7 @@ func (l *Lanzou) extractRegex(reg *regexp.Regexp, str string) string {
 	return ""
 }
 
-func (l *Lanzou) resolveFileItemShareURL(parsedURI string, pwd string) ([]ResponseData, error) {
+func (l *Lanzou) resolveFileItemShareURL(parsedURI, pwd string) ([]ResponseData, error) {
 	resp, _ := l.R().Get(parsedURI)
 	str := resp.String()
 	formData := map[string]string{

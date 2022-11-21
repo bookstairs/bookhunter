@@ -27,8 +27,8 @@ func (a *aliyunDriver) Source() Source {
 	return ALIYUN
 }
 
-func (a *aliyunDriver) Resolve(shareLink string, passcode string) ([]Share, error) {
-	shareID := strings.TrimPrefix(shareLink, "https://www.aliyundrive.com/s/")
+func (a *aliyunDriver) Resolve(link, passcode string) ([]Share, error) {
+	shareID := strings.TrimPrefix(link, "https://www.aliyundrive.com/s/")
 	sharePwd := strings.TrimSpace(passcode)
 
 	token, err := a.client.ShareToken(shareID, sharePwd)

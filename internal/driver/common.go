@@ -29,7 +29,7 @@ type (
 		Source() Source
 
 		// Resolve the given link and return the file name with the download link.
-		Resolve(shareLink string, passcode string) ([]Share, error)
+		Resolve(link, passcode string) ([]Share, error)
 
 		// Download the given link.
 		Download(share Share) (io.ReadCloser, int64, error)

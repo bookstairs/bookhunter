@@ -129,15 +129,15 @@ func sanitizeArchivePath(d, t string) (v string, err error) {
 	return "", fmt.Errorf("%s: %s", "content filepath is tainted", t)
 }
 
-// encodingFilename will convert the GBK into UTF-8
+// encodingFilename will convert the GBK into UTF-8 and escape invalid characters.
 func encodingFilename(name string) string {
 	i := bytes.NewReader([]byte(name))
 	decoder := transform.NewReader(i, encoding.NewDecoder())
 	content, err := io.ReadAll(decoder)
 	if err != nil {
 		// Fallback to default UTF-8 encoding
-		return name
+		return escape(name)
 	} else {
-		return string(content)
+		return escape(string(content))
 	}
 }

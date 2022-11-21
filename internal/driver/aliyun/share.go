@@ -20,7 +20,7 @@ func (ali *Aliyun) AnonymousShare(shareID string) (*ShareInfoResp, error) {
 	return resp.Result().(*ShareInfoResp), nil
 }
 
-func (ali *Aliyun) Share(shareID string, shareToken string) ([]ShareFile, error) {
+func (ali *Aliyun) Share(shareID, shareToken string) ([]ShareFile, error) {
 	return ali.listShareFiles(&listShareFilesParam{
 		shareToken:   shareToken,
 		shareID:      shareID,

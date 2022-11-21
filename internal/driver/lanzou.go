@@ -24,8 +24,8 @@ func (l *lanzouDriver) Source() Source {
 	return LANZOU
 }
 
-func (l *lanzouDriver) Resolve(shareLink string, passcode string) ([]Share, error) {
-	resp, err := l.driver.ResolveShareURL(shareLink, passcode)
+func (l *lanzouDriver) Resolve(link, passcode string) ([]Share, error) {
+	resp, err := l.driver.ResolveShareURL(link, passcode)
 	if err != nil {
 		return nil, err
 	}

@@ -53,7 +53,7 @@ func (c *Config) Property(name string) string {
 	return ""
 }
 
-func (c *Config) SetRedirect(redirect func(request *http.Request, requests []*http.Request) error) error {
+func (c *Config) SetRedirect(redirect func(*http.Request, []*http.Request) error) error {
 	if c.Config.Redirect != nil {
 		return ErrOverrideRedirectHandler
 	}

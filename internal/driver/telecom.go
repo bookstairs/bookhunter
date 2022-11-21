@@ -26,13 +26,13 @@ func (t *telecomDriver) Source() Source {
 	return TELECOM
 }
 
-func (t *telecomDriver) Resolve(shareLink string, passcode string) ([]Share, error) {
-	code, err := t.client.ShareCode(shareLink)
+func (t *telecomDriver) Resolve(link, passcode string) ([]Share, error) {
+	code, err := t.client.ShareCode(link)
 	if err != nil {
 		return nil, err
 	}
 
-	info, files, err := t.client.ShareFiles(shareLink, passcode)
+	info, files, err := t.client.ShareFiles(link, passcode)
 	if err != nil {
 		return nil, err
 	}

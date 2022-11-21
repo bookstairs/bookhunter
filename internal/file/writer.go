@@ -11,8 +11,20 @@ import (
 	"github.com/bookstairs/bookhunter/internal/log"
 )
 
-type Creator interface {
-	NewWriter(id, total int64, name string, format Format, size int64) (Writer, error)
+const (
+	maxLength = 100
+	empty     = " "
+)
+
+// escape the filename in *nix like systems and limit the max name size.
+func escape(filename string) string {
+	filename = replacer.Replace(filename)
+
+	if name := []rune(filename); len(name) > maxLength {
+		return string(name[0:maxLength])
+	} else {
+		return filename
+	}
 }
 
 func NewCreator(rename bool, downloadPath string, formats []Format, extract bool) Creator {
@@ -22,6 +34,10 @@ func NewCreator(rename bool, downloadPath string, formats []Format, extract bool
 	}
 
 	return &creator{rename: rename, downloadPath: downloadPath, formats: fs, extract: extract}
+}
+
+type Creator interface {
+	NewWriter(id, total int64, name string, format Format, size int64) (Writer, error)
 }
 
 type creator struct {
