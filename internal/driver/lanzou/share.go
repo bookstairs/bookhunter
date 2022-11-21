@@ -121,9 +121,9 @@ func (l *Drive) resolveFileShareURL(parsedURI string, pwd string) (*ResponseData
 			SetFormData(map[string]string{
 				"action":     "downprocess",
 				"signs":      data["ajaxdata"],
-				"sign":       data["msigns"],
-				"websign":    data["wsigns"],
-				"websignkey": data["cwebsignkeyc"],
+				"sign":       data["s_sign"],
+				"websign":    data["ws_sign"],
+				"websignkey": data["wsk_sign"],
 				"ves":        "1",
 			}).
 			Post("/ajaxm.php")
