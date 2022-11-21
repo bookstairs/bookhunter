@@ -77,8 +77,8 @@ func TestParseLanzouUrl(t *testing.T) {
 		}, {
 			name: "test lanzou file list1",
 			args: args{
-				url: "https://wws.lanzous.com/imPXnkux3kb",
-				pwd: "",
+				url: "https://sobooks.lanzoui.com/b03nqddti",
+				pwd: "gw0h",
 			},
 		},
 	}
