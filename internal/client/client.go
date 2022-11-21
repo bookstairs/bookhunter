@@ -3,6 +3,7 @@ package client
 import (
 	"errors"
 	"fmt"
+	"net/http/cookiejar"
 	"net/url"
 	"os"
 	"path/filepath"
@@ -83,6 +84,11 @@ func (c *Config) baseURL() string {
 func (c *Client) SetDefaultHostname(host string) {
 	c.Host = host
 	c.Client.SetBaseURL(c.baseURL())
+}
+
+func (c *Client) CleanCookies() {
+	jar, _ := cookiejar.New(nil)
+	c.SetCookieJar(jar)
 }
 
 // DefaultConfigRoot will generate the default config path based on the user and his running environment.

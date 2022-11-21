@@ -7,7 +7,9 @@ import (
 )
 
 const (
-	webPrefix = "https://cloud.189.cn"
+	webPrefix  = "https://cloud.189.cn"
+	authPrefix = "https://open.e.189.cn/api/logbox/oauth2"
+	apiPrefix  = "https://api.cloud.189.cn"
 )
 
 type Telecom struct {
