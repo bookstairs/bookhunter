@@ -82,3 +82,4 @@ run:
   skip-dirs:
     - .github
     - docker
+    - scripts
