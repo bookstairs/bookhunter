@@ -15,6 +15,7 @@ import (
 )
 
 func (l *Lanzou) ResolveShareURL(shareURL, pwd string) ([]ResponseData, error) {
+	shareURL = strings.TrimSpace(shareURL)
 	// 移除url前部的主机
 	rawURL, _ := url.Parse(shareURL)
 	parsedURI := rawURL.RequestURI()
