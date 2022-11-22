@@ -39,7 +39,7 @@ type bitProgress struct {
 	progress *bitset.BitSet    // progress is used for file Progress.
 	assigned *bitset.BitSet    // the assign status, memory based.
 	lock     *sync.Mutex       // lock is used for concurrent request.
-	file     string            // The Progress file path for download progress.
+	file     *os.File          // The Progress file path for download progress.
 }
 
 // NewProgress Create a storge for save the download progress.
@@ -53,11 +53,6 @@ func NewProgress(start, size int64, rate int, path string) (Progress, error) {
 
 	var progress *bitset.BitSet
 	var file *os.File
-	defer func() {
-		if file != nil {
-			_ = file.Close()
-		}
-	}()
 
 	startIndex := func(set *bitset.BitSet) {
 		for i := uint(0); i < uint(start-1); i++ {
@@ -109,13 +104,18 @@ func NewProgress(start, size int64, rate int, path string) (Progress, error) {
 		progress: progress,
 		assigned: assigned,
 		lock:     new(sync.Mutex),
-		file:     path,
+		file:     file,
 	}, nil
 }
 
-func saveStorage(file *os.File, progress *bitset.BitSet) (err error) {
-	_, err = progress.WriteTo(file)
-	return
+func saveStorage(file *os.File, progress *bitset.BitSet) error {
+	bytes, err := progress.MarshalBinary()
+	if err != nil {
+		return err
+	}
+
+	_, err = file.WriteAt(bytes, 0)
+	return err
 }
 
 func loadStorage(file *os.File) (*bitset.BitSet, error) {
@@ -158,12 +158,9 @@ func (storage *bitProgress) SaveBookID(bookID int64) error {
 	storage.assigned.Set(i)
 	storage.progress.Set(i)
 
-	if file, err := os.OpenFile(storage.file, os.O_RDWR, 0o644); err != nil {
-		return err
-	} else {
-		defer func() { _ = file.Close() }()
-		return saveStorage(file, storage.progress)
-	}
+	_ = saveStorage(storage.file, storage.progress)
+
+	return nil
 }
 
 // Finished would tell the called whether all the books have downloaded.
