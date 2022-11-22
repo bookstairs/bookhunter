@@ -106,10 +106,6 @@ func IsValidFormat(format file.Format) bool {
 
 // New create a fetcher service for downloading books.
 func New(c *Config) (Fetcher, error) {
-	if c.Category == Telegram {
-		return newTelegramFetcher(c)
-	}
-
 	s, err := newService(c)
 	if err != nil {
 		return nil, err

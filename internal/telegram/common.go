@@ -3,7 +3,11 @@ package telegram
 import (
 	"context"
 
+	"github.com/gotd/contrib/bg"
+	"github.com/gotd/contrib/middleware/floodwait"
+	"github.com/gotd/td/session"
 	"github.com/gotd/td/telegram"
+	"github.com/gotd/td/telegram/dcs"
 	"github.com/gotd/td/tg"
 
 	"github.com/bookstairs/bookhunter/internal/file"
@@ -36,24 +40,44 @@ type (
 )
 
 // New will create a telegram client.
-func New(channelID string, mobile string, appID int64, appHash string, client *telegram.Client) *Telegram {
-	return &Telegram{
+func New(channelID, mobile string, appID int64, appHash string, sessionPath, proxy string) (*Telegram, error) {
+	// Create the http proxy dial.
+	dialFunc, err := createProxy(proxy)
+	if err != nil {
+		return nil, err
+	}
+
+	// Create the backend telegram client.
+	client := telegram.NewClient(
+		int(appID),
+		appHash,
+		telegram.Options{
+			Resolver:       dcs.Plain(dcs.PlainOptions{Dial: dialFunc}),
+			SessionStorage: &session.FileStorage{Path: sessionPath},
+			Middlewares: []telegram.Middleware{
+				floodwait.NewSimpleWaiter().WithMaxRetries(uint(3)),
+			},
+		},
+	)
+
+	ctx := context.Background()
+	_, err = bg.Connect(client, bg.WithContext(ctx)) // No need to close this client.
+	if err != nil {
+		return nil, err
+	}
+
+	t := &Telegram{
+		ctx:       ctx,
 		channelID: channelID,
 		mobile:    mobile,
 		appID:     appID,
 		appHash:   appHash,
 		client:    client,
 	}
-}
 
-func (t *Telegram) Execute(f func() error) error {
-	return t.client.Run(context.Background(), func(ctx context.Context) error {
-		if err := t.Authentication(ctx); err != nil {
-			return err
-		}
+	if err := t.Authentication(t.ctx); err != nil {
+		return nil, err
+	}
 
-		t.ctx = ctx
-
-		return f()
-	})
+	return t, nil
 }

@@ -30,6 +30,8 @@ func newService(c *Config) (service, error) {
 		return newSobooksService(c)
 	case TianLang:
 		return newTianlangService(c)
+	case Telegram:
+		return newTelegramService(c)
 	default:
 		return nil, fmt.Errorf("no such fetcher service [%s] supported", c.Category)
 	}

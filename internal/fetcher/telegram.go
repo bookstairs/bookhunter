@@ -6,10 +6,6 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/gotd/contrib/middleware/floodwait"
-	"github.com/gotd/td/session"
-	client "github.com/gotd/td/telegram"
-	"github.com/gotd/td/telegram/dcs"
 	"github.com/gotd/td/tg"
 
 	"github.com/bookstairs/bookhunter/internal/driver"
@@ -17,12 +13,7 @@ import (
 	"github.com/bookstairs/bookhunter/internal/telegram"
 )
 
-type telegramFetcher struct {
-	fetcher  *commonFetcher
-	telegram *telegram.Telegram
-}
-
-func newTelegramFetcher(config *Config) (Fetcher, error) {
+func newTelegramService(config *Config) (service, error) {
 	// Create the session file.
 	path, err := config.ConfigPath()
 	if err != nil {
@@ -41,43 +32,15 @@ func newTelegramFetcher(config *Config) (Fetcher, error) {
 	// Change the process file name.
 	config.precessFile = strings.ReplaceAll(channelID, "/", "_") + ".db"
 
-	// Create the http proxy dial.
-	dialFunc, err := telegram.CreateProxy(config.Proxy)
+	tel, err := telegram.New(channelID, mobile, appID, appHash, sessionPath, config.Proxy)
 	if err != nil {
 		return nil, err
 	}
 
-	// Create the backend telegram client.
-	cl := client.NewClient(
-		int(appID),
-		appHash,
-		client.Options{
-			Resolver:       dcs.Plain(dcs.PlainOptions{Dial: dialFunc}),
-			SessionStorage: &session.FileStorage{Path: sessionPath},
-			Middlewares: []client.Middleware{
-				floodwait.NewSimpleWaiter().WithMaxRetries(uint(3)),
-			},
-		},
-	)
-
-	tel := telegram.New(channelID, mobile, appID, appHash, cl)
-
-	return &telegramFetcher{
-		fetcher: &commonFetcher{
-			Config: config,
-			service: &telegramService{
-				config:   config,
-				telegram: tel,
-			},
-		},
+	return &telegramService{
+		config:   config,
 		telegram: tel,
 	}, nil
-}
-
-func (t *telegramFetcher) Download() error {
-	return t.telegram.Execute(func() error {
-		return t.fetcher.Download()
-	})
 }
 
 type telegramService struct {

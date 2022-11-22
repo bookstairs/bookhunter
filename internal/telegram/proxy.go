@@ -22,9 +22,9 @@ func init() {
 
 // This file is used to manually create a proxy with the arguments and system environment.
 
-// CreateProxy is used to create a dcs.DialFunc for the telegram to send request.
+// createProxy is used to create a dcs.DialFunc for the telegram to send request.
 // We don't support MTProxy now.
-func CreateProxy(proxyURL string) (dcs.DialFunc, error) {
+func createProxy(proxyURL string) (dcs.DialFunc, error) {
 	if proxyURL != "" {
 		log.Debugf("Try to manually create the proxy through %s", proxyURL)
 
