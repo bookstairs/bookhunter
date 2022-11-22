@@ -38,7 +38,7 @@ var talebookDownloadCmd = &cobra.Command{
 			Row("Initial ID", flags.InitialBookID).
 			Row("Rename File", flags.Rename).
 			Row("Thread", flags.Thread).
-			Row("Request Per Minute", flags.RateLimit).
+			Row("Thread Limit (req/min)", flags.RateLimit).
 			Print()
 
 		// Create the fetcher.
@@ -124,7 +124,7 @@ func init() {
 	f.Int64VarP(&flags.InitialBookID, "initial", "i", flags.InitialBookID, "The book id you want to start download")
 	f.BoolVarP(&flags.Rename, "rename", "r", flags.Rename, "Rename the book file by book id")
 	f.IntVarP(&flags.Thread, "thread", "t", flags.Thread, "The number of download thead")
-	f.IntVar(&flags.RateLimit, "ratelimit", flags.RateLimit, "The allowed requests per minutes")
+	f.IntVar(&flags.RateLimit, "ratelimit", flags.RateLimit, "The allowed requests per minutes for every thread")
 
 	// Mark some flags as required.
 	_ = talebookDownloadCmd.MarkFlagRequired("website")

@@ -49,7 +49,8 @@ func (f *commonFetcher) Download() error {
 	if f.precessFile == "" {
 		f.precessFile = defaultProgressFile
 	}
-	f.progress, err = progress.NewProgress(f.InitialBookID, size, f.RateLimit, filepath.Join(configPath, f.precessFile))
+	rate := f.RateLimit * f.Thread
+	f.progress, err = progress.NewProgress(f.InitialBookID, size, rate, filepath.Join(configPath, f.precessFile))
 	if err != nil {
 		return err
 	}

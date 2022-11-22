@@ -36,7 +36,7 @@ type Config struct {
 	InitialBookID int64         // The book id start to download.
 	Rename        bool          // Rename the file by using book ID.
 	Thread        int           // The number of download threads.
-	RateLimit     int           // Request per minute.
+	RateLimit     int           // Request per minute for a thread.
 	precessFile   string        // Define the download process.
 
 	// The extra configuration for a custom fetcher services.

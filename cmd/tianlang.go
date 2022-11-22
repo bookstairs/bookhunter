@@ -34,7 +34,7 @@ var tianlangCmd = &cobra.Command{
 			Row("Initial ID", flags.InitialBookID).
 			Row("Rename File", flags.Rename).
 			Row("Thread", flags.Thread).
-			Row("Request Per Minute", flags.RateLimit).
+			Row("Thread Limit (req/min)", flags.RateLimit).
 			Row("Secret key", flags.TianlangSecretKey).
 			Row("Aliyun RefreshToken", flags.HideSensitive(flags.RefreshToken)).
 			Row("Telecom Username", flags.HideSensitive(flags.Username)).
@@ -69,7 +69,7 @@ func init() {
 	f.Int64VarP(&flags.InitialBookID, "initial", "i", flags.InitialBookID, "The book id you want to start download")
 	f.BoolVarP(&flags.Rename, "rename", "r", flags.Rename, "Rename the book file by book id")
 	f.IntVarP(&flags.Thread, "thread", "t", flags.Thread, "The number of download thead")
-	f.IntVar(&flags.RateLimit, "ratelimit", flags.RateLimit, "The allowed requests per minutes")
+	f.IntVar(&flags.RateLimit, "ratelimit", flags.RateLimit, "The allowed requests per minutes for every thread")
 
 	// Tianlang books flags.
 	f.StringVar(&flags.TianlangSecretKey, "secretKey", flags.TianlangSecretKey, "The secret key for tianlang")
