@@ -15,14 +15,14 @@ import (
 
 // Authentication is used for log into the telegram with a session support.
 // Every telegram execution will require this method.
-func (t *Telegram) Authentication(ctx context.Context) error {
+func (t *Telegram) Authentication() error {
 	// Setting up authentication flow helper based on terminal auth.
 	flow := auth.NewFlow(&terminalAuth{mobile: t.mobile}, auth.SendCodeOptions{})
-	if err := t.client.Auth().IfNecessary(ctx, flow); err != nil {
+	if err := t.client.Auth().IfNecessary(t.ctx, flow); err != nil {
 		return err
 	}
 
-	status, _ := t.client.Auth().Status(ctx)
+	status, _ := t.client.Auth().Status(t.ctx)
 	if !status.Authorized {
 		return errors.New("failed to login, please check you login info or refresh the session by --refresh")
 	}

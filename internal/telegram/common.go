@@ -75,7 +75,7 @@ func New(channelID, mobile string, appID int64, appHash string, sessionPath, pro
 		client:    client,
 	}
 
-	if err := t.Authentication(t.ctx); err != nil {
+	if err := t.Authentication(); err != nil {
 		return nil, err
 	}
 
