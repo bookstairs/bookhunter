@@ -21,8 +21,8 @@ type Fetcher interface {
 	Download() error
 }
 
-// commonFetcher is the basic common download service the multiple thread support.
-type commonFetcher struct {
+// fetcher is the basic common download service the multiple thread support.
+type fetcher struct {
 	*Config
 	service  service
 	progress progress.Progress
@@ -31,7 +31,7 @@ type commonFetcher struct {
 }
 
 // Download the books from the given service.
-func (f *commonFetcher) Download() error {
+func (f *fetcher) Download() error {
 	// Create the config path.
 	configPath, err := f.ConfigPath()
 	if err != nil {
@@ -90,7 +90,7 @@ func (f *commonFetcher) Download() error {
 }
 
 // startDownload will start a download thread.
-func (f *commonFetcher) startDownload() {
+func (f *fetcher) startDownload() {
 thread:
 	for {
 		bookID := f.progress.AcquireBookID()
@@ -136,7 +136,7 @@ thread:
 }
 
 // downloadFile in a thread.
-func (f *commonFetcher) downloadFile(bookID int64, format file.Format, share driver.Share) error {
+func (f *fetcher) downloadFile(bookID int64, format file.Format, share driver.Share) error {
 	// Create the file writer.
 	writer, err := f.creator.NewWriter(bookID, f.progress.Size(), share.FileName, format, share.Size)
 	if err != nil {
@@ -149,7 +149,7 @@ func (f *commonFetcher) downloadFile(bookID int64, format file.Format, share dri
 }
 
 // filterFormats will find the valid formats by user configure.
-func (f *commonFetcher) filterFormats(formats map[file.Format]driver.Share) map[file.Format]driver.Share {
+func (f *fetcher) filterFormats(formats map[file.Format]driver.Share) map[file.Format]driver.Share {
 	fs := make(map[file.Format]driver.Share)
 	for format, share := range formats {
 		for _, vf := range f.Formats {

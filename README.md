@@ -33,17 +33,14 @@ by your running environment.
 
 ## 📚 Usage
 
-<!--ts-->
-
-* [Login Aliyundrive to get the refreshToken](#login-aliyundrive-to-get-the-refreshtoken)
-* [Register account in Talebook](#register-account-in-talebook)
-* [Download books from Talebook](#download-books-from-talebook)
-* [Download books from Tianlang](#download-books-from-tianlang)
-* [Download books from SoBooks](#download-books-from-sobooks)
-* [Download books from Sanqiu](#download-books-from-sanqiu)
-* [Download books from Telegram groups.](#download-books-from-telegram-groups)
-
-<!--te-->
+| Website                                          | Address                                | Direct Download | Aliyun | Lanzou | Telecom |
+|--------------------------------------------------|----------------------------------------|-----------------|--------|--------|---------|
+| [Talebook](#download-books-from-talebook)        | <https://github.com/talebook/talebook> | ✅               | ❌      | ❌      | ❌       |
+| [天浪书屋](#download-books-from-tianlang)            | <https://www.tianlangbooks.com/>       | ❌               | ❌      | ✅      | ❌       |
+| [SoBooks](#download-books-from-sobooks)          | <https://sobooks.net/>                 | ✅               | ❌      | ✅      | ❌       |
+| [三秋书屋](#download-books-from-sanqiu)              | <https://www.sanqiu.mobi/>             | ❌               | ✅      | ❌      | ✅       |
+| [有益读](#download-books-from-youyidu)              | <https://www.youyidu.xyz/>             | ❌               | ✅      | ❌      | ✅       |
+| [Telegram](#download-books-from-telegram-groups) | <https://t.me/>                        | ✅               | ❌      | ❌      | ❌       |
 
 ### Login Aliyundrive to get the `refreshToken`
 
@@ -85,7 +82,7 @@ Flags:
   -h, --help              help for download
   -i, --initial int       The book id you want to start download (default 1)
   -p, --password string   The talebook password
-      --ratelimit int     The allowed requests per minutes (default 30)
+      --ratelimit int     The allowed requests per minutes for every thread (default 30)
   -r, --rename            Rename the book file by book id
   -t, --thread int        The number of download thead (default 1)
   -u, --username string   The talebook username
@@ -110,7 +107,7 @@ Flags:
   -f, --format strings           The file formats you want to download (default [epub,azw3,mobi,pdf,zip])
   -h, --help                     help for tianlang
   -i, --initial int              The book id you want to start download (default 1)
-      --ratelimit int            The allowed requests per minutes (default 30)
+      --ratelimit int            The allowed requests per minutes for every thread (default 30)
       --refreshToken string      Refresh token for aliyun drive
   -r, --rename                   Rename the book file by book id
       --secretKey string         The secret key for tianlang (default "359198")
@@ -139,7 +136,7 @@ Flags:
   -f, --format strings    The file formats you want to download (default [epub,azw3,mobi,pdf,zip])
   -h, --help              help for sobooks
   -i, --initial int       The book id you want to start download (default 1)
-      --ratelimit int     The allowed requests per minutes (default 30)
+      --ratelimit int     The allowed requests per minutes for every thread (default 30)
   -r, --rename            Rename the book file by book id
   -t, --thread int        The number of download thead (default 1)
 
@@ -162,7 +159,34 @@ Flags:
   -f, --format strings           The file formats you want to download (default [epub,azw3,mobi,pdf,zip])
   -h, --help                     help for sanqiu
   -i, --initial int              The book id you want to start download (default 1)
-      --ratelimit int            The allowed requests per minutes (default 30)
+      --ratelimit int            The allowed requests per minutes for every thread (default 30)
+      --refreshToken string      Refresh token for aliyun drive
+  -r, --rename                   Rename the book file by book id
+      --source string            The source (aliyun, telecom, lanzou) to download book (default "telecom")
+      --telecomPassword string   Telecom drive password
+      --telecomUsername string   Telecom drive username
+  -t, --thread int               The number of download thead (default 1)
+
+Global Flags:
+  -c, --config string       The config path for bookhunter
+      --proxy string        The request proxy
+  -a, --user-agent string   The request user-agent (default "Mozilla/5.0 (X11; Linux i686; rv:13.0) Gecko/13.0 Firefox/13.0")
+      --verbose             Print all the logs for debugging
+```
+
+### Download books from Youyidu
+
+```text
+Usage:
+  bookhunter youyidu [flags]
+
+Flags:
+  -d, --download string          The book directory you want to use (default ".")
+  -e, --extract                  Extract the archive file for filtering
+  -f, --format strings           The file formats you want to download (default [epub,azw3,mobi,pdf,zip])
+  -h, --help                     help for youyidu
+  -i, --initial int              The book id you want to start download (default 1)
+      --ratelimit int            The allowed requests per minutes for every thread (default 30)
       --refreshToken string      Refresh token for aliyun drive
   -r, --rename                   Rename the book file by book id
       --source string            The source (aliyun, telecom, lanzou) to download book (default "telecom")
@@ -198,7 +222,7 @@ Flags:
   -h, --help               help for telegram
   -i, --initial int        The book id you want to start download (default 1)
   -b, --mobile string      The mobile number, we will add +86 as default zone code
-      --ratelimit int      The allowed requests per minutes (default 30)
+      --ratelimit int      The allowed requests per minutes for every thread (default 30)
       --refresh            Refresh the login session
   -r, --rename             Rename the book file by book id
   -t, --thread int         The number of download thead (default 1)

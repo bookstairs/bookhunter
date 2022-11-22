@@ -111,8 +111,5 @@ func New(c *Config) (Fetcher, error) {
 		return nil, err
 	}
 
-	return &commonFetcher{
-		Config:  c,
-		service: s,
-	}, nil
+	return &fetcher{Config: c, service: s}, nil
 }
