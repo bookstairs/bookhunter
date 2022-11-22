@@ -29,9 +29,6 @@ builds:
         goarch: "386"
       - goos: windows
         goarch: arm64
-    hooks:
-      post:
-        - scripts/compress.sh "{{ .Path }}"
 
 scoop:
   bucket:
