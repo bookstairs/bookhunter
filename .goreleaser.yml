@@ -80,6 +80,7 @@ changelog:
       - '^docs:'
       - '^test:'
       - '^web:'
+      - '^build:'
 
 archives:
   - id: bookhunter
