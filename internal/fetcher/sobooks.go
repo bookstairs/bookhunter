@@ -100,7 +100,7 @@ func (s *sobooksService) formats(id int64) (map[file.Format]driver.Share, error)
 	if err != nil {
 		return nil, err
 	}
-	if resp.StatusCode() == 404 {
+	if resp.IsError() {
 		log.Debugf("The current book [%v] content does not exist ", id)
 		return map[file.Format]driver.Share{}, nil
 	}
