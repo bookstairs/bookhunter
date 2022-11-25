@@ -35,7 +35,7 @@ by your running environment.
 
 | Website                                          | Address                                | Direct Download | Aliyun | Lanzou | Telecom |
 |--------------------------------------------------|----------------------------------------|-----------------|--------|--------|---------|
-| [国家中小学智慧教育平台](#download-textbooks-for-kids)      | <https://www.zxx.edu.cn/tchMaterial>   | ✅               | ❌      | ❌      | ❌       |
+| [智慧教育平台](#download-textbooks-for-kids)           | <https://www.zxx.edu.cn/tchMaterial>   | ✅               | ❌      | ❌      | ❌       |
 | [Talebook](#download-books-from-talebook)        | <https://github.com/talebook/talebook> | ✅               | ❌      | ❌      | ❌       |
 | [天浪书屋](#download-books-from-tianlang)            | <https://www.tianlangbooks.com>        | ❌               | ❌      | ✅      | ❌       |
 | [SoBooks](#download-books-from-sobooks)          | <https://sobooks.net>                  | ✅               | ❌      | ✅      | ❌       |
@@ -53,7 +53,22 @@ bookhunter aliyun
 
 ### Download textbooks for Kids
 
+```text
+Usage:
+  bookhunter k12 [flags]
 
+Flags:
+  -d, --download string   The book directory you want to use (default ".")
+  -h, --help              help for k12
+      --ratelimit int     The allowed requests per minutes for every thread (default 30)
+  -t, --thread int        The number of download thead (default 1)
+
+Global Flags:
+  -c, --config string       The config path for bookhunter
+      --proxy string        The request proxy
+  -a, --user-agent string   The request user-agent (default "Mozilla/5.0 (X11; Linux i686; rv:13.0) Gecko/13.0 Firefox/13.0")
+      --verbose             Print all the logs for debugging
+```
 
 ### Register account in Talebook
 
