@@ -35,12 +35,13 @@ by your running environment.
 
 | Website                                          | Address                                | Direct Download | Aliyun | Lanzou | Telecom |
 |--------------------------------------------------|----------------------------------------|-----------------|--------|--------|---------|
+| [国家中小学智慧教育平台](#download-textbooks-for-kids)      | <https://www.zxx.edu.cn/tchMaterial>   | ✅               | ❌      | ❌      | ❌       |
 | [Talebook](#download-books-from-talebook)        | <https://github.com/talebook/talebook> | ✅               | ❌      | ❌      | ❌       |
-| [天浪书屋](#download-books-from-tianlang)            | <https://www.tianlangbooks.com/>       | ❌               | ❌      | ✅      | ❌       |
-| [SoBooks](#download-books-from-sobooks)          | <https://sobooks.net/>                 | ✅               | ❌      | ✅      | ❌       |
-| [三秋书屋](#download-books-from-sanqiu)              | <https://www.sanqiu.mobi/>             | ❌               | ✅      | ❌      | ✅       |
-| [有益读](#download-books-from-youyidu)              | <https://www.youyidu.xyz/>             | ❌               | ✅      | ❌      | ✅       |
-| [Telegram](#download-books-from-telegram-groups) | <https://t.me/>                        | ✅               | ❌      | ❌      | ❌       |
+| [天浪书屋](#download-books-from-tianlang)            | <https://www.tianlangbooks.com>        | ❌               | ❌      | ✅      | ❌       |
+| [SoBooks](#download-books-from-sobooks)          | <https://sobooks.net>                  | ✅               | ❌      | ✅      | ❌       |
+| [三秋书屋](#download-books-from-sanqiu)              | <https://www.sanqiu.mobi>              | ❌               | ✅      | ❌      | ✅       |
+| [有益读](#download-books-from-youyidu)              | <https://www.youyidu.xyz>              | ❌               | ✅      | ❌      | ✅       |
+| [Telegram](#download-books-from-telegram-groups) | <https://t.me>                         | ✅               | ❌      | ❌      | ❌       |
 
 ### Login Aliyundrive to get the `refreshToken`
 
@@ -49,6 +50,10 @@ We would show a QR code at the first time. And cache the `refreshToken` after su
 ```shell
 bookhunter aliyun
 ```
+
+### Download textbooks for Kids
+
+
 
 ### Register account in Talebook
 

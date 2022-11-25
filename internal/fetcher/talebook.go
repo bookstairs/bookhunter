@@ -70,10 +70,7 @@ func newTalebookService(config *Config) (service, error) {
 		log.Info("Login success. Save cookies into file.")
 	}
 
-	return &talebookService{
-		config: config,
-		Client: c,
-	}, nil
+	return &talebookService{config: config, Client: c}, nil
 }
 
 func (t *talebookService) size() (int64, error) {

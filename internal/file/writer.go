@@ -37,7 +37,7 @@ func NewCreator(rename bool, downloadPath string, formats []Format, extract bool
 }
 
 type Creator interface {
-	NewWriter(id, total int64, name string, format Format, size int64) (Writer, error)
+	NewWriter(id, total int64, name, subPath string, format Format, size int64) (Writer, error)
 }
 
 type creator struct {
@@ -47,7 +47,7 @@ type creator struct {
 	downloadPath string
 }
 
-func (c *creator) NewWriter(id, total int64, name string, format Format, size int64) (Writer, error) {
+func (c *creator) NewWriter(id, total int64, name, subPath string, format Format, size int64) (Writer, error) {
 	// Rename if it was required.
 	filename := strconv.FormatInt(id, 10)
 	if c.rename {
@@ -60,8 +60,18 @@ func (c *creator) NewWriter(id, total int64, name string, format Format, size in
 	// Ref: https://en.wikipedia.org/wiki/Filename#Reserved_characters_and_words
 	filename = escape(filename)
 
+	// Create the download path.
+	downloadPath := c.downloadPath
+	if subPath != "" {
+		downloadPath = filepath.Join(downloadPath, subPath)
+		err := os.MkdirAll(downloadPath, 0o755)
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	// Generate the file path.
-	path := filepath.Join(c.downloadPath, filename)
+	path := filepath.Join(downloadPath, filename)
 
 	// Remove the exist file.
 	if _, err := os.Stat(path); err == nil {
@@ -82,7 +92,7 @@ func (c *creator) NewWriter(id, total int64, name string, format Format, size in
 	return &writer{
 		file:     file,
 		name:     filename,
-		download: c.downloadPath,
+		download: downloadPath,
 		extract:  c.extract && format.Archive(),
 		formats:  c.formats,
 		bar:      bar,

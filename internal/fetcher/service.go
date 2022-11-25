@@ -32,6 +32,8 @@ func newService(c *Config) (service, error) {
 		return newTianlangService(c)
 	case Telegram:
 		return newTelegramService(c)
+	case K12:
+		return newK12Service(c)
 	default:
 		return nil, fmt.Errorf("no such fetcher service [%s] supported", c.Category)
 	}

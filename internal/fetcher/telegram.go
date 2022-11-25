@@ -37,10 +37,7 @@ func newTelegramService(config *Config) (service, error) {
 		return nil, err
 	}
 
-	return &telegramService{
-		config:   config,
-		telegram: tel,
-	}, nil
+	return &telegramService{config: config, telegram: tel}, nil
 }
 
 type telegramService struct {

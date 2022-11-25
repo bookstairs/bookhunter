@@ -138,7 +138,7 @@ thread:
 // downloadFile in a thread.
 func (f *fetcher) downloadFile(bookID int64, format file.Format, share driver.Share) error {
 	// Create the file writer.
-	writer, err := f.creator.NewWriter(bookID, f.progress.Size(), share.FileName, format, share.Size)
+	writer, err := f.creator.NewWriter(bookID, f.progress.Size(), share.FileName, share.SubPath, format, share.Size)
 	if err != nil {
 		return err
 	}

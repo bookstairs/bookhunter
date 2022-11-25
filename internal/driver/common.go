@@ -15,6 +15,8 @@ type (
 	Share struct {
 		// FileName is a file name with the file extension.
 		FileName string
+		// SubPath The path for saving the files.
+		SubPath string
 		// Size is the file size in bytes.
 		Size int64
 		// URL is the downloadable url for this file.

@@ -54,11 +54,7 @@ func newSobooksService(config *Config) (service, error) {
 		return nil, err
 	}
 
-	return &sobooksService{
-		config: config,
-		Client: c,
-		driver: d,
-	}, nil
+	return &sobooksService{config: config, Client: c, driver: d}, nil
 }
 
 func (s *sobooksService) size() (int64, error) {
@@ -74,7 +70,7 @@ func (s *sobooksService) size() (int64, error) {
 
 	lastID := -1
 
-	// Find all the links is case of the website master changed the theme.
+	// Find all the links is case of the website primary changed the theme.
 	doc.Find("a").Each(func(i int, selection *goquery.Selection) {
 		// This is a book link.
 		link, exists := selection.Attr("href")

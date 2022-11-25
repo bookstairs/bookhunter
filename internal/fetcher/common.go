@@ -25,6 +25,7 @@ const (
 	SoBooks  Category = "sobooks"
 	TianLang Category = "tianlang"
 	Telegram Category = "telegram"
+	K12      Category = "k12"
 )
 
 // Config is used to define a common config for a specified fetcher service.

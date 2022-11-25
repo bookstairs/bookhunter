@@ -37,6 +37,7 @@ func init() {
 	rootCmd.AddCommand(telegramCmd)
 	rootCmd.AddCommand(sobooksCmd)
 	rootCmd.AddCommand(youyiduCmd)
+	rootCmd.AddCommand(k12Cmd)
 
 	// Tool commands.
 	rootCmd.AddCommand(aliyunCmd)
