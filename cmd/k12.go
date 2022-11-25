@@ -16,7 +16,7 @@ var k12Cmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		// Print download configuration.
 		log.NewPrinter().
-			Title("SoBooks Download Information").
+			Title("Textbook Download Information").
 			Head(log.DefaultHead...).
 			Row("Config Path", flags.ConfigRoot).
 			Row("Proxy", flags.Proxy).
