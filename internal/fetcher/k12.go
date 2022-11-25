@@ -93,8 +93,8 @@ func (k *k12Service) formats(id int64) (map[file.Format]driver.Share, error) {
 	}
 
 	return map[file.Format]driver.Share{
-		file.PDF: {
-			FileName:   book.Title + "." + book.CustomProperties.Format,
+		file.Format(book.CustomProperties.Format): {
+			FileName:   book.Title,
 			SubPath:    subPath,
 			Size:       book.CustomProperties.Size,
 			URL:        book.ID,

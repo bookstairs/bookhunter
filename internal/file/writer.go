@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+	"strings"
 
 	"github.com/schollz/progressbar/v3"
 
@@ -52,8 +53,10 @@ func (c *creator) NewWriter(id, total int64, name, subPath string, format Format
 	filename := strconv.FormatInt(id, 10)
 	if c.rename {
 		filename = filename + "." + string(format)
+	} else if strings.HasSuffix(name, "."+string(format)) {
+		filename = name
 	} else {
-		filename = filename + "_" + name
+		filename = name + "." + string(format)
 	}
 
 	// Escape the file name for avoiding the illegal characters.
