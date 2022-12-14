@@ -33,15 +33,15 @@ by your running environment.
 
 ## 📚 Usage
 
-| Website                                          | Address                                | Direct Download | Aliyun | Lanzou | Telecom |
-|--------------------------------------------------|----------------------------------------|-----------------|--------|--------|---------|
-| [智慧教育平台](#download-textbooks-for-kids)           | <https://www.zxx.edu.cn/tchMaterial>   | ✅               | ❌      | ❌      | ❌       |
-| [Talebook](#download-books-from-talebook)        | <https://github.com/talebook/talebook> | ✅               | ❌      | ❌      | ❌       |
-| [天浪书屋](#download-books-from-tianlang)            | <https://www.tianlangbooks.com>        | ❌               | ❌      | ✅      | ❌       |
-| [SoBooks](#download-books-from-sobooks)          | <https://sobooks.net>                  | ✅               | ❌      | ✅      | ❌       |
-| [三秋书屋](#download-books-from-sanqiu)              | <https://www.sanqiu.mobi>              | ❌               | ✅      | ❌      | ✅       |
-| [有益读](#download-books-from-youyidu)              | <https://www.youyidu.xyz>              | ❌               | ✅      | ❌      | ✅       |
-| [Telegram](#download-books-from-telegram-groups) | <https://t.me>                         | ✅               | ❌      | ❌      | ❌       |
+| Website                                          | Address                                | Direct Download | [Aliyun](https://www.aliyundrive.com/) | [Lanzou](https://www.lanzou.com/) | [Telecom](https://cloud.189.cn/) |
+|--------------------------------------------------|----------------------------------------|-----------------|----------------------------------------|-----------------------------------|----------------------------------|
+| [智慧教育平台](#download-textbooks-for-kids)           | <https://www.zxx.edu.cn/tchMaterial>   | ✅               | ❌                                      | ❌                                 | ❌                                |
+| [Talebook](#download-books-from-talebook)        | <https://github.com/talebook/talebook> | ✅               | ❌                                      | ❌                                 | ❌                                |
+| [天浪书屋](#download-books-from-tianlang)            | <https://www.tianlangbooks.com>        | ❌               | ❌                                      | ✅                                 | ❌                                |
+| [SoBooks](#download-books-from-sobooks)          | <https://sobooks.net>                  | ✅               | ❌                                      | ✅                                 | ❌                                |
+| [三秋书屋](#download-books-from-sanqiu)              | <https://www.sanqiu.mobi>              | ❌               | ✅                                      | ❌                                 | ✅                                |
+| [有益读](#download-books-from-youyidu)              | <https://www.youyidu.xyz>              | ❌               | ✅                                      | ❌                                 | ✅                                |
+| [Telegram](#download-books-from-telegram-groups) | <https://t.me>                         | ✅               | ❌                                      | ❌                                 | ❌                                |
 
 ### Login Aliyundrive to get the `refreshToken`
 
