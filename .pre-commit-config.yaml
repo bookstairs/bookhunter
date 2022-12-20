@@ -18,3 +18,7 @@ repos:
     hooks:
       - id: go-mod-tidy-repo
       - id: golangci-lint-mod
+      - id: my-cmd
+        name: goimports
+        alias: goimports
+        args: [ scripts/goimports.sh, github.com/bookstairs/bookhunter, --hook:error-on-output ]

@@ -1,70 +1,40 @@
 #!/bin/bash
 
-##
-# parse_file_hook_args
-# Creates global vars:
-#   OPTIONS: List of options to passed to command
-#   FILES  : List of files to process, filtered against ignore_file_pattern_array
+## This shell script is used with https://github.com/TekWizely/pre-commit-golang
+#  You should add it to your .pre-commit-config.yaml file with the options like
 #
-function parse_file_hook_args {
-	OPTIONS=()
-	# If arg doesn't pass [ -f ] check, then it is assumed to be an option
-	#
-	while [ $# -gt 0 ] && [ "$1" != "--" ] && [ ! -f "$1" ]; do
-		OPTIONS+=("$1")
-		shift
-	done
+#  - repo: https://github.com/tekwizely/pre-commit-golang
+#    rev: v1.0.0-rc.1
+#    hooks:
+#      - id: my-cmd
+#        name: goimports
+#        alias: goimports
+#        args: [ scripts/goimports.sh, github.com/syhily/hobbit, --hook:error-on-output ]
 
-	local all_files
-	all_files=()
-	# Assume start of file list (may still be options)
-	#
-	while [ $# -gt 0 ] && [ "$1" != "--" ]; do
-		all_files+=("$1")
-		shift
-	done
+module="$1"
+file="$2"
 
-	# If '--' next, then files = options
-	#
-	if [ "$1" == "--" ]; then
-		shift
-		# Append to previous options
-		#
-		OPTIONS+=("${all_files[@]}")
-		all_files=()
-	fi
+# Detect the running OS.
+COMMAND="sed"
+if [[ $OSTYPE == 'darwin'* ]]; then
+  # macOS have to use the gsed which can be installed by `brew install gsed`.
+  COMMAND="gsed"
+fi
 
-	# Any remaining arguments are assumed to be files
-	#
-	all_files+=("$@")
+# Detect the command.
+command -v $COMMAND >/dev/null 2>&1 || { echo >&2 "Require ${COMMAND} but it's not installed. Aborting."; exit 1; }
+command -v goimports >/dev/null 2>&1 || { echo >&2 "Require goimports but it's not installed. Aborting."; exit 1; }
 
-	# Filter out vendor entries and ignore_file_pattern_array
-	#
-	FILES=()
-	local file pattern
-	ignore_file_pattern_array+=( "vendor/*" "*/vendor/*" "*/vendor" )
-	for file in "${all_files[@]}"; do
-		for pattern in "${ignore_file_pattern_array[@]}"; do
-			if [[ "${file}" == ${pattern} ]] ; then # pattern => unquoted
-				continue 2
-			fi
-		done
-		FILES+=("${file}")
-	done
-}
+# Remove all the import spaces in staging golang files.
+REPLACEMENT=$(cat <<-END
+'
+  /^import (/,/)/ {
+    /^$/ d
+  }
+'
+END
+)
+bash -c "${COMMAND} -i ${REPLACEMENT} ${file}"
 
-parse_file_hook_args "$@"
-
-##
-# Remove all blank lines in go 'imports' statements, then sort with default goimports.
-# This scripts only works in macOS with `brew install gnu-sed`
-# Change gsed to sed in case of you are developing under the Linux.
-#
-for file in "${FILES[@]}"; do
-  gsed -i '
-    /^import (/,/)/ {
-      /^$/ d
-    }
-  ' "${file}"
-  goimports -l -d -local github.com/bookstairs/bookhunter -w "${file}"
-done
+# Format the staging golang files.
+goimports -l -d -local "${module}" -w "${file}"
