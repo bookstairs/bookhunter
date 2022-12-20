@@ -1,5 +1,12 @@
 # ⏬ bookhunter
 
+[![LICENSE](https://img.shields.io/github/license/bookstairs/bookhunter)](https://github.com/bookstairs/bookhunter/blob/main/LICENSE)
+[![Language](https://img.shields.io/badge/Language-Go-blue.svg)](https://golang.org/)
+[![Go Report Card](https://goreportcard.com/badge/github.com/bookstairs/bookhunter)](https://goreportcard.com/report/github.com/bookstairs/bookhunter)
+![](https://img.shields.io/github/stars/bookstairs/bookhunter.svg)
+![](https://img.shields.io/github/forks/bookstairs/bookhunter.svg)
+![Release](https://github.com/bookstairs/bookhunter/workflows/release/badge.svg)
+
 Downloading books from [talebook](https://github.com/talebook/talebook), [三秋书屋](https://www.sanqiu.mobi/)
 , [天浪书屋](https://www.tianlangbooks.com), [SoBooks](https://sobooks.cc) and Telegram Channels. This is a totally
 rewritten fork compared to its [original version](https://github.com/hellojukay/dl-talebook).
