@@ -21,4 +21,4 @@ repos:
       - id: my-cmd
         name: goimports
         alias: goimports
-        args: [ scripts/goimports.sh, github.com/bookstairs/bookhunter, --hook:error-on-output ]
+        args: [ scripts/goimports.sh, github.com/bookstairs/bookhunter ]
