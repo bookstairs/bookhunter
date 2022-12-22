@@ -9,7 +9,7 @@
 #      - id: my-cmd
 #        name: goimports
 #        alias: goimports
-#        args: [ scripts/goimports.sh, github.com/syhily/hobbit, --hook:error-on-output ]
+#        args: [ scripts/goimports.sh, github.com/syhily/hobbit ]
 
 module="$1"
 file="$2"
