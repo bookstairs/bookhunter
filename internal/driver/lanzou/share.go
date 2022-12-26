@@ -80,64 +80,80 @@ func (l *Lanzou) resolveFileShareURL(parsedURI, pwd string) (*ResponseData, erro
 		if pwd == "" {
 			return nil, fmt.Errorf("缺少密码 %v", parsedURI)
 		}
-		allString := find1Re.FindStringSubmatch(firstPage)
-		urlpath := allString[1]
-		params := allString[2] + pwd
-
-		result := &Dom{}
-
-		query, _ := url.ParseQuery(params)
-
-		_, err = l.R().
-			SetHeader("referer", l.BaseURL+parsedURI).
-			SetHeader("Content-Type", "application/x-www-form-urlencoded").
-			SetResult(result).
-			SetFormDataFromValues(query).
-			Post(urlpath)
-		if err != nil {
-			return nil, err
-		}
-		return l.parseDom(result)
+		return l.ParsePasswordShare(parsedURI, pwd, firstPage)
 	} else if find2Re.MatchString(firstPage) {
-		allString := find2Re.FindStringSubmatch(firstPage)
-
-		dom, err := l.R().Get(allString[1])
-		if err != nil {
-			return nil, err
-		}
-		data := make(map[string]string)
-
-		var re = regexp.MustCompile(`(?m)var\s+(\w+)\s+=\s+'(.*)';`)
-		for _, match := range re.FindAllStringSubmatch(dom.String(), -1) {
-			data[match[1]] = match[2]
-		}
-		title := l.extractRegex(find2TitleRe, firstPage)
-
-		result := &Dom{}
-		_, err = l.R().
-			SetHeader("origin", l.BaseURL).
-			SetHeader("referer", l.BaseURL+parsedURI).
-			SetHeader("Content-Type", "application/x-www-form-urlencoded").
-			SetResult(result).
-			SetFormData(map[string]string{
-				"action":     "downprocess",
-				"signs":      data["ajaxdata"],
-				"sign":       data["s_sign"],
-				"websign":    data["ws_sign"],
-				"websignkey": data["wsk_sign"],
-				"ves":        "1",
-			}).
-			Post("/ajaxm.php")
-		if err != nil {
-			return nil, err
-		}
-		lanzouDom, err := l.parseDom(result)
-		if lanzouDom != nil {
-			lanzouDom.Name = title
-		}
+		lanzouDom, err := l.ParseAnonymousShare(parsedURI, firstPage)
 		return lanzouDom, err
 	}
 	return nil, fmt.Errorf("解析页面失败")
+}
+
+func (l *Lanzou) ParsePasswordShare(parsedURI string, pwd string, firstPage string) (*ResponseData, error) {
+	allString := find1Re.FindStringSubmatch(firstPage)
+	urlpath := allString[1]
+	params := allString[2] + pwd
+
+	result := &Dom{}
+	query, _ := url.ParseQuery(params)
+	_, err := l.R().
+		SetHeader("referer", l.BaseURL+parsedURI).
+		SetHeader("Content-Type", "application/x-www-form-urlencoded").
+		SetResult(result).
+		SetFormDataFromValues(query).
+		Post(urlpath)
+	if err != nil {
+		return nil, err
+	}
+	return l.parseDom(result)
+}
+
+func (l *Lanzou) ParseAnonymousShare(parsedURI string, firstPage string) (*ResponseData, error) {
+	allString := find2Re.FindStringSubmatch(firstPage)
+
+	dom, err := l.R().Get(allString[1])
+	if err != nil {
+		return nil, err
+	}
+	data := make(map[string]string)
+	fnDom := l.removeNotes(dom.String())
+	var re = regexp.MustCompile(`(?m)var\s+(\w+)\s+=\s+'(.*)';`)
+	for _, match := range re.FindAllStringSubmatch(fnDom, -1) {
+		data[match[1]] = match[2]
+	}
+	title := l.extractRegex(find2TitleRe, firstPage)
+
+	var formRe = regexp.MustCompile(`(?m)('(\w+)':([\w']+),?)`)
+
+	fromData := make(map[string]string)
+	for _, match := range formRe.FindAllStringSubmatch(fnDom, -1) {
+		k := match[2]
+		v := match[3]
+
+		if v == "1" {
+		} else if strings.HasPrefix(v, "'") && strings.HasSuffix(v, "'") {
+			v = strings.TrimLeft(strings.TrimRight(v, "'"), "'")
+		} else {
+			v = data[v]
+		}
+		fromData[k] = v
+	}
+
+	result := &Dom{}
+	_, err = l.R().
+		SetHeader("origin", l.BaseURL).
+		SetHeader("referer", l.BaseURL+parsedURI).
+		SetHeader("Content-Type", "application/x-www-form-urlencoded").
+		SetResult(result).
+		SetFormData(fromData).
+		Post("/ajaxm.php")
+	if err != nil {
+		return nil, err
+	}
+	lanzouDom, err := l.parseDom(result)
+	if lanzouDom != nil {
+		lanzouDom.Name = title
+	}
+	return lanzouDom, err
 }
 
 func (l *Lanzou) parseDom(result *Dom) (*ResponseData, error) {
