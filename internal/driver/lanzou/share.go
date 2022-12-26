@@ -129,10 +129,9 @@ func (l *Lanzou) ParseAnonymousShare(parsedURI string, firstPage string) (*Respo
 		k := match[2]
 		v := match[3]
 
-		if v == "1" {
-		} else if strings.HasPrefix(v, "'") && strings.HasSuffix(v, "'") {
+		if strings.HasPrefix(v, "'") && strings.HasSuffix(v, "'") {
 			v = strings.TrimLeft(strings.TrimRight(v, "'"), "'")
-		} else {
+		} else if v != "1" {
 			v = data[v]
 		}
 		fromData[k] = v
