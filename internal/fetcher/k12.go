@@ -40,7 +40,7 @@ func (k *k12Service) size() (int64, error) {
 	}
 
 	res := resp.Result().(*MetadataSource)
-	maxID := int64(0)
+	id := int64(1)
 
 	for _, url := range strings.Split(res.URLs, ",") {
 		books, err := k.downloadMetadata(url)
@@ -50,15 +50,12 @@ func (k *k12Service) size() (int64, error) {
 
 		for idx := range books {
 			book := books[idx]
-			id := book.CustomProperties.ResSort
 			k.metadata[id] = book
-			if id > maxID {
-				maxID = id
-			}
+			id++
 		}
 	}
 
-	return maxID, nil
+	return int64(len(k.metadata)), nil
 }
 
 func (k *k12Service) downloadMetadata(url string) ([]TextBook, error) {
