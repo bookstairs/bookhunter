@@ -89,17 +89,20 @@ func (l *Lanzou) resolveFileShareURL(parsedURI, pwd string) (*ResponseData, erro
 }
 
 func (l *Lanzou) ParsePasswordShare(parsedURI string, pwd string, firstPage string) (*ResponseData, error) {
-	allString := find1Re.FindStringSubmatch(firstPage)
-	urlpath := allString[1]
-	params := allString[2] + pwd
+	sign := find1Re.FindStringSubmatch(firstPage)
+	urlpath := "/ajaxm.php"
 
 	result := &Dom{}
-	query, _ := url.ParseQuery(params)
+	data := make(map[string]string)
+	data["action"] = "downprocess"
+	data["sign"] = sign[1]
+	data["p"] = pwd
+
 	_, err := l.R().
 		SetHeader("referer", l.BaseURL+parsedURI).
 		SetHeader("Content-Type", "application/x-www-form-urlencoded").
 		SetResult(result).
-		SetFormDataFromValues(query).
+		SetFormData(data).
 		Post(urlpath)
 	if err != nil {
 		return nil, err
