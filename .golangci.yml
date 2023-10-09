@@ -41,6 +41,16 @@ linters-settings:
       - G401
       - G501
       - G306
+  depguard:
+    rules:
+      main:
+        # Packages that are not allowed where the value is a suggestion.
+        deny:
+          - pkg: "github.com/sirupsen/logrus"
+            desc: not allowed
+          - pkg: "github.com/pkg/errors"
+            desc: Should be replaced by standard lib errors package
+
 
 linters:
   disable-all: true

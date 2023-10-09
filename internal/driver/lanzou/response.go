@@ -15,7 +15,7 @@ var (
 	dirURLRe  = regexp.MustCompile(`(?m)https?://[a-zA-Z0-9-]*?\.?lanzou[a-z]\.com/(/s/)?b[a-zA-Z0-9]{7,}/?`)
 	fileURLRe = regexp.MustCompile(`(?m)https?://[a-zA-Z0-9-]*?\.?lanzou[a-z]\.com/(/s/)?i[a-zA-Z0-9]{7,}/?`)
 
-	find1Re      = regexp.MustCompile(`(?m)url\s:\s+'(.*?)',\n\t+data\s:\s+'(.*?)'\+pwd,`)
+	find1Re      = regexp.MustCompile(`(?m)var\s+skdklds\s+=\s+'(.*?)';`)
 	find2Re      = regexp.MustCompile(`(?m)<iframe.*?src="(/fn\?\w{10,})"\s.*>`)
 	find2TitleRe = regexp.MustCompile(`(?m)<title>(.*?)\s-\s蓝奏云</title>`)
 
