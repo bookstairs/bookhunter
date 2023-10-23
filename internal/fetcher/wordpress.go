@@ -22,7 +22,7 @@ var (
 
 	sanqiuPasscodeRe = regexp.MustCompile(".*?([a-zA-Z0-9]+).*?")
 
-	tianLangLinkRe     = regexp.MustCompile(`(?m)location\.href\s?=\s?"(http.*?)(\n?)";`)
+	tianLangLinkRe     = regexp.MustCompile(`(?m)location\.href\s?=\s?"\s*(http.*?)\s*(\n?)";`)
 	tianlangPasscodeRe = regexp.MustCompile("密码.*?([a-zA-Z0-9]+).*?")
 )
 

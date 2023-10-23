@@ -88,5 +88,5 @@ func extractTianLangLink(c *client.Client, url string) (string, error) {
 		return "", fmt.Errorf("invalid tianlang share link: %s", url)
 	}
 
-	return submatch[1], nil
+	return strings.Trim(submatch[1], " "), nil
 }
