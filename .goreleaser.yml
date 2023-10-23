@@ -30,21 +30,21 @@ builds:
       - goos: windows
         goarch: arm64
 
-scoop:
-  bucket:
-    owner: bookstairs
-    name: scoop-bucket
-    branch: master
-  commit_author:
-    name: syhily
-    email: syhily@gmail.com
-  homepage: "https://github.com/bookstairs"
-  description: "Software to download chinese ebooks from Internet."
-  license: MIT
+scoops:
+  - repository:
+      owner: bookstairs
+      name: scoop-bucket
+      branch: master
+    commit_author:
+      name: syhily
+      email: syhily@gmail.com
+    homepage: "https://github.com/bookstairs"
+    description: "Software to download chinese ebooks from Internet."
+    license: MIT
 
 brews:
   - name: bookhunter
-    tap:
+    repository:
       owner: bookstairs
       name: homebrew-tap
       branch: master
