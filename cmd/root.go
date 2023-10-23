@@ -32,11 +32,9 @@ func Execute() {
 func init() {
 	// Download commands.
 	rootCmd.AddCommand(talebookCmd)
-	rootCmd.AddCommand(sanqiuCmd)
 	rootCmd.AddCommand(tianlangCmd)
 	rootCmd.AddCommand(telegramCmd)
 	rootCmd.AddCommand(sobooksCmd)
-	rootCmd.AddCommand(youyiduCmd)
 	rootCmd.AddCommand(k12Cmd)
 
 	// Tool commands.
