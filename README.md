@@ -7,8 +7,11 @@
 ![](https://img.shields.io/github/forks/bookstairs/bookhunter.svg)
 ![Release](https://github.com/bookstairs/bookhunter/workflows/release/badge.svg)
 
-Downloading books from [talebook](https://github.com/talebook/talebook), [三秋书屋](https://www.sanqiu.mobi/)
-, [天浪书屋](https://www.tianlangbooks.com), [SoBooks](https://sobooks.cc) and Telegram Channels. This is a totally
+Downloading books from [talebook](https://github.com/talebook/talebook),
+[天浪书屋](https://www.tianlangbooks.com),
+[SoBooks](https://sobooks.cc)
+[中小学教材](https://basic.smartedu.cn/tchMaterial)
+and Telegram Channels. This is a totally
 rewritten fork compared to its [original version](https://github.com/hellojukay/dl-talebook).
 
 ## 🚧 Development
@@ -42,7 +45,7 @@ by your running environment.
 
 | Website                                          | Address                                | Direct Download | [Aliyun](https://www.aliyundrive.com/) | [Lanzou](https://www.lanzou.com/) | [Telecom](https://cloud.189.cn/) |
 |--------------------------------------------------|----------------------------------------|-----------------|----------------------------------------|-----------------------------------|----------------------------------|
-| [智慧教育平台](#download-textbooks-for-kids)           | <https://www.zxx.edu.cn/tchMaterial>   | ✅               | ❌                                      | ❌                                 | ❌                                |
+| [智慧教育平台](#download-textbooks-for-kids)           | <https://basic.smartedu.cn/tchMaterial>   | ✅               | ❌                                      | ❌                                 | ❌                                |
 | [Talebook](#download-books-from-talebook)        | <https://github.com/talebook/talebook> | ✅               | ❌                                      | ❌                                 | ❌                                |
 | [天浪书屋](#download-books-from-tianlang)            | <https://www.tianlangbooks.com>        | ❌               | ❌                                      | ✅                                 | ❌                                |
 | [SoBooks](#download-books-from-sobooks)          | <https://sobooks.net>                  | ✅               | ❌                                      | ✅                                 | ❌                                |
@@ -164,60 +167,6 @@ Flags:
       --ratelimit int     The allowed requests per minutes for every thread (default 30)
   -r, --rename            Rename the book file by book id
   -t, --thread int        The number of download thead (default 1)
-
-Global Flags:
-  -c, --config string       The config path for bookhunter
-      --proxy string        The request proxy
-  -a, --user-agent string   The request user-agent (default "Mozilla/5.0 (X11; Linux i686; rv:13.0) Gecko/13.0 Firefox/13.0")
-      --verbose             Print all the logs for debugging
-```
-
-### Download books from Sanqiu
-
-```text
-Usage:
-  bookhunter sanqiu [flags]
-
-Flags:
-  -d, --download string          The book directory you want to use (default ".")
-  -e, --extract                  Extract the archive file for filtering
-  -f, --format strings           The file formats you want to download (default [epub,azw3,mobi,pdf,zip])
-  -h, --help                     help for sanqiu
-  -i, --initial int              The book id you want to start download (default 1)
-      --ratelimit int            The allowed requests per minutes for every thread (default 30)
-      --refreshToken string      Refresh token for aliyun drive
-  -r, --rename                   Rename the book file by book id
-      --source string            The source (aliyun, telecom, lanzou) to download book (default "telecom")
-      --telecomPassword string   Telecom drive password
-      --telecomUsername string   Telecom drive username
-  -t, --thread int               The number of download thead (default 1)
-
-Global Flags:
-  -c, --config string       The config path for bookhunter
-      --proxy string        The request proxy
-  -a, --user-agent string   The request user-agent (default "Mozilla/5.0 (X11; Linux i686; rv:13.0) Gecko/13.0 Firefox/13.0")
-      --verbose             Print all the logs for debugging
-```
-
-### Download books from Youyidu
-
-```text
-Usage:
-  bookhunter youyidu [flags]
-
-Flags:
-  -d, --download string          The book directory you want to use (default ".")
-  -e, --extract                  Extract the archive file for filtering
-  -f, --format strings           The file formats you want to download (default [epub,azw3,mobi,pdf,zip])
-  -h, --help                     help for youyidu
-  -i, --initial int              The book id you want to start download (default 1)
-      --ratelimit int            The allowed requests per minutes for every thread (default 30)
-      --refreshToken string      Refresh token for aliyun drive
-  -r, --rename                   Rename the book file by book id
-      --source string            The source (aliyun, telecom, lanzou) to download book (default "telecom")
-      --telecomPassword string   Telecom drive password
-      --telecomUsername string   Telecom drive username
-  -t, --thread int               The number of download thead (default 1)
 
 Global Flags:
   -c, --config string       The config path for bookhunter
