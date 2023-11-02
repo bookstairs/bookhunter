@@ -8,7 +8,6 @@
 ![Release](https://github.com/bookstairs/bookhunter/workflows/release/badge.svg)
 
 Downloading books from [talebook](https://github.com/talebook/talebook),
-[天浪书屋](https://www.tianlangbooks.com),
 [SoBooks](https://sobooks.cc)
 [中小学教材](https://basic.smartedu.cn/tchMaterial)
 and Telegram Channels. This is a totally
@@ -47,7 +46,6 @@ by your running environment.
 |--------------------------------------------------|----------------------------------------|-----------------|----------------------------------------|-----------------------------------|----------------------------------|
 | [智慧教育平台](#download-textbooks-for-kids)           | <https://basic.smartedu.cn/tchMaterial>   | ✅               | ❌                                      | ❌                                 | ❌                                |
 | [Talebook](#download-books-from-talebook)        | <https://github.com/talebook/talebook> | ✅               | ❌                                      | ❌                                 | ❌                                |
-| [天浪书屋](#download-books-from-tianlang)            | <https://www.tianlangbooks.com>        | ❌               | ❌                                      | ✅                                 | ❌                                |
 | [SoBooks](#download-books-from-sobooks)          | <https://sobooks.net>                  | ✅               | ❌                                      | ✅                                 | ❌                                |
 | [Telegram](#download-books-from-telegram-groups) | <https://t.me>                         | ✅               | ❌                                      | ❌                                 | ❌                                |
 
@@ -115,34 +113,6 @@ Flags:
   -t, --thread int        The number of download thead (default 1)
   -u, --username string   The talebook username
   -w, --website string    The talebook link
-
-Global Flags:
-  -c, --config string       The config path for bookhunter
-      --proxy string        The request proxy
-  -a, --user-agent string   The request user-agent (default "Mozilla/5.0 (X11; Linux i686; rv:13.0) Gecko/13.0 Firefox/13.0")
-      --verbose             Print all the logs for debugging
-```
-
-### Download books from Tianlang
-
-```text
-Usage:
-  bookhunter tianlang [flags]
-
-Flags:
-  -d, --download string          The book directory you want to use (default ".")
-  -e, --extract                  Extract the archive file for filtering
-  -f, --format strings           The file formats you want to download (default [epub,azw3,mobi,pdf,zip])
-  -h, --help                     help for tianlang
-  -i, --initial int              The book id you want to start download (default 1)
-      --ratelimit int            The allowed requests per minutes for every thread (default 30)
-      --refreshToken string      Refresh token for aliyun drive
-  -r, --rename                   Rename the book file by book id
-      --secretKey string         The secret key for tianlang (default "359198")
-      --source string            The source (aliyun, telecom, lanzou) to download book (default "telecom")
-      --telecomPassword string   Telecom drive password
-      --telecomUsername string   Telecom drive username
-  -t, --thread int               The number of download thead (default 1)
 
 Global Flags:
   -c, --config string       The config path for bookhunter

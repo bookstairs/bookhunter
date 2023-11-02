@@ -47,10 +47,6 @@ var (
 	AppID     = int64(0)
 	AppHash   = ""
 
-	// Tianlang secret key.
-
-	TianlangSecretKey = "359198"
-
 	// SoBooks configurations.
 
 	SoBooksCode = "844283"
