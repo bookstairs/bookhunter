@@ -30,7 +30,7 @@ func newTelegramService(config *Config) (service, error) {
 	appHash := config.Property("appHash")
 
 	// Change the process file name.
-	config.precessFile = strings.ReplaceAll(channelID, "/", "_") + ".db"
+	config.processFile = strings.ReplaceAll(channelID, "/", "_") + ".db"
 
 	tel, err := telegram.New(channelID, mobile, appID, appHash, sessionPath, config.Proxy)
 	if err != nil {

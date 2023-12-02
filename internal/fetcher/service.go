@@ -2,6 +2,7 @@ package fetcher
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/bookstairs/bookhunter/internal/driver"
 	"github.com/bookstairs/bookhunter/internal/file"
@@ -17,6 +18,20 @@ type service interface {
 
 	// fetch the given book ID.
 	fetch(int64, file.Format, driver.Share, file.Writer) error
+}
+
+func matchKeywords(title string, keywords []string) bool {
+	if len(keywords) == 0 {
+		return true
+	}
+
+	for _, keyword := range keywords {
+		if strings.Contains(title, keyword) {
+			return true
+		}
+	}
+
+	return false
 }
 
 // newService is the endpoint for creating all the supported download service.

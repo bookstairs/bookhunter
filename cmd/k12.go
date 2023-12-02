@@ -24,6 +24,7 @@ var k12Cmd = &cobra.Command{
 			Row("Download Path", flags.DownloadPath).
 			Row("Thread", flags.Thread).
 			Row("Thread Limit (req/min)", flags.RateLimit).
+			Row("Keywords", flags.Keywords).
 			Print()
 
 		flags.Website = k12Website

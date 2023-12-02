@@ -1,6 +1,8 @@
 package fetcher
 
 import (
+	"errors"
+	"fmt"
 	"os"
 	"path/filepath"
 	"sync"
@@ -45,12 +47,12 @@ func (f *fetcher) Download() error {
 	}
 	log.Infof("Successfully query the download content counts: %d", size)
 
-	// Create download progress with ratelimit.
-	if f.precessFile == "" {
-		f.precessFile = defaultProgressFile
+	// Create download progress with rate limit.
+	if f.processFile == "" {
+		f.processFile = defaultProgressFile
 	}
 	rate := f.RateLimit * f.Thread
-	f.progress, err = progress.NewProgress(f.InitialBookID, size, rate, filepath.Join(configPath, f.precessFile))
+	f.progress, err = progress.NewProgress(f.InitialBookID, size, rate, filepath.Join(configPath, f.processFile))
 	if err != nil {
 		return err
 	}
@@ -120,9 +122,17 @@ thread:
 		// Download the file by formats one by one.
 		for format, share := range formats {
 			err := f.downloadFile(bookID, format, share)
-			if err != nil && err != ErrFileNotExist {
-				f.errs <- err
-				break thread
+			for retry := 0; err != nil && retry < f.Retry; retry++ {
+				fmt.Printf("Download book id %d failed: %v, retry (%d/%d)\n", bookID, err, retry, f.Retry)
+				err = f.downloadFile(bookID, format, share)
+			}
+
+			if err != nil && !errors.Is(err, ErrFileNotExist) {
+				fmt.Printf("Download book id %d failed: %v\n", bookID, err)
+				if !f.SkipError {
+					f.errs <- err
+					break thread
+				}
 			}
 		}
 
@@ -137,6 +147,8 @@ thread:
 
 // downloadFile in a thread.
 func (f *fetcher) downloadFile(bookID int64, format file.Format, share driver.Share) error {
+	f.progress.TakeRateLimit()
+	log.Debugf("Start download book id %d, format %s, share %v.", bookID, format, share)
 	// Create the file writer.
 	writer, err := f.creator.NewWriter(bookID, f.progress.Size(), share.FileName, share.SubPath, format, share.Size)
 	if err != nil {
@@ -153,7 +165,7 @@ func (f *fetcher) filterFormats(formats map[file.Format]driver.Share) map[file.F
 	fs := make(map[file.Format]driver.Share)
 	for format, share := range formats {
 		for _, vf := range f.Formats {
-			if format == vf {
+			if format == vf && matchKeywords(share.FileName, f.Keywords) {
 				fs[format] = share
 				break
 			}
