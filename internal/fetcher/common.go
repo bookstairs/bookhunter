@@ -32,13 +32,16 @@ const (
 type Config struct {
 	Category      Category      // The identity of the fetcher service.
 	Formats       []file.Format // The formats that the user wants.
+	Keywords      []string      // The keywords that the user wants.
 	Extract       bool          // Extract the archives after download.
 	DownloadPath  string        // The path for storing the file.
 	InitialBookID int64         // The book id start to download.
 	Rename        bool          // Rename the file by using book ID.
 	Thread        int           // The number of download threads.
 	RateLimit     int           // Request per minute for a thread.
-	precessFile   string        // Define the download process.
+	Retry         int           // The retry times for a failed download.
+	SkipError     bool          // Continue to download the next book if the current book download failed.
+	processFile   string        // Define the download process.
 
 	// The extra configuration for a custom fetcher services.
 	Properties map[string]string

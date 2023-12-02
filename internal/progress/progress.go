@@ -20,6 +20,9 @@ var (
 )
 
 type Progress interface {
+	// TakeRateLimit would wait until the rate limit is available.
+	TakeRateLimit()
+
 	// AcquireBookID would find the book id from the assign array.
 	AcquireBookID() int64
 
@@ -42,7 +45,7 @@ type bitProgress struct {
 	file     *os.File          // The Progress file path for download progress.
 }
 
-// NewProgress Create a storge for save the download progress.
+// NewProgress Create a storage for save the download progress.
 func NewProgress(start, size int64, rate int, path string) (Progress, error) {
 	if start < 1 {
 		return nil, ErrStartBookID
@@ -127,13 +130,15 @@ func loadStorage(file *os.File) (*bitset.BitSet, error) {
 	return set, nil
 }
 
+// TakeRateLimit block until the rate meets the given config.
+func (storage *bitProgress) TakeRateLimit() {
+	storage.limit.Take()
+}
+
 // AcquireBookID would find the book id from the assign array.
 func (storage *bitProgress) AcquireBookID() int64 {
 	storage.lock.Lock()
 	defer storage.lock.Unlock()
-
-	// Block until the rate meets the given config.
-	storage.limit.Take()
 
 	for i := uint(0); i < storage.assigned.Len(); i++ {
 		if !storage.assigned.Test(i) {

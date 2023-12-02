@@ -22,6 +22,9 @@ var (
 	UserAgent  = client.DefaultUserAgent
 	Proxy      = ""
 	ConfigRoot = ""
+	Keywords   = ""
+	Retry      = 3
+	SkipError  = true
 
 	// Common download flags.
 
@@ -68,10 +71,16 @@ func NewFetcher(category fetcher.Category, properties map[string]string) (fetche
 		return nil, err
 	}
 
+	keywords := strings.Split(Keywords, ",")
+	for i, keyword := range keywords {
+		keywords[i] = strings.TrimSpace(keyword)
+	}
+
 	return fetcher.New(&fetcher.Config{
 		Config:        cc,
 		Category:      category,
 		Formats:       fs,
+		Keywords:      keywords,
 		Extract:       Extract,
 		DownloadPath:  DownloadPath,
 		InitialBookID: InitialBookID,
@@ -79,6 +88,8 @@ func NewFetcher(category fetcher.Category, properties map[string]string) (fetche
 		Thread:        Thread,
 		RateLimit:     RateLimit,
 		Properties:    properties,
+		Retry:         Retry,
+		SkipError:     SkipError,
 	})
 }
 
