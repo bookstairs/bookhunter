@@ -5,6 +5,7 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/gotd/td/tg"
 
@@ -31,6 +32,9 @@ func newTelegramService(config *Config) (service, error) {
 
 	// Change the process file name.
 	config.processFile = strings.ReplaceAll(channelID, "/", "_") + ".db"
+	if len(config.Keywords) == 0 {
+		config.processFile = strconv.FormatInt(time.Now().Unix(), 10) + config.processFile
+	}
 
 	tel, err := telegram.New(channelID, mobile, appID, appHash, sessionPath, config.Proxy)
 	if err != nil {
