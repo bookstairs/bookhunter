@@ -5,7 +5,10 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strconv"
+	"strings"
 	"sync"
+	"time"
 
 	"github.com/bookstairs/bookhunter/internal/driver"
 	"github.com/bookstairs/bookhunter/internal/file"
@@ -49,7 +52,12 @@ func (f *fetcher) Download() error {
 
 	// Create download progress with rate limit.
 	if f.processFile == "" {
-		f.processFile = defaultProgressFile
+		if len(f.Keywords) == 0 {
+			f.processFile = defaultProgressFile
+		} else {
+			// Avoid the download progress overloading.
+			f.processFile = strconv.FormatInt(time.Now().Unix(), 10) + defaultProgressFile
+		}
 	}
 	rate := f.RateLimit * f.Thread
 	f.progress, err = progress.NewProgress(f.InitialBookID, size, rate, filepath.Join(configPath, f.processFile))
@@ -92,7 +100,7 @@ func (f *fetcher) Download() error {
 }
 
 // startDownload will start a download thread.
-func (f *fetcher) startDownload() {
+func (f *fetcher) startDownload() { //nolint:gocyclo
 thread:
 	for {
 		bookID := f.progress.AcquireBookID()
@@ -102,7 +110,7 @@ thread:
 			break thread
 		}
 
-		// Start download the given book ID.
+		// Start downloading the given book ID.
 		// The error will be sent to the channel.
 
 		// Acquire the available file formats
@@ -119,10 +127,20 @@ thread:
 			log.Warnf("[%d/%d] No downloadable files found.", bookID, f.progress.Size())
 		}
 
+		// Filter the name, skip the progress if the name isn't the desired one.
+		if len(formats) != 0 && len(f.Keywords) != 0 {
+			formats = f.filterNames(formats)
+			if len(formats) == 0 {
+				log.Warnf("[%d/%d] The files found by the given keywords", bookID, f.progress.Size())
+				// No need to save the download progress.
+				continue
+			}
+		}
+
 		// Download the file by formats one by one.
 		for format, share := range formats {
 			err := f.downloadFile(bookID, format, share)
-			for retry := 0; err != nil && retry < f.Retry; retry++ {
+			for retry := 0; err != nil && !errors.Is(err, ErrFileNotExist) && retry < f.Retry; retry++ {
 				fmt.Printf("Download book id %d failed: %v, retry (%d/%d)\n", bookID, err, retry, f.Retry)
 				err = f.downloadFile(bookID, format, share)
 			}
@@ -165,11 +183,32 @@ func (f *fetcher) filterFormats(formats map[file.Format]driver.Share) map[file.F
 	fs := make(map[file.Format]driver.Share)
 	for format, share := range formats {
 		for _, vf := range f.Formats {
-			if format == vf && matchKeywords(share.FileName, f.Keywords) {
+			if format == vf {
 				fs[format] = share
 				break
 			}
 		}
 	}
 	return fs
+}
+
+func (f *fetcher) filterNames(formats map[file.Format]driver.Share) map[file.Format]driver.Share {
+	fs := make(map[file.Format]driver.Share)
+	for format, share := range formats {
+		if matchKeywords(share.FileName, f.Keywords) {
+			fs[format] = share
+		}
+	}
+	return fs
+}
+
+func matchKeywords(title string, keywords []string) bool {
+	for _, keyword := range keywords {
+		// Should we support the regular expression?
+		if strings.Contains(title, keyword) {
+			return true
+		}
+	}
+
+	return false
 }
