@@ -37,6 +37,7 @@ var telegramCmd = &cobra.Command{
 			Row("Initial ID", flags.InitialBookID).
 			Row("Rename File", flags.Rename).
 			Row("Thread", flags.Thread).
+			Row("Keywords", flags.Keywords).
 			Row("Thread Limit (req/min)", flags.RateLimit).
 			Print()
 

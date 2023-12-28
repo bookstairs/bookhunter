@@ -22,7 +22,7 @@ var (
 	UserAgent  = client.DefaultUserAgent
 	Proxy      = ""
 	ConfigRoot = ""
-	Keywords   = ""
+	Keywords   []string
 	Retry      = 3
 	SkipError  = true
 
@@ -71,16 +71,11 @@ func NewFetcher(category fetcher.Category, properties map[string]string) (fetche
 		return nil, err
 	}
 
-	keywords := strings.Split(Keywords, ",")
-	for i, keyword := range keywords {
-		keywords[i] = strings.TrimSpace(keyword)
-	}
-
 	return fetcher.New(&fetcher.Config{
 		Config:        cc,
 		Category:      category,
 		Formats:       fs,
-		Keywords:      keywords,
+		Keywords:      Keywords,
 		Extract:       Extract,
 		DownloadPath:  DownloadPath,
 		InitialBookID: InitialBookID,
