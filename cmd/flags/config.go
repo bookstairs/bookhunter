@@ -19,7 +19,6 @@ var (
 	// Common flags.
 
 	Website    = ""
-	UserAgent  = client.DefaultUserAgent
 	Proxy      = ""
 	ConfigRoot = ""
 	Keywords   []string
@@ -56,7 +55,7 @@ var (
 )
 
 func NewClientConfig() (*client.Config, error) {
-	return client.NewConfig(Website, UserAgent, Proxy, ConfigRoot)
+	return client.NewConfig(Website, Proxy, ConfigRoot)
 }
 
 // NewFetcher will create the fetcher by the command line arguments.

@@ -4,35 +4,24 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/bookstairs/bookhunter/cmd/flags"
-	"github.com/bookstairs/bookhunter/internal/driver"
 	"github.com/bookstairs/bookhunter/internal/fetcher"
 	"github.com/bookstairs/bookhunter/internal/log"
 )
 
-const (
-	lowestSobooksBookID = 18000
-	sobooksWebsite      = "https://sobooks.net"
-)
+const hsuWebsite = "https://book.hsu.life"
 
-// sobooksCmd used for download books from sobooks.net
-var sobooksCmd = &cobra.Command{
-	Use:   "sobooks",
-	Short: "A tool for downloading books from sobooks.net",
+var hsuCmd = &cobra.Command{
+	Use:   "hsu",
+	Short: "A tool for downloading book from hsu.life",
 	Run: func(cmd *cobra.Command, args []string) {
-		// Set the default start index.
-		if flags.InitialBookID < lowestSobooksBookID {
-			flags.InitialBookID = lowestSobooksBookID
-		}
-
-		// Print download configuration.
 		log.NewPrinter().
-			Title("SoBooks Download Information").
-			Head(log.DefaultHead...).
-			Row("SoBooks Code", flags.SoBooksCode).
+			Title("hsu.life Download Information").
+			Head(log.DefaultHead).
+			Row("Username", flags.Username).
+			Row("Password", flags.HideSensitive(flags.Password)).
 			Row("Config Path", flags.ConfigRoot).
 			Row("Proxy", flags.Proxy).
 			Row("Formats", flags.Formats).
-			Row("Extract Archive", flags.Extract).
 			Row("Download Path", flags.DownloadPath).
 			Row("Initial ID", flags.InitialBookID).
 			Row("Rename File", flags.Rename).
@@ -41,17 +30,16 @@ var sobooksCmd = &cobra.Command{
 			Row("Thread Limit (req/min)", flags.RateLimit).
 			Print()
 
-		// Set the domain for using in the client.Client.
-		flags.Website = sobooksWebsite
-		flags.Driver = string(driver.LANZOU)
+		flags.Website = hsuWebsite
 
 		// Create the fetcher.
-		properties := flags.NewDriverProperties()
-		properties["code"] = flags.SoBooksCode
-		f, err := flags.NewFetcher(fetcher.SoBooks, properties)
+		f, err := flags.NewFetcher(fetcher.Hsu, map[string]string{
+			"username": flags.Username,
+			"password": flags.Password,
+		})
 		log.Exit(err)
 
-		// Wait all the threads have finished.
+		// Start downloading the books.
 		err = f.Download()
 		log.Exit(err)
 
@@ -61,19 +49,22 @@ var sobooksCmd = &cobra.Command{
 }
 
 func init() {
-	f := sobooksCmd.Flags()
+	// Add flags for use info.
+	f := hsuCmd.Flags()
+
+	// Talebook related flags.
+	f.StringVarP(&flags.Username, "username", "u", flags.Username, "The hsu.life username")
+	f.StringVarP(&flags.Password, "password", "p", flags.Password, "The hsu.life password")
 
 	// Common download flags.
 	f.StringSliceVarP(&flags.Formats, "format", "f", flags.Formats, "The file formats you want to download")
-	f.BoolVarP(&flags.Extract, "extract", "e", flags.Extract, "Extract the archive file for filtering")
 	f.StringVarP(&flags.DownloadPath, "download", "d", flags.DownloadPath, "The book directory you want to use")
 	f.Int64VarP(&flags.InitialBookID, "initial", "i", flags.InitialBookID, "The book id you want to start download")
 	f.BoolVarP(&flags.Rename, "rename", "r", flags.Rename, "Rename the book file by book id")
 	f.IntVarP(&flags.Thread, "thread", "t", flags.Thread, "The number of download thead")
 	f.IntVar(&flags.RateLimit, "ratelimit", flags.RateLimit, "The allowed requests per minutes for every thread")
 
-	// SoBooks books flags.
-	f.StringVar(&flags.SoBooksCode, "code", flags.SoBooksCode, "The secret code for SoBooks")
-
-	_ = sobooksCmd.MarkFlagRequired("code")
+	// Mark some flags as required.
+	_ = hsuCmd.MarkFlagRequired("username")
+	_ = hsuCmd.MarkFlagRequired("password")
 }

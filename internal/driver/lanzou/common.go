@@ -43,7 +43,6 @@ func New(config *client.Config) (*Lanzou, error) {
 	cl, err := client.New(&client.Config{
 		HTTPS:      true,
 		Host:       availableHostnames[0],
-		UserAgent:  config.UserAgent,
 		Proxy:      config.Proxy,
 		ConfigRoot: config.ConfigRoot,
 	})

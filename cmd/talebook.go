@@ -32,7 +32,6 @@ var talebookDownloadCmd = &cobra.Command{
 			Row("Password", flags.HideSensitive(flags.Password)).
 			Row("Config Path", flags.ConfigRoot).
 			Row("Proxy", flags.Proxy).
-			Row("UserAgent", flags.UserAgent).
 			Row("Formats", flags.Formats).
 			Row("Download Path", flags.DownloadPath).
 			Row("Initial ID", flags.InitialBookID).
@@ -49,7 +48,7 @@ var talebookDownloadCmd = &cobra.Command{
 		})
 		log.Exit(err)
 
-		// Start download the books.
+		// Start downloading the books.
 		err = f.Download()
 		log.Exit(err)
 
@@ -74,12 +73,11 @@ You can use this register command for creating account`,
 			Row("Password", flags.Password).
 			Row("Email", flags.Email).
 			Row("Config Path", flags.ConfigRoot).
-			Row("UserAgent", flags.UserAgent).
 			Row("Proxy", flags.Proxy).
 			Print()
 
 		// Create client config.
-		config, err := client.NewConfig(flags.Website, flags.UserAgent, flags.Proxy, flags.ConfigRoot)
+		config, err := client.NewConfig(flags.Website, flags.Proxy, flags.ConfigRoot)
 		log.Exit(err)
 
 		// Create http client.

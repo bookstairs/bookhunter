@@ -21,11 +21,10 @@ type Category string // The fetcher service identity.
 
 const (
 	Talebook Category = "talebook"
-	SanQiu   Category = "sanqiu"
 	SoBooks  Category = "sobooks"
-	TianLang Category = "tianlang"
 	Telegram Category = "telegram"
 	K12      Category = "k12"
+	Hsu      Category = "hsu"
 )
 
 // Config is used to define a common config for a specified fetcher service.

@@ -24,16 +24,14 @@ func newService(c *Config) (service, error) {
 	switch c.Category {
 	case Talebook:
 		return newTalebookService(c)
-	case SanQiu:
-		return newSanqiuService(c)
 	case SoBooks:
 		return newSobooksService(c)
-	case TianLang:
-		return newTianlangService(c)
 	case Telegram:
 		return newTelegramService(c)
 	case K12:
 		return newK12Service(c)
+	case Hsu:
+		return newHsuService(c)
 	default:
 		return nil, fmt.Errorf("no such fetcher service [%s] supported", c.Category)
 	}

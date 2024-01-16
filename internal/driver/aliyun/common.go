@@ -14,7 +14,6 @@ func New(c *client.Config, refreshToken string) (*Aliyun, error) {
 	c = &client.Config{
 		HTTPS:      true,
 		Host:       "api.aliyundrive.com",
-		UserAgent:  c.UserAgent,
 		Proxy:      c.Proxy,
 		ConfigRoot: c.ConfigRoot,
 	}

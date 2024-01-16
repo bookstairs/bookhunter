@@ -26,7 +26,6 @@ var telegramCmd = &cobra.Command{
 			Head(log.DefaultHead...).
 			Row("Config Path", flags.ConfigRoot).
 			Row("Proxy", flags.Proxy).
-			Row("UserAgent", flags.UserAgent).
 			Row("Channel ID", flags.ChannelID).
 			Row("Mobile", flags.HideSensitive(flags.Mobile)).
 			Row("AppID", flags.HideSensitive(strconv.FormatInt(flags.AppID, 10))).

@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"time"
 
+	browser "github.com/EDDYCJY/fake-useragent"
 	"github.com/go-resty/resty/v2"
 
 	"github.com/bookstairs/bookhunter/internal/log"
@@ -16,11 +17,6 @@ import (
 
 var (
 	ErrInvalidRequestURL = errors.New("invalid request url, we only support https:// or http://")
-)
-
-const (
-	DefaultUserAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko)" +
-		" Chrome/107.0.0.0 Safari/537.36 Edg/107.0.1418.42"
 )
 
 // Client is the wrapper for resty.Client we may provide extra method on this wrapper.
@@ -33,9 +29,8 @@ type Client struct {
 type Config struct {
 	HTTPS      bool   // If the request was under the https of http.
 	Host       string // The request host name.
-	UserAgent  string // Custom user agent for mocking as the browser client.
 	Proxy      string // The proxy address, such as the http://127.0.0.1:7890, socks://127.0.0.1:7890
-	ConfigRoot string // The root config path for whole bookhunter download service.
+	ConfigRoot string // The root config path for the whole bookhunter download service.
 
 	// The custom redirect function.
 	Redirect resty.RedirectPolicy `json:"-"`
@@ -63,14 +58,6 @@ func (c *Config) redirectPolicy() []any {
 	}
 
 	return policies
-}
-
-func (c *Config) userAgent() string {
-	if c.UserAgent == "" {
-		return DefaultUserAgent
-	}
-
-	return c.UserAgent
 }
 
 func (c *Config) baseURL() string {
@@ -110,7 +97,7 @@ func mkdir(path string) (string, error) {
 }
 
 // NewConfig will create a config instance by using the request url.
-func NewConfig(rawURL, userAgent, proxy, configRoot string) (*Config, error) {
+func NewConfig(rawURL, proxy, configRoot string) (*Config, error) {
 	u, err := url.Parse(rawURL)
 	if err != nil {
 		return nil, fmt.Errorf(rawURL, err)
@@ -134,7 +121,6 @@ func NewConfig(rawURL, userAgent, proxy, configRoot string) (*Config, error) {
 	return &Config{
 		HTTPS:      u.Scheme == "https",
 		Host:       u.Host,
-		UserAgent:  userAgent,
 		Proxy:      proxy,
 		ConfigRoot: configRoot,
 	}, nil
@@ -149,7 +135,7 @@ func New(c *Config) (*Client, error) {
 		SetAllowGetMethodPayload(true).
 		SetTimeout(5*time.Minute).
 		SetContentLength(true).
-		SetHeader("User-Agent", c.userAgent())
+		SetHeader("User-Agent", browser.Chrome())
 
 	if !log.EnableDebug {
 		client.DisableTrace().SetDebug(false).SetDisableWarn(true)

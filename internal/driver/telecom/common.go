@@ -21,7 +21,6 @@ func New(c *client.Config, username, password string) (*Telecom, error) {
 	cl, err := client.New(&client.Config{
 		HTTPS:      false,
 		Host:       "cloud.189.cn",
-		UserAgent:  c.UserAgent,
 		Proxy:      c.Proxy,
 		ConfigRoot: c.ConfigRoot,
 	})

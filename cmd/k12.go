@@ -20,7 +20,6 @@ var k12Cmd = &cobra.Command{
 			Head(log.DefaultHead...).
 			Row("Config Path", flags.ConfigRoot).
 			Row("Proxy", flags.Proxy).
-			Row("UserAgent", flags.UserAgent).
 			Row("Download Path", flags.DownloadPath).
 			Row("Thread", flags.Thread).
 			Row("Thread Limit (req/min)", flags.RateLimit).
