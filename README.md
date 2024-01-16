@@ -48,6 +48,7 @@ by your running environment.
 | [Talebook](#download-books-from-talebook)        | <https://github.com/talebook/talebook> | ✅               | ❌                                      | ❌                                 | ❌                                |
 | [SoBooks](#download-books-from-sobooks)          | <https://sobooks.net>                  | ✅               | ❌                                      | ✅                                 | ❌                                |
 | [Telegram](#download-books-from-telegram-groups) | <https://t.me>                         | ✅               | ❌                                      | ❌                                 | ❌                                |
+| [Hsu Life](#download-books-from-hsu-life)        | <https://book.hsu.life                 | ✅               | ❌                                      | ❌                                 | ❌                                |
 
 ### Login Aliyundrive to get the `refreshToken`
 
@@ -145,7 +146,7 @@ Global Flags:
       --verbose             Print all the logs for debugging
 ```
 
-### Download books from Telegram groups.
+### Download books from Telegram groups
 
 Example command: `bookhunter telegram --appID ****** --appHash ****** -k https://t.me/MothLib`
 
@@ -176,4 +177,32 @@ Global Flags:
       --proxy string        The request proxy
   -a, --user-agent string   The request user-agent (default "Mozilla/5.0 (X11; Linux i686; rv:13.0) Gecko/13.0 Firefox/13.0")
       --verbose             Print all the logs for debugging
+```
+
+### Download books from Hsu Life
+
+Example command: `bookhunter hsu --username ****** --password ******`
+
+```text
+Usage:
+  bookhunter hsu [flags]
+
+Flags:
+  -d, --download string   The book directory you want to use (default "/Users/Yufan/Developer/bookstairs/bookhunter")
+  -f, --format strings    The file formats you want to download (default [epub,azw3,mobi,pdf,zip])
+  -h, --help              help for hsu
+  -i, --initial int       The book id you want to start download (default 1)
+  -p, --password string   The hsu.life password
+      --ratelimit int     The allowed requests per minutes for every thread (default 30)
+  -r, --rename            Rename the book file by book id
+  -t, --thread int        The number of download thead (default 1)
+  -u, --username string   The hsu.life username
+
+Global Flags:
+  -c, --config string     The config path for bookhunter
+  -k, --keyword strings   The keywords for books
+      --proxy string      The request proxy
+      --retry int         The retry times for a failed download (default 3)
+  -s, --skip-error        Continue to download the next book if the current book download failed (default true)
+      --verbose           Print all the logs for debugging
 ```
