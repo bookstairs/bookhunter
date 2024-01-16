@@ -48,7 +48,7 @@ by your running environment.
 | [Talebook](#download-books-from-talebook)        | <https://github.com/talebook/talebook> | ✅               | ❌                                      | ❌                                 | ❌                                |
 | [SoBooks](#download-books-from-sobooks)          | <https://sobooks.net>                  | ✅               | ❌                                      | ✅                                 | ❌                                |
 | [Telegram](#download-books-from-telegram-groups) | <https://t.me>                         | ✅               | ❌                                      | ❌                                 | ❌                                |
-| [Hsu Life](#download-books-from-hsu-life)        | <https://book.hsu.life                 | ✅               | ❌                                      | ❌                                 | ❌                                |
+| [Hsu Life](#download-books-from-hsu-life)        | <https://book.hsu.life>                | ✅               | ❌                                      | ❌                                 | ❌                                |
 
 ### Login Aliyundrive to get the `refreshToken`
 
