@@ -160,13 +160,13 @@ Usage:
 Flags:
       --appHash string     The app hash for telegram
       --appID int          The app id for telegram
-  -k, --channelID string   The channel id for telegram
+      --channelID string   The channel id for telegram
   -d, --download string    The book directory you want to use (default ".")
   -e, --extract            Extract the archive file for filtering
   -f, --format strings     The file formats you want to download (default [epub,azw3,mobi,pdf,zip])
   -h, --help               help for telegram
   -i, --initial int        The book id you want to start download (default 1)
-  -b, --mobile string      The mobile number, we will add +86 as default zone code
+      --mobile string      The mobile number, we will add +86 as default zone code
       --ratelimit int      The allowed requests per minutes for every thread (default 30)
       --refresh            Refresh the login session
   -r, --rename             Rename the book file by book id
