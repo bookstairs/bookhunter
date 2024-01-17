@@ -63,8 +63,8 @@ func init() {
 	f := telegramCmd.Flags()
 
 	// Telegram download arguments.
-	f.StringVarP(&flags.ChannelID, "channelID", "k", flags.ChannelID, "The channel id for telegram")
-	f.StringVarP(&flags.Mobile, "mobile", "b", flags.Mobile, "The mobile number, we will add +86 as default zone code")
+	f.StringVarP(&flags.ChannelID, "channelID", "", flags.ChannelID, "The channel id for telegram")
+	f.StringVarP(&flags.Mobile, "mobile", "", flags.Mobile, "The mobile number, we will add +86 as default zone code")
 	f.BoolVar(&flags.ReLogin, "refresh", flags.ReLogin, "Refresh the login session")
 	f.Int64Var(&flags.AppID, "appID", flags.AppID, "The app id for telegram")
 	f.StringVar(&flags.AppHash, "appHash", flags.AppHash, "The app hash for telegram")
