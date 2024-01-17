@@ -63,6 +63,11 @@ func (c *creator) NewWriter(id, total int64, name, subPath string, format Format
 	// Ref: https://en.wikipedia.org/wiki/Filename#Reserved_characters_and_words
 	filename = escape(filename)
 
+	// Avoid filename too large.
+	if len(filename) > 200 {
+		filename = filename[:200]
+	}
+	
 	// Create the download path.
 	downloadPath := c.downloadPath
 	if subPath != "" {
