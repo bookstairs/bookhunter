@@ -7,21 +7,19 @@ import (
 	"github.com/jedib0t/go-pretty/v6/table"
 )
 
-var DefaultHead = []any{"Config Key", "Config Value"}
+var DefaultHead = table.Row{"Config Key", "Config Value"}
 
 type Printer interface {
-	Title(title string) Printer   // Title adds the table title.
-	Head(heads ...any) Printer    // Head adds the table head.
-	MaxWidth(width uint8) Printer // MaxColWidth the large column will be trimmed.
-	Row(fields ...any) Printer    // Row add a row to the table.
-	AllowZeroValue() Printer      // AllowZeroValue The row will be printed if it contains zero value.
-	Print()                       // Print would print a table-like message from the given config.
+	Title(title string) Printer // Title adds the table title.
+	Head(heads ...any) Printer  // Head adds the table head.
+	Row(fields ...any) Printer  // Row add a row to the table.
+	AllowZeroValue() Printer    // AllowZeroValue The row will be printed if it contains zero value.
+	Print()                     // Print would print a table-like message from the given config.
 }
 
 type tablePrinter struct {
 	title     string
 	heads     []any
-	width     uint8
 	rows      [][]any
 	allowZero bool
 }
@@ -36,19 +34,8 @@ func (t *tablePrinter) Head(heads ...any) Printer {
 	return t
 }
 
-func (t *tablePrinter) MaxWidth(width uint8) Printer {
-	t.width = width
-	return t
-}
-
 func (t *tablePrinter) Row(fields ...any) Printer {
 	if len(fields) > 0 {
-		// Trim the fields into a small length.
-		for i, field := range fields {
-			if f, ok := field.(string); ok && len(f) > int(t.width) {
-				fields[i] = f[:t.width] + "..."
-			}
-		}
 		t.rows = append(t.rows, fields)
 	}
 	return t
@@ -94,5 +81,5 @@ func appendRow(writer table.Writer, row []any, allowZero bool) {
 
 // NewPrinter will return a printer for table-like logs.
 func NewPrinter() Printer {
-	return &tablePrinter{width: 30}
+	return &tablePrinter{}
 }

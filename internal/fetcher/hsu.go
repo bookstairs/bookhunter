@@ -1,6 +1,7 @@
 package fetcher
 
 import (
+	"fmt"
 	"io"
 	"sort"
 	"strconv"
@@ -150,7 +151,11 @@ func newHsuService(config *Config) (service, error) {
 		return nil, err
 	}
 
-	c.SetAuthToken(resp.Result().(*HsuLoginResp).Token)
+	token := resp.Result().(*HsuLoginResp).Token
+	if token == "" {
+		return nil, fmt.Errorf("invalid login credential")
+	}
+	c.SetAuthToken(token)
 
 	// Download books.
 	resp, err = c.R().

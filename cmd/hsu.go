@@ -16,7 +16,7 @@ var hsuCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		log.NewPrinter().
 			Title("hsu.life Download Information").
-			Head(log.DefaultHead).
+			Head(log.DefaultHead...).
 			Row("Username", flags.Username).
 			Row("Password", flags.HideSensitive(flags.Password)).
 			Row("Config Path", flags.ConfigRoot).
