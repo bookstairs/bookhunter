@@ -3,12 +3,12 @@ module github.com/bookstairs/bookhunter
 go 1.21
 
 require (
-	github.com/EDDYCJY/fake-useragent v0.2.0
 	github.com/PuerkitoBio/goquery v1.8.1
 	github.com/bits-and-blooms/bitset v1.13.0
+	github.com/corpix/uarand v0.2.0
 	github.com/go-resty/resty/v2 v2.11.0
 	github.com/gotd/contrib v0.19.0
-	github.com/gotd/td v0.93.0
+	github.com/gotd/td v0.95.0
 	github.com/jedib0t/go-pretty/v6 v6.5.3
 	github.com/k0kubun/go-ansi v0.0.0-20180517002512-3bf9e2903213
 	github.com/mitchellh/colorstring v0.0.0-20190213212951-d06e56a500db
@@ -40,8 +40,8 @@ require (
 	github.com/rivo/uniseg v0.4.4 // indirect
 	github.com/segmentio/asm v1.2.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
-	go.opentelemetry.io/otel v1.21.0 // indirect
-	go.opentelemetry.io/otel/trace v1.21.0 // indirect
+	go.opentelemetry.io/otel v1.22.0 // indirect
+	go.opentelemetry.io/otel/trace v1.22.0 // indirect
 	go.uber.org/atomic v1.11.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	go.uber.org/zap v1.26.0 // indirect

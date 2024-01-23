@@ -219,7 +219,11 @@ func (h *hsuService) formats(i int64) (map[file.Format]driver.Share, error) {
 				return nil, err
 			}
 
-			size, err := strconv.ParseInt(resp.String(), 10, 64)
+			fileSize := resp.String()
+			if fileSize == "" {
+				return nil, fmt.Errorf("you are not allowed to download books")
+			}
+			size, err := strconv.ParseInt(fileSize, 10, 64)
 			if err != nil {
 				return nil, err
 			}

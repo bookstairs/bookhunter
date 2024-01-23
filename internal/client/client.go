@@ -9,7 +9,7 @@ import (
 	"path/filepath"
 	"time"
 
-	browser "github.com/EDDYCJY/fake-useragent"
+	"github.com/corpix/uarand"
 	"github.com/go-resty/resty/v2"
 
 	"github.com/bookstairs/bookhunter/internal/log"
@@ -135,7 +135,7 @@ func New(c *Config) (*Client, error) {
 		SetAllowGetMethodPayload(true).
 		SetTimeout(5*time.Minute).
 		SetContentLength(true).
-		SetHeader("User-Agent", browser.Chrome())
+		SetHeader("User-Agent", uarand.GetRandom())
 
 	if !log.EnableDebug {
 		client.DisableTrace().SetDebug(false).SetDisableWarn(true)
