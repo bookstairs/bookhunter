@@ -10,7 +10,7 @@ import (
 )
 
 func TestParseSobooksUrl(t *testing.T) {
-	client := resty.New().SetBaseURL("https://sobooks.net")
+	client := resty.New().SetBaseURL("https://sobooks.cc")
 
 	// unsupported 14320 11000
 	// 20081 16899 16240
@@ -18,9 +18,9 @@ func TestParseSobooksUrl(t *testing.T) {
 	resp, err := client.R().
 		SetCookie(&http.Cookie{
 			Name:   "mpcode",
-			Value:  "844283",
+			Value:  "244152",
 			Path:   "/",
-			Domain: "sobooks.net",
+			Domain: "sobooks.cc",
 		}).
 		SetPathParam("bookId", strconv.FormatInt(id, 10)).
 		SetHeader("referer", client.BaseURL).
