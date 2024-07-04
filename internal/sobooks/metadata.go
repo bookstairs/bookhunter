@@ -25,7 +25,7 @@ var (
 		driver.DIRECT:  "备份",
 	}
 	dateRe = regexp.MustCompile(`(?m)(\d{4})-(\d{2})-(\d{2})`)
-	linkRe = regexp.MustCompile(`(?m)https://sobooks\.net/go\.html\?url=(.*?)"(.*?[：:]\s?(\w+))?`)
+	linkRe = regexp.MustCompile(`(?m)https://sobooks\.cc/go\.html\?url=(.*?)"(.*?[：:]\s?(\w+))?`)
 )
 
 type BookLink struct {

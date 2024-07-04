@@ -51,7 +51,7 @@ var (
 
 	// SoBooks configurations.
 
-	SoBooksCode = "844283"
+	SoBooksCode = "244152"
 )
 
 func NewClientConfig() (*client.Config, error) {
