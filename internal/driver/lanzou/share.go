@@ -210,13 +210,6 @@ func (l *Lanzou) unbox(arg string) string {
 	return strings.Join(v2, "")
 }
 
-func min(x, y int) int {
-	if x < y {
-		return x
-	}
-	return y
-}
-
 func (l *Lanzou) hexXor(arg, args string) string {
 	a := min(len(arg), len(args))
 	res := ""

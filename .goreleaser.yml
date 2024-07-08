@@ -1,4 +1,5 @@
 project_name: bookhunter
+version: 2
 
 before:
   hooks:
@@ -53,7 +54,7 @@ brews:
     commit_author:
       name: syhily
       email: syhily@gmail.com
-    folder: Formula
+    directory: Formula
     homepage: "https://github.com/bookstairs"
     description: "Software to download chinese ebooks from Internet."
     license: "MIT"
