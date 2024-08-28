@@ -2,6 +2,7 @@ package flags
 
 import (
 	"os"
+	"runtime"
 	"strings"
 
 	"github.com/bookstairs/bookhunter/internal/client"
@@ -38,7 +39,7 @@ var (
 	DownloadPath, _ = os.Getwd()
 	InitialBookID   = int64(1)
 	Rename          = false
-	Thread          = 1
+	Thread          = runtime.NumCPU()
 	RateLimit       = 30
 
 	// Telegram configurations.

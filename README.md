@@ -71,10 +71,12 @@ Flags:
   -t, --thread int        The number of download thead (default 1)
 
 Global Flags:
-  -c, --config string       The config path for bookhunter
-      --proxy string        The request proxy
-  -a, --user-agent string   The request user-agent (default "Mozilla/5.0 (X11; Linux i686; rv:13.0) Gecko/13.0 Firefox/13.0")
-      --verbose             Print all the logs for debugging
+  -c, --config string     The config path for bookhunter
+  -k, --keyword strings   The keywords for books
+      --proxy string      The request proxy
+      --retry int         The retry times for a failed download (default 3)
+  -s, --skip-error        Continue to download the next book if the current book download failed (default true)
+      --verbose           Print all the logs for debugging
 ```
 
 ### Register account in Talebook
@@ -91,10 +93,12 @@ Flags:
   -w, --website string    The talebook link
 
 Global Flags:
-  -c, --config string       The config path for bookhunter
-      --proxy string        The request proxy
-  -a, --user-agent string   The request user-agent (default "Mozilla/5.0 (X11; Linux i686; rv:13.0) Gecko/13.0 Firefox/13.0")
-      --verbose             Print all the logs for debugging
+  -c, --config string     The config path for bookhunter
+  -k, --keyword strings   The keywords for books
+      --proxy string      The request proxy
+      --retry int         The retry times for a failed download (default 3)
+  -s, --skip-error        Continue to download the next book if the current book download failed (default true)
+      --verbose           Print all the logs for debugging
 ```
 
 ### Download books from Talebook
@@ -116,10 +120,12 @@ Flags:
   -w, --website string    The talebook link
 
 Global Flags:
-  -c, --config string       The config path for bookhunter
-      --proxy string        The request proxy
-  -a, --user-agent string   The request user-agent (default "Mozilla/5.0 (X11; Linux i686; rv:13.0) Gecko/13.0 Firefox/13.0")
-      --verbose             Print all the logs for debugging
+  -c, --config string     The config path for bookhunter
+  -k, --keyword strings   The keywords for books
+      --proxy string      The request proxy
+      --retry int         The retry times for a failed download (default 3)
+  -s, --skip-error        Continue to download the next book if the current book download failed (default true)
+      --verbose           Print all the logs for debugging
 ```
 
 ### Download books from SoBooks
@@ -129,7 +135,7 @@ Usage:
   bookhunter sobooks [flags]
 
 Flags:
-      --code string       The secret code for SoBooks (default "844283")
+      --code string       The secret code for SoBooks (default "244152")
   -d, --download string   The book directory you want to use (default ".")
   -e, --extract           Extract the archive file for filtering
   -f, --format strings    The file formats you want to download (default [epub,azw3,mobi,pdf,zip])
@@ -140,15 +146,17 @@ Flags:
   -t, --thread int        The number of download thead (default 1)
 
 Global Flags:
-  -c, --config string       The config path for bookhunter
-      --proxy string        The request proxy
-  -a, --user-agent string   The request user-agent (default "Mozilla/5.0 (X11; Linux i686; rv:13.0) Gecko/13.0 Firefox/13.0")
-      --verbose             Print all the logs for debugging
+  -c, --config string     The config path for bookhunter
+  -k, --keyword strings   The keywords for books
+      --proxy string      The request proxy
+      --retry int         The retry times for a failed download (default 3)
+  -s, --skip-error        Continue to download the next book if the current book download failed (default true)
+      --verbose           Print all the logs for debugging
 ```
 
 ### Download books from Telegram groups
 
-Example command: `bookhunter telegram --appID ****** --appHash ****** -k https://t.me/MothLib`
+Example command: `bookhunter telegram --appID ****** --appHash ****** --thread 4 --proxy http://127.0.0.1:7890 --channelID https://t.me/sharebooks4you`
 
 Please refer [Creating your Telegram Application](https://core.telegram.org/api/obtaining_api_id) to obtain your `appID`
 and `appHash`.
@@ -173,10 +181,12 @@ Flags:
   -t, --thread int         The number of download thead (default 1)
 
 Global Flags:
-  -c, --config string       The config path for bookhunter
-      --proxy string        The request proxy
-  -a, --user-agent string   The request user-agent (default "Mozilla/5.0 (X11; Linux i686; rv:13.0) Gecko/13.0 Firefox/13.0")
-      --verbose             Print all the logs for debugging
+  -c, --config string     The config path for bookhunter
+  -k, --keyword strings   The keywords for books
+      --proxy string      The request proxy
+      --retry int         The retry times for a failed download (default 3)
+  -s, --skip-error        Continue to download the next book if the current book download failed (default true)
+      --verbose           Print all the logs for debugging
 ```
 
 ### Download books from Hsu Life
@@ -188,7 +198,7 @@ Usage:
   bookhunter hsu [flags]
 
 Flags:
-  -d, --download string   The book directory you want to use (default "/Users/Yufan/Developer/bookstairs/bookhunter")
+  -d, --download string   The book directory you want to use (default ".")
   -f, --format strings    The file formats you want to download (default [epub,azw3,mobi,pdf,zip])
   -h, --help              help for hsu
   -i, --initial int       The book id you want to start download (default 1)
