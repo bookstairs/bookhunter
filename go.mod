@@ -18,8 +18,8 @@ require (
 	github.com/stretchr/testify v1.9.0
 	go.uber.org/ratelimit v0.3.1
 	golang.org/x/net v0.28.0
-	golang.org/x/term v0.23.0
-	golang.org/x/text v0.17.0
+	golang.org/x/term v0.24.0
+	golang.org/x/text v0.18.0
 )
 
 require (
@@ -47,7 +47,7 @@ require (
 	go.uber.org/zap v1.27.0 // indirect
 	golang.org/x/crypto v0.26.0 // indirect
 	golang.org/x/sync v0.8.0 // indirect
-	golang.org/x/sys v0.24.0 // indirect
+	golang.org/x/sys v0.25.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	nhooyr.io/websocket v1.8.17 // indirect
 	rsc.io/qr v0.2.0 // indirect
