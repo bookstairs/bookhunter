@@ -68,7 +68,7 @@ func (t *Telegram) privateChannelInfo(hash string) (id int64, access int64, err 
 
 // publicChannelInfo queries the public channel by its name.
 func (t *Telegram) publicChannelInfo(name string) (id, access int64, err error) {
-	username, err := t.client.API().ContactsResolveUsername(t.ctx, name)
+	username, err := t.client.API().ContactsResolveUsername(t.ctx, &tg.ContactsResolveUsernameRequest{Username: name})
 	if err != nil {
 		return
 	}

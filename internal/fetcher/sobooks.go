@@ -22,11 +22,6 @@ var (
 	sobooksIDRe = regexp.MustCompile(`.*?/(\d+?).html`)
 )
 
-const (
-	sobooksCloudIP   = "95.111.255.115"
-	sobooksCloudHost = "sobooks.cloud"
-)
-
 type sobooksService struct {
 	config *Config
 	*client.Client
@@ -103,7 +98,7 @@ func (s *sobooksService) formats(id int64) (map[file.Format]driver.Share, error)
 
 	title, links, err := sobooks.ParseLinks(resp.String(), id)
 	if err != nil {
-		return nil, err
+		return map[file.Format]driver.Share{}, nil
 	}
 
 	res := make(map[file.Format]driver.Share)
@@ -145,14 +140,8 @@ func (s *sobooksService) fetch(_ int64, _ file.Format, share driver.Share, write
 	if err != nil {
 		return err
 	}
-	host := u.Host
-	if host == sobooksCloudHost {
-		u.Host = sobooksCloudIP
-	}
-
 	resp, err := s.R().
 		SetDoNotParseResponse(true).
-		SetHeader("Host", host).
 		Get(u.String())
 	if err != nil {
 		return err

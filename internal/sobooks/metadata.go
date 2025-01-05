@@ -45,8 +45,8 @@ func ParseLinks(content string, id int64) (title string, links map[driver.Source
 	dateText := doc.Find("div.bookinfo > ul > li:nth-child(5)").Text()
 
 	if !dateRe.MatchString(dateText) {
-		log.Fatal("not found book date", id)
-		return "", map[driver.Source]BookLink{}, fmt.Errorf("%v not found book date", id)
+		log.Fatal("not found book date ", id)
+		return "", map[driver.Source]BookLink{}, fmt.Errorf("not found book date %v", id)
 	}
 	submatch := dateRe.FindStringSubmatch(dateText)
 	year := submatch[1]
