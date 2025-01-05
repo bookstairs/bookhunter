@@ -97,4 +97,4 @@ release:
   draft: true
 
 snapshot:
-  name_template: "{{ incminor .Version }}-next"
+  version_template: "{{ incminor .Version }}-next"
