@@ -84,7 +84,7 @@ func init() {
 	taskListCmd.Flags().StringSliceVarP(&listTags, "tag", "t", []string{}, "按标签筛选")
 	taskListCmd.Flags().BoolVar(&listEnabled, "enabled", false, "仅显示启用的任务")
 	taskListCmd.Flags().BoolVar(&listDisabled, "disabled", false, "仅显示禁用的任务")
-	taskListCmd.Flags().StringSliceVarP(&listCategories, "category", "c", []string{}, "按类别筛选")
+	taskListCmd.Flags().StringSliceVar(&listCategories, "category", []string{}, "按类别筛选")
 }
 
 func getTaskConfigPath() string {
@@ -282,4 +282,3 @@ func removeTask(cmd *cobra.Command, args []string) {
 
 	fmt.Println(ui.RenderSuccess(fmt.Sprintf("已删除任务: %s", taskName)))
 }
-
