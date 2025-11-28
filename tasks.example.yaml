@@ -1,0 +1,146 @@
+version: "1.0"
+
+tasks:
+  # Telegram 频道下载示例
+  - name: "mothlib-telegram"
+    description: "从 MothLib Telegram 频道下载书籍"
+    enabled: true
+    tags: ["telegram", "daily"]
+    command:
+      category: "telegram"
+      args:
+        appID: "YOUR_APP_ID"           # 从 https://my.telegram.org 获取
+        appHash: "YOUR_APP_HASH"       # 从 https://my.telegram.org 获取
+        formats: ["epub"]              # 下载格式: epub, mobi, pdf, azw3
+        rename: true                   # 是否按 ID 重命名
+        thread: 4                      # 下载线程数
+        ratelimit: 120                 # 速率限制（请求/分钟/线程）
+        directory: "./downloads/MothLib"  # 下载目录
+        channelID: "https://t.me/MothLib" # Telegram 频道链接
+        # mobile: "+8613800138000"     # 可选：手机号
+        # relogin: false               # 可选：强制重新登录
+
+  - name: "librojamanto-telegram"
+    description: "从 librojamanto 频道下载西班牙语书籍"
+    enabled: false
+    tags: ["telegram", "spanish"]
+    command:
+      category: "telegram"
+      args:
+        appID: "YOUR_APP_ID"
+        appHash: "YOUR_APP_HASH"
+        formats: ["epub", "pdf"]
+        rename: true
+        thread: 2
+        ratelimit: 100
+        directory: "./downloads/librojamanto"
+        channelID: "https://t.me/librojamanto"
+
+  # SoBooks 下载示例
+  - name: "sobooks-download"
+    description: "从 SoBooks 下载书籍"
+    enabled: false
+    tags: ["sobooks", "daily"]
+    command:
+      category: "sobooks"
+      args:
+        extract: true                  # 自动解压压缩包
+        formats: ["epub", "zip"]       # 下载格式
+        code: "881120"                 # SoBooks 访问密码
+        rename: true                   # 按 ID 重命名
+        thread: 2                      # 下载线程数
+        directory: "./downloads/sobooks"  # 下载目录
+        initialBookID: 1               # 起始书籍 ID
+        ratelimit: 120                 # 速率限制
+
+  # 中小学教材下载示例
+  - name: "k12-textbooks"
+    description: "下载中小学教材"
+    enabled: false
+    tags: ["k12", "education"]
+    command:
+      category: "k12"
+      args:
+        formats: ["pdf"]
+        thread: 2
+        directory: "./downloads/k12"
+        ratelimit: 60
+
+  # Talebook 自托管站点示例
+  - name: "my-talebook"
+    description: "从自己的 Talebook 站点下载"
+    enabled: false
+    tags: ["talebook", "personal"]
+    command:
+      category: "talebook"
+      args:
+        website: "https://books.example.com"  # Talebook 站点地址
+        username: "your-username"              # 可选：用户名
+        password: "your-password"              # 可选：密码
+        formats: ["epub", "mobi", "azw3"]
+        thread: 4
+        directory: "./downloads/talebook"
+        initialBookID: 1
+        ratelimit: 100
+
+  # Hsu Life 站点示例
+  - name: "hsu-books"
+    description: "从 Hsu Life 下载书籍"
+    enabled: false
+    tags: ["hsu", "chinese"]
+    command:
+      category: "hsu"
+      args:
+        website: "https://hsu.life"
+        formats: ["epub"]
+        thread: 2
+        directory: "./downloads/hsu"
+        initialBookID: 1
+        ratelimit: 80
+
+# 使用说明：
+#
+# 1. 复制此文件到 ~/.config/bookhunter/tasks.yaml
+# 2. 编辑任务配置，填写你的实际参数
+# 3. 使用以下命令管理任务：
+#
+#    列出所有任务:
+#      bookhunter task list
+#
+#    启用/禁用任务:
+#      bookhunter task enable mothlib-telegram
+#      bookhunter task disable sobooks-download
+#
+#    查看任务详情:
+#      bookhunter task show mothlib-telegram
+#
+#    执行任务:
+#      bookhunter run                          # 执行所有启用的任务
+#      bookhunter run mothlib-telegram         # 执行指定任务
+#      bookhunter run --tag telegram           # 按标签执行
+#      bookhunter run --interactive            # 交互式选择
+#
+#    验证配置:
+#      bookhunter task validate
+#
+# 4. 更多参数说明：
+#
+#    formats: 支持的格式包括 epub, mobi, pdf, azw3, txt, zip
+#    thread: 建议设置为 CPU 核心数或更少
+#    ratelimit: 速率限制，避免请求过于频繁被封禁
+#    extract: 是否自动解压 zip/rar/7z 等压缩包
+#    rename: 是否按书籍 ID 重命名文件
+#    initialBookID: 从哪个 ID 开始下载
+#
+# 5. Telegram 相关：
+#
+#    - 需要先在 https://my.telegram.org 注册应用获取 appID 和 appHash
+#    - 首次运行会要求输入手机号和验证码
+#    - 登录信息会缓存，无需每次输入
+#
+# 6. 代理设置：
+#
+#    可以在全局或每个任务中设置代理:
+#      proxy: "http://127.0.0.1:7890"
+#      proxy: "socks5://127.0.0.1:1080"
+

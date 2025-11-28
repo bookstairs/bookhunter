@@ -554,4 +554,293 @@ pre-commit run --all-files
 
 ---
 
+## 🎯 任务管理系统 (v0.15.0+)
+
+### 概述
+
+任务管理系统是 bookhunter 的新功能，允许用户通过 YAML 配置文件管理多个下载任务，简化批量下载的操作流程。
+
+### 核心组件
+
+#### 1. 任务配置 (`internal/task/config.go`)
+
+负责任务配置的加载、保存和验证：
+
+```go
+type TaskConfig struct {
+    Version string `yaml:"version"`
+    Tasks   []Task `yaml:"tasks"`
+}
+
+type Task struct {
+    Name        string
+    Description string
+    Enabled     bool
+    Tags        []string
+    Command     Command
+}
+```
+
+**主要功能**：
+- YAML 配置文件的加载和保存
+- 配置验证（检查任务名称重复、类别有效性等）
+- 配置文件路径优先级管理
+- 示例配置生成
+
+#### 2. 任务管理器 (`internal/task/manager.go`)
+
+提供任务的 CRUD 操作：
+
+```go
+type Manager struct {
+    configPath string
+    config     *TaskConfig
+}
+```
+
+**主要方法**：
+- `List(filter TaskFilter)` - 列出任务（支持按标签、状态、类别筛选）
+- `Get(name string)` - 获取单个任务
+- `Add/Remove/Update` - 增删改任务
+- `Enable/Disable` - 启用/禁用任务
+- `Validate()` - 验证配置文件
+
+#### 3. 任务执行器 (`internal/task/executor.go`)
+
+负责将任务配置转换为 fetcher 并执行：
+
+```go
+type Executor struct {
+    config     *TaskConfig
+    manager    *Manager
+    globalArgs *GlobalArgs
+}
+```
+
+**核心流程**：
+1. 从任务配置解析参数
+2. 创建 `client.Config` 和 `fetcher.Config`
+3. 根据 category 创建对应的 fetcher
+4. 串行或并行执行任务
+5. 收集和展示执行结果
+
+**关键特性**：
+- 支持串行和并行执行
+- 自动类型转换（YAML interface{} → Go 类型）
+- 错误处理和跳过逻辑
+- 执行结果统计
+
+#### 4. TUI 交互组件 (`internal/task/ui/`)
+
+使用 [Bubble Tea](https://github.com/charmbracelet/bubbletea) 实现的交互式界面：
+
+**selector.go** - 任务选择器：
+- 方向键导航
+- 空格键选择/取消
+- 支持全选/取消全选
+- 显示任务状态和标签
+
+**list.go** - 任务列表和详情展示：
+- `RenderTaskList()` - 表格化显示任务列表
+- `RenderTaskDetail()` - 显示单个任务详情
+- `RenderTaskPreview()` - 简短预览
+- `RenderTaskSummary()` - 统计摘要
+
+#### 5. UI 组件库 (`internal/ui/`)
+
+从 bookimporter 移植的完整 UI 组件库：
+
+**styles.go** - 颜色主题和样式：
+- 成功、错误、警告、信息等状态颜色
+- 文本样式（粗体、斜体、删除线等）
+- 状态图标（✓ ✗ → ⚠ ⋯）
+
+**components.go** - 可复用组件：
+- 消息框、分隔线、标题
+- 统计摘要表格
+- 文件操作格式化
+
+**progress.go** - 进度跟踪：
+- `ProgressTracker` - 标准进度条
+- `Spinner` - 旋转动画
+- `MultiSpinner` - 多任务进度
+
+**table.go** - 表格生成器：
+- 多种边框样式（normal, rounded, double, thick）
+- 列宽自动计算
+- 支持右对齐
+- 紧凑模式
+
+**terminal.go** - 终端能力检测：
+- 颜色支持检测（NO_COLOR, TERM=dumb）
+- Unicode 支持检测
+- 自动降级到 ASCII
+
+### 命令实现
+
+#### `bookhunter run` (`cmd/run.go`)
+
+执行配置的任务：
+
+**参数**：
+- `[task names...]` - 指定要执行的任务
+- `--tag, -t` - 按标签筛选
+- `--interactive, -i` - 交互式选择
+- `--parallel, -p` - 并行执行
+- `--dry-run` - 预览模式
+- `--force, -f` - 强制执行禁用的任务
+
+**流程**：
+1. 检查配置文件存在性
+2. 筛选要执行的任务
+3. 检查禁用任务
+4. 显示预览并确认
+5. 创建 executor 并执行
+6. 显示结果统计
+
+#### `bookhunter task` (`cmd/task.go`)
+
+管理任务配置：
+
+**子命令**：
+- `list` - 列出任务（支持筛选）
+- `show` - 显示任务详情
+- `enable` - 启用任务
+- `disable` - 禁用任务
+- `remove` - 删除任务
+- `validate` - 验证配置文件
+
+### 配置文件
+
+**位置优先级**：
+1. `--config-file` 参数指定
+2. 环境变量 `BOOKHUNTER_TASKS_CONFIG`
+3. 默认路径 `~/.config/bookhunter/tasks.yaml`
+
+**示例** (`tasks.example.yaml`)：
+```yaml
+version: "1.0"
+tasks:
+  - name: "mothlib-telegram"
+    description: "从 MothLib 频道下载书籍"
+    enabled: true
+    tags: ["telegram", "daily"]
+    command:
+      category: "telegram"
+      args:
+        appID: "YOUR_APP_ID"
+        appHash: "YOUR_APP_HASH"
+        formats: ["epub"]
+        thread: 4
+        ratelimit: 120
+        directory: "./downloads/MothLib"
+        channelID: "https://t.me/MothLib"
+```
+
+### 类型转换和参数映射
+
+从 YAML 的 `map[string]interface{}` 转换为 `fetcher.Config`：
+
+**基本类型**：
+- `bool` → 直接类型断言
+- `int/int64/float64` → `toInt()` / `toInt64()` 辅助函数
+- `string` → 直接类型断言
+
+**复杂类型**：
+- `[]interface{}` → `[]string` 通过 `toStringSlice()`
+- `formats` → `[]file.Format` 通过 `fetcher.ParseFormats()`
+
+**Properties 映射**：
+不同 category 需要特定的参数：
+- Telegram: `appID`, `appHash`, `channelID`, `mobile`, `relogin`
+- SoBooks: `code`
+- Talebook/Hsu: `username`, `password`, `email`
+
+### 设计亮点
+
+1. **接口驱动**：
+   - Manager, Executor, Fetcher 都有清晰的接口
+   - 易于测试和扩展
+
+2. **UI 自动降级**：
+   - 检测终端能力（颜色、Unicode）
+   - 优雅降级到纯文本输出
+   - 兼容各种终端环境
+
+3. **错误处理完善**：
+   - 配置验证多层次
+   - 执行错误可跳过或中断
+   - 友好的错误提示
+
+4. **用户体验优化**：
+   - 首次使用引导创建配置
+   - 交互式任务选择
+   - 预览模式避免误操作
+   - 危险操作需要确认
+
+5. **复用现有代码**：
+   - 完全复用 `internal/fetcher` 核心
+   - 利用现有的 client、progress、log 等模块
+   - 不破坏原有命令行接口
+
+### 扩展性
+
+#### 未来可添加功能
+
+1. **任务依赖**：
+   ```yaml
+   - name: "task-b"
+     depends_on: ["task-a"]
+   ```
+
+2. **定时调度**：
+   ```yaml
+   - name: "daily-download"
+     schedule: "0 2 * * *"
+   ```
+
+3. **任务钩子**：
+   ```yaml
+   - name: "download-task"
+     hooks:
+       before: "echo 'Start'"
+       after: "bookimporter clname -p ./downloads"
+       on_success: "./notify.sh success"
+   ```
+
+4. **远程配置**：
+   ```bash
+   bookhunter run --config https://example.com/tasks.yaml
+   ```
+
+### 使用建议
+
+1. **日常使用**：使用任务管理系统简化操作
+2. **一次性下载**：直接使用原有命令（`telegram`, `sobooks` 等）
+3. **脚本集成**：使用任务管理或直接调用命令都可以
+4. **自动化**：配合 cron/systemd timer 定时执行任务
+
+### 测试
+
+验证任务管理系统：
+
+```bash
+# 1. 创建示例配置
+bookhunter run  # 选择创建示例配置
+
+# 2. 验证配置
+bookhunter task validate
+
+# 3. 列出任务
+bookhunter task list
+
+# 4. 预览执行
+bookhunter run --dry-run
+
+# 5. 交互式执行
+bookhunter run --interactive
+```
+
+---
+
 *最后更新: 2025-11-28*

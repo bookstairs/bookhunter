@@ -42,6 +42,35 @@ by your running environment.
 
 ## 📚 Usage
 
+### ⚡ Quick Start: Task Management (Recommended)
+
+**NEW**: Manage multiple download tasks with a single configuration file!
+
+```bash
+# Create example configuration
+bookhunter run  # Will prompt to create config if not exists
+
+# List all configured tasks
+bookhunter task list
+
+# Run all enabled tasks
+bookhunter run
+
+# Run specific tasks
+bookhunter run mothlib-telegram sobooks-download
+
+# Interactive task selection
+bookhunter run --interactive
+
+# Enable/disable tasks
+bookhunter task enable mothlib-telegram
+bookhunter task disable sobooks-download
+```
+
+See [Task Management Guide](#task-management) for details.
+
+### 📖 Supported Sources
+
 | Website                                          | Address                                | Direct Download | [Aliyun](https://www.aliyundrive.com/) | [Lanzou](https://www.lanzou.com/) | [Telecom](https://cloud.189.cn/) |
 |--------------------------------------------------|----------------------------------------|-----------------|----------------------------------------|-----------------------------------|----------------------------------|
 | [智慧教育平台](#download-textbooks-for-kids)           | <https://basic.smartedu.cn/tchMaterial>   | ✅               | ❌                                      | ❌                                 | ❌                                |
@@ -216,3 +245,156 @@ Global Flags:
   -s, --skip-error        Continue to download the next book if the current book download failed (default true)
       --verbose           Print all the logs for debugging
 ```
+
+## 🎯 Task Management
+
+### Overview
+
+Task management allows you to configure multiple download tasks in a YAML file and execute them easily. This is much more convenient than running individual commands.
+
+**Benefits:**
+- ✅ Configure once, run anytime
+- ✅ Manage multiple sources in one place
+- ✅ Enable/disable tasks without deleting configuration
+- ✅ Tag-based filtering and batch operations
+- ✅ Interactive task selection with TUI
+- ✅ Parallel or sequential execution
+
+### Configuration File
+
+The default configuration file is located at `~/.config/bookhunter/tasks.yaml`. You can also specify a custom location using `--config-file`.
+
+Example configuration (see `tasks.example.yaml` for complete examples):
+
+```yaml
+version: "1.0"
+tasks:
+  - name: "mothlib-telegram"
+    description: "Download books from MothLib Telegram channel"
+    enabled: true
+    tags: ["telegram", "daily"]
+    command:
+      category: "telegram"
+      args:
+        appID: "YOUR_APP_ID"
+        appHash: "YOUR_APP_HASH"
+        formats: ["epub"]
+        thread: 4
+        ratelimit: 120
+        directory: "./downloads/MothLib"
+        channelID: "https://t.me/MothLib"
+
+  - name: "sobooks-download"
+    description: "Download books from SoBooks"
+    enabled: false
+    tags: ["sobooks", "daily"]
+    command:
+      category: "sobooks"
+      args:
+        extract: true
+        formats: ["epub", "zip"]
+        code: "881120"
+        thread: 2
+        directory: "./downloads/sobooks"
+```
+
+### Task Commands
+
+**List tasks:**
+```bash
+# List all tasks
+bookhunter task list
+
+# List enabled tasks only
+bookhunter task list --enabled
+
+# Filter by tag
+bookhunter task list --tag telegram
+
+# Filter by category
+bookhunter task list --category sobooks
+```
+
+**Show task details:**
+```bash
+bookhunter task show mothlib-telegram
+```
+
+**Enable/disable tasks:**
+```bash
+bookhunter task enable mothlib-telegram
+bookhunter task disable sobooks-download
+```
+
+**Remove tasks:**
+```bash
+bookhunter task remove old-task
+bookhunter task remove old-task --force  # Skip confirmation
+```
+
+**Validate configuration:**
+```bash
+bookhunter task validate
+```
+
+### Running Tasks
+
+**Execute all enabled tasks:**
+```bash
+bookhunter run
+```
+
+**Execute specific tasks:**
+```bash
+bookhunter run mothlib-telegram sobooks-download
+```
+
+**Execute by tags:**
+```bash
+bookhunter run --tag telegram
+bookhunter run --tag daily --tag telegram  # Multiple tags
+```
+
+**Interactive selection:**
+```bash
+bookhunter run --interactive
+```
+
+**Preview mode (dry-run):**
+```bash
+bookhunter run --dry-run
+```
+
+**Parallel execution:**
+```bash
+bookhunter run --parallel
+```
+
+**Force execute disabled tasks:**
+```bash
+bookhunter run disabled-task --force
+```
+
+### Getting Started
+
+1. Run any command to create example configuration:
+   ```bash
+   bookhunter run
+   ```
+
+2. Edit the configuration file:
+   ```bash
+   vi ~/.config/bookhunter/tasks.yaml
+   ```
+
+3. Fill in your actual parameters (API keys, passwords, etc.)
+
+4. Enable tasks you want to use:
+   ```bash
+   bookhunter task enable mothlib-telegram
+   ```
+
+5. Run your tasks:
+   ```bash
+   bookhunter run
+   ```
