@@ -8,8 +8,6 @@ import (
 	"github.com/bookstairs/bookhunter/internal/log"
 )
 
-const k12Website = "https://www.zxx.edu.cn"
-
 var k12Cmd = &cobra.Command{
 	Use:   "k12",
 	Short: "A tool for downloading textbooks from www.zxx.edu.cn",
@@ -26,8 +24,33 @@ var k12Cmd = &cobra.Command{
 			Row("Keywords", flags.Keywords).
 			Print()
 
-		flags.Website = k12Website
-		f, err := flags.NewFetcher(fetcher.K12, map[string]string{})
+		// 构建参数 map
+		cmdArgs := map[string]interface{}{
+			"formats":   flags.Formats,
+			"extract":   flags.Extract,
+			"directory": flags.DownloadPath,
+			"rename":    flags.Rename,
+			"thread":    flags.Thread,
+			"ratelimit": flags.RateLimit,
+			"keywords":  flags.Keywords,
+		}
+
+		// 全局参数
+		globalArgs := &fetcher.GlobalArgs{
+			ConfigRoot: flags.ConfigRoot,
+			Proxy:      flags.Proxy,
+			Retry:      flags.Retry,
+			SkipError:  flags.SkipError,
+		}
+
+		// 使用 FetcherBuilder 创建 fetcher
+		builder := &fetcher.FetcherBuilder{
+			Category:   fetcher.K12,
+			Args:       cmdArgs,
+			GlobalArgs: globalArgs,
+		}
+
+		f, err := builder.Build()
 		log.Exit(err)
 
 		err = f.Download()

@@ -3,7 +3,6 @@ package cmd
 import (
 	"fmt"
 	"os"
-	"strings"
 
 	"github.com/spf13/cobra"
 
@@ -20,21 +19,18 @@ var taskCmd = &cobra.Command{
 	Short: "管理下载任务",
 	Long: `管理和配置下载任务。
 
-可以列出、添加、删除、启用、禁用任务，以及验证配置文件。
+可以列出和验证任务配置文件。
+要添加/修改/删除任务，请直接编辑配置文件。
 
 示例:
   # 列出所有任务
   bookhunter task list
 
-  # 显示任务详情
-  bookhunter task show mothlib-telegram
-
-  # 启用/禁用任务
-  bookhunter task enable mothlib-telegram
-  bookhunter task disable mothlib-telegram
-
   # 验证配置文件
-  bookhunter task validate`,
+  bookhunter task validate
+
+  # 创建示例配置
+  bookhunter task create-example`,
 }
 
 // List 子命令
@@ -71,11 +67,8 @@ var (
 func init() {
 	rootCmd.AddCommand(taskCmd)
 	taskCmd.AddCommand(taskListCmd)
-	taskCmd.AddCommand(taskShowCmd)
-	taskCmd.AddCommand(taskEnableCmd)
-	taskCmd.AddCommand(taskDisableCmd)
 	taskCmd.AddCommand(taskValidateCmd)
-	taskCmd.AddCommand(taskRemoveCmd)
+	taskCmd.AddCommand(taskCreateExampleCmd)
 
 	// 全局参数
 	taskCmd.PersistentFlags().StringVarP(&taskConfigPath, "config-file", "", "", "任务配置文件路径")
@@ -99,7 +92,7 @@ func ensureTaskManagerOrExit() *task.Manager {
 
 	if !task.ConfigExists(configPath) {
 		fmt.Println(ui.RenderError("配置文件不存在: " + configPath))
-		fmt.Println(ui.RenderInfo("运行 'bookhunter run' 创建示例配置"))
+		fmt.Println(ui.RenderInfo("运行 'bookhunter task create-example' 创建示例配置"))
 		os.Exit(1)
 	}
 
@@ -138,63 +131,36 @@ func listTasks(cmd *cobra.Command, args []string) {
 	fmt.Println(taskui.RenderTaskSummary(tasks))
 }
 
-// Show 子命令
-var taskShowCmd = &cobra.Command{
-	Use:   "show <task-name>",
-	Short: "显示任务详细信息",
-	Long:  "显示指定任务的详细配置信息。",
-	Args:  cobra.ExactArgs(1),
-	Run:   showTask,
+// CreateExample 子命令
+var taskCreateExampleCmd = &cobra.Command{
+	Use:   "create-example",
+	Short: "创建示例配置文件",
+	Long:  "在默认位置或指定位置创建示例任务配置文件。",
+	Run:   createExampleConfig,
 }
 
-func showTask(cmd *cobra.Command, args []string) {
-	manager := ensureTaskManagerOrExit()
+func createExampleConfig(cmd *cobra.Command, args []string) {
+	configPath := getTaskConfigPath()
 
-	taskName := args[0]
-	t, err := manager.Get(taskName)
-	log.Exit(err)
-
-	fmt.Println(taskui.RenderTaskDetail(t))
-}
-
-// Enable 子命令
-var taskEnableCmd = &cobra.Command{
-	Use:   "enable <task-name>",
-	Short: "启用任务",
-	Long:  "启用指定的任务，使其可以在 'bookhunter run' 中执行。",
-	Args:  cobra.ExactArgs(1),
-	Run:   enableTask,
-}
-
-func enableTask(cmd *cobra.Command, args []string) {
-	manager := ensureTaskManagerOrExit()
-
-	taskName := args[0]
-	if err := manager.Enable(taskName); err != nil {
-		log.Exit(err)
+	// 检查文件是否已存在
+	if task.ConfigExists(configPath) {
+		fmt.Println(ui.RenderWarning("配置文件已存在: " + configPath))
+		fmt.Println(ui.RenderInfo("如需重新创建，请先删除或移动现有配置文件"))
+		os.Exit(1)
 	}
 
-	fmt.Println(ui.RenderSuccess(fmt.Sprintf("已启用任务: %s", taskName)))
-}
-
-// Disable 子命令
-var taskDisableCmd = &cobra.Command{
-	Use:   "disable <task-name>",
-	Short: "禁用任务",
-	Long:  "禁用指定的任务，使其不会在 'bookhunter run' 中自动执行。",
-	Args:  cobra.ExactArgs(1),
-	Run:   disableTask,
-}
-
-func disableTask(cmd *cobra.Command, args []string) {
-	manager := ensureTaskManagerOrExit()
-
-	taskName := args[0]
-	if err := manager.Disable(taskName); err != nil {
-		log.Exit(err)
+	// 创建示例配置
+	if err := task.CreateExampleConfig(configPath); err != nil {
+		log.Exit(fmt.Errorf("创建示例配置失败: %w", err))
 	}
 
-	fmt.Println(ui.RenderSuccess(fmt.Sprintf("已禁用任务: %s", taskName)))
+	fmt.Println(ui.RenderSuccess("✓ 示例配置已创建: " + configPath))
+	fmt.Println()
+	fmt.Println(ui.RenderInfo("接下来的步骤:"))
+	fmt.Println("  1. 编辑配置文件，填写您的实际参数")
+	fmt.Println("  2. 运行 'bookhunter task validate' 验证配置")
+	fmt.Println("  3. 运行 'bookhunter task list' 查看任务列表")
+	fmt.Println("  4. 运行 'bookhunter run' 开始下载")
 }
 
 // Validate 子命令
@@ -218,9 +184,9 @@ func validateConfig(cmd *cobra.Command, args []string) {
 		log.Exit(err)
 	}
 
-	fmt.Println(ui.RenderSuccess("配置文件格式正确"))
-	fmt.Println(ui.RenderInfo(fmt.Sprintf("版本: %s", config.Version)))
-	fmt.Println(ui.RenderInfo(fmt.Sprintf("任务数: %d", len(config.Tasks))))
+	fmt.Println(ui.RenderSuccess("✓ 配置文件格式正确"))
+	fmt.Println(ui.RenderInfo(fmt.Sprintf("  版本: %s", config.Version)))
+	fmt.Println(ui.RenderInfo(fmt.Sprintf("  任务数: %d", len(config.Tasks))))
 
 	// 统计信息
 	enabledCount := 0
@@ -231,54 +197,6 @@ func validateConfig(cmd *cobra.Command, args []string) {
 	}
 
 	fmt.Println()
-	fmt.Println(ui.StyleMuted.Render(fmt.Sprintf("✓ 启用: %d", enabledCount)))
-	fmt.Println(ui.StyleMuted.Render(fmt.Sprintf("⋯ 禁用: %d", len(config.Tasks)-enabledCount)))
-}
-
-// Remove 子命令
-var taskRemoveCmd = &cobra.Command{
-	Use:   "remove <task-name>",
-	Short: "删除任务",
-	Long:  "从配置文件中删除指定的任务。",
-	Args:  cobra.ExactArgs(1),
-	Run:   removeTask,
-}
-
-var removeForce bool
-
-func init() {
-	taskRemoveCmd.Flags().BoolVarP(&removeForce, "force", "f", false, "强制删除不需要确认")
-}
-
-func removeTask(cmd *cobra.Command, args []string) {
-	manager := ensureTaskManagerOrExit()
-
-	taskName := args[0]
-
-	// 确认删除
-	if !removeForce {
-		t, err := manager.Get(taskName)
-		log.Exit(err)
-
-		fmt.Println(ui.RenderWarning(fmt.Sprintf("即将删除任务: %s", taskName)))
-		if t.Description != "" {
-			fmt.Println(ui.StyleMuted.Render("  " + t.Description))
-		}
-		fmt.Println(ui.RenderInfo("确认删除？[y/N]"))
-
-		var answer string
-		fmt.Scanln(&answer)
-		answer = strings.ToLower(strings.TrimSpace(answer))
-
-		if answer != "y" && answer != "yes" {
-			fmt.Println(ui.RenderWarning("已取消"))
-			os.Exit(0)
-		}
-	}
-
-	if err := manager.Remove(taskName); err != nil {
-		log.Exit(err)
-	}
-
-	fmt.Println(ui.RenderSuccess(fmt.Sprintf("已删除任务: %s", taskName)))
+	fmt.Println(ui.StyleMuted.Render(fmt.Sprintf("  ✓ 启用: %d", enabledCount)))
+	fmt.Println(ui.StyleMuted.Render(fmt.Sprintf("  ⋯ 禁用: %d", len(config.Tasks)-enabledCount)))
 }

@@ -4,14 +4,12 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/bookstairs/bookhunter/cmd/flags"
-	"github.com/bookstairs/bookhunter/internal/driver"
 	"github.com/bookstairs/bookhunter/internal/fetcher"
 	"github.com/bookstairs/bookhunter/internal/log"
 )
 
 const (
 	lowestSobooksBookID = 18000
-	sobooksWebsite      = "https://sobooks.cc"
 )
 
 // sobooksCmd used for download books from sobooks.cc
@@ -41,14 +39,35 @@ var sobooksCmd = &cobra.Command{
 			Row("Thread Limit (req/min)", flags.RateLimit).
 			Print()
 
-		// Set the domain for using in the client.Client.
-		flags.Website = sobooksWebsite
-		flags.Driver = string(driver.LANZOU)
+		// 构建参数 map
+		cmdArgs := map[string]interface{}{
+			"code":          flags.SoBooksCode,
+			"formats":       flags.Formats,
+			"extract":       flags.Extract,
+			"directory":     flags.DownloadPath,
+			"initialBookID": flags.InitialBookID,
+			"rename":        flags.Rename,
+			"thread":        flags.Thread,
+			"ratelimit":     flags.RateLimit,
+			"keywords":      flags.Keywords,
+		}
 
-		// Create the fetcher.
-		properties := flags.NewDriverProperties()
-		properties["code"] = flags.SoBooksCode
-		f, err := flags.NewFetcher(fetcher.SoBooks, properties)
+		// 全局参数
+		globalArgs := &fetcher.GlobalArgs{
+			ConfigRoot: flags.ConfigRoot,
+			Proxy:      flags.Proxy,
+			Retry:      flags.Retry,
+			SkipError:  flags.SkipError,
+		}
+
+		// 使用 FetcherBuilder 创建 fetcher
+		builder := &fetcher.FetcherBuilder{
+			Category:   fetcher.SoBooks,
+			Args:       cmdArgs,
+			GlobalArgs: globalArgs,
+		}
+
+		f, err := builder.Build()
 		log.Exit(err)
 
 		// Wait all the threads have finished.

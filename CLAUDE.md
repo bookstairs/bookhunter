@@ -2,7 +2,7 @@
 
 ## 📋 项目概述
 
-**BookHunter** 是一个使用 Go 语言开发的多源图书下载工具，用于从多个在线图书平台批量下载电子书。
+**BookHunter** 是一个使用 Go 语言开发的多源图书下载工具，用于从多个在线图书平台批量下载电子书。这个工具最初的设计哲学是 Unix。
 
 ### 核心特性
 
@@ -558,7 +558,9 @@ pre-commit run --all-files
 
 ### 概述
 
-任务管理系统是 bookhunter 的新功能，允许用户通过 YAML 配置文件管理多个下载任务，简化批量下载的操作流程。
+任务管理系统是 bookhunter 的配置文件功能，允许用户通过 YAML 配置文件管理多个下载任务，简化批量下载的操作流程。
+
+**设计哲学**: 遵循 Unix 哲学 - 使用纯文本配置，无交互式 TUI，完全可脚本化。
 
 ### 核心组件
 
@@ -589,7 +591,7 @@ type Task struct {
 
 #### 2. 任务管理器 (`internal/task/manager.go`)
 
-提供任务的 CRUD 操作：
+提供任务的查询和验证操作：
 
 ```go
 type Manager struct {
@@ -601,9 +603,11 @@ type Manager struct {
 **主要方法**：
 - `List(filter TaskFilter)` - 列出任务（支持按标签、状态、类别筛选）
 - `Get(name string)` - 获取单个任务
-- `Add/Remove/Update` - 增删改任务
-- `Enable/Disable` - 启用/禁用任务
+- `GetTasksByName/Tag` - 按名称或标签获取任务
 - `Validate()` - 验证配置文件
+- `CreateExampleConfig()` - 创建示例配置
+
+**注意**: Manager 不提供 Add/Remove/Update 方法，用户通过直接编辑 YAML 文件管理任务。
 
 #### 3. 任务执行器 (`internal/task/executor.go`)
 
@@ -630,21 +634,17 @@ type Executor struct {
 - 错误处理和跳过逻辑
 - 执行结果统计
 
-#### 4. TUI 交互组件 (`internal/task/ui/`)
+#### 4. UI 展示组件 (`internal/task/ui/`)
 
-使用 [Bubble Tea](https://github.com/charmbracelet/bubbletea) 实现的交互式界面：
-
-**selector.go** - 任务选择器：
-- 方向键导航
-- 空格键选择/取消
-- 支持全选/取消全选
-- 显示任务状态和标签
+提供任务信息的格式化输出：
 
 **list.go** - 任务列表和详情展示：
 - `RenderTaskList()` - 表格化显示任务列表
 - `RenderTaskDetail()` - 显示单个任务详情
 - `RenderTaskPreview()` - 简短预览
 - `RenderTaskSummary()` - 统计摘要
+
+**无交互式组件**: 遵循 Unix 哲学，不使用 TUI，输出纯文本。
 
 #### 5. UI 组件库 (`internal/ui/`)
 
@@ -685,18 +685,19 @@ type Executor struct {
 **参数**：
 - `[task names...]` - 指定要执行的任务
 - `--tag, -t` - 按标签筛选
-- `--interactive, -i` - 交互式选择
 - `--parallel, -p` - 并行执行
 - `--dry-run` - 预览模式
 - `--force, -f` - 强制执行禁用的任务
 
 **流程**：
 1. 检查配置文件存在性
-2. 筛选要执行的任务
+2. 筛选要执行的任务（名称/标签/全部启用）
 3. 检查禁用任务
-4. 显示预览并确认
+4. 显示预览（dry-run 模式下停止）
 5. 创建 executor 并执行
 6. 显示结果统计
+
+**特点**: 完全非交互，适合脚本和自动化。
 
 #### `bookhunter task` (`cmd/task.go`)
 
@@ -704,11 +705,10 @@ type Executor struct {
 
 **子命令**：
 - `list` - 列出任务（支持筛选）
-- `show` - 显示任务详情
-- `enable` - 启用任务
-- `disable` - 禁用任务
-- `remove` - 删除任务
 - `validate` - 验证配置文件
+- `create-example` - 创建示例配置
+
+**管理任务**: 直接编辑 YAML 配置文件，不提供 add/edit/remove 命令。
 
 ### 配置文件
 
@@ -762,10 +762,11 @@ tasks:
    - Manager, Executor, Fetcher 都有清晰的接口
    - 易于测试和扩展
 
-2. **UI 自动降级**：
-   - 检测终端能力（颜色、Unicode）
-   - 优雅降级到纯文本输出
-   - 兼容各种终端环境
+2. **Unix 哲学**：
+   - 纯文本配置（YAML）
+   - 无交互式 TUI
+   - 完全可脚本化
+   - 标准输出/错误流
 
 3. **错误处理完善**：
    - 配置验证多层次
@@ -774,14 +775,18 @@ tasks:
 
 4. **用户体验优化**：
    - 首次使用引导创建配置
-   - 交互式任务选择
    - 预览模式避免误操作
-   - 危险操作需要确认
+   - 清晰的输出格式
 
 5. **复用现有代码**：
    - 完全复用 `internal/fetcher` 核心
    - 利用现有的 client、progress、log 等模块
    - 不破坏原有命令行接口
+
+6. **自动化友好**：
+   - 无需人工交互
+   - 支持 dry-run 预览
+   - 明确的退出码
 
 ### 扩展性
 
@@ -793,13 +798,7 @@ tasks:
      depends_on: ["task-a"]
    ```
 
-2. **定时调度**：
-   ```yaml
-   - name: "daily-download"
-     schedule: "0 2 * * *"
-   ```
-
-3. **任务钩子**：
+2. **任务钩子**：
    ```yaml
    - name: "download-task"
      hooks:
@@ -808,17 +807,28 @@ tasks:
        on_success: "./notify.sh success"
    ```
 
-4. **远程配置**：
-   ```bash
-   bookhunter run --config https://example.com/tasks.yaml
+3. **环境变量支持**：
+   ```yaml
+   - name: "telegram-task"
+     command:
+       args:
+         appID: "${TG_APP_ID}"
+         appHash: "${TG_APP_HASH}"
+   ```
+
+4. **Include 其他配置**：
+   ```yaml
+   include:
+     - tasks/telegram.yaml
+     - tasks/sobooks.yaml
    ```
 
 ### 使用建议
 
-1. **日常使用**：使用任务管理系统简化操作
+1. **批量下载**：使用任务配置系统管理多个源
 2. **一次性下载**：直接使用原有命令（`telegram`, `sobooks` 等）
-3. **脚本集成**：使用任务管理或直接调用命令都可以
-4. **自动化**：配合 cron/systemd timer 定时执行任务
+3. **脚本集成**：任务系统完全可脚本化
+4. **自动化**：配合 cron/systemd timer 定时执行，无需交互
 
 ### 测试
 
@@ -826,21 +836,134 @@ tasks:
 
 ```bash
 # 1. 创建示例配置
-bookhunter run  # 选择创建示例配置
+bookhunter task create-example
 
-# 2. 验证配置
+# 2. 编辑配置
+vi ~/.config/bookhunter/tasks.yaml
+
+# 3. 验证配置
 bookhunter task validate
 
-# 3. 列出任务
+# 4. 列出任务
 bookhunter task list
 
-# 4. 预览执行
+# 5. 预览执行
 bookhunter run --dry-run
 
-# 5. 交互式执行
-bookhunter run --interactive
+# 6. 执行任务
+bookhunter run
 ```
 
 ---
 
-*最后更新: 2025-11-28*
+## 🔄 设计哲学回归 (v0.18.0+)
+
+### Unix 哲学优先
+
+从 v0.18.0 开始，bookhunter 回归 Unix 哲学设计：
+
+#### 核心原则
+
+**移除的功能** (违反 Unix 哲学):
+
+❌ 交互式 TUI (Bubble Tea)  
+❌ `task add --interactive`  
+❌ `task edit`  
+❌ `task remove`  
+❌ `run --interactive`  
+❌ 确认提示
+
+**保留的功能** (符合 Unix 哲学):
+
+✅ 纯文本 YAML 配置  
+✅ `task list` - 查询任务  
+✅ `task validate` - 验证配置  
+✅ `task create-example` - 创建示例  
+✅ `run` - 执行任务（完全非交互）  
+✅ 标准输出/错误流  
+✅ 明确的退出码
+
+#### 工作流程
+
+**旧方式** (v0.15.0 - v0.17.0):
+```bash
+bookhunter task add --interactive  # TUI 表单
+bookhunter task edit task-name     # TUI 编辑器
+```
+
+**新方式** (v0.18.0+):
+```bash
+# 1. 创建示例
+bookhunter task create-example
+
+# 2. 编辑 YAML
+vi ~/.config/bookhunter/tasks.yaml
+
+# 3. 验证
+bookhunter task validate
+
+# 4. 执行
+bookhunter run
+```
+
+**优势**:
+- ✅ 完全可脚本化
+- ✅ 版本控制友好（纯文本）
+- ✅ 批量编辑容易（sed/awk）
+- ✅ 无需学习 TUI 快捷键
+- ✅ 可用任何文本编辑器
+
+#### 配置文件管理
+
+**手动编辑** (推荐):
+```bash
+# 使用你喜欢的编辑器
+vi ~/.config/bookhunter/tasks.yaml
+nano ~/.config/bookhunter/tasks.yaml
+code ~/.config/bookhunter/tasks.yaml
+```
+
+**版本控制**:
+```bash
+cd ~/.config/bookhunter
+git init
+git add tasks.yaml
+git commit -m "Add download tasks"
+```
+
+**批量操作** (Unix 工具):
+```bash
+# 批量禁用任务
+sed -i 's/enabled: true/enabled: false/g' tasks.yaml
+
+# 批量修改线程数
+sed -i 's/thread: 4/thread: 8/g' tasks.yaml
+
+# 替换 appHash
+sed -i 's/OLD_HASH/NEW_HASH/g' tasks.yaml
+```
+
+### 迁移说明
+
+从 v0.17.0 迁移到 v0.18.0:
+
+**移除的命令**:
+```bash
+# ❌ 不再支持
+bookhunter task add --interactive
+bookhunter task edit task-name
+bookhunter task remove task-name
+bookhunter run --interactive
+```
+
+**替代方案**:
+```bash
+# ✅ 直接编辑 YAML
+vi ~/.config/bookhunter/tasks.yaml
+bookhunter task validate
+bookhunter run
+```
+
+---
+
+*最后更新: 2025-11-29*

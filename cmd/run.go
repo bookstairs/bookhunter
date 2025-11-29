@@ -3,7 +3,6 @@ package cmd
 import (
 	"fmt"
 	"os"
-	"strings"
 
 	"github.com/spf13/cobra"
 
@@ -15,12 +14,11 @@ import (
 )
 
 var (
-	runTags        []string
-	runInteractive bool
-	runParallel    bool
-	runDryRun      bool
-	runForce       bool
-	runConfigPath  string
+	runTags       []string
+	runParallel   bool
+	runDryRun     bool
+	runForce      bool
+	runConfigPath string
 )
 
 var runCmd = &cobra.Command{
@@ -40,9 +38,6 @@ var runCmd = &cobra.Command{
   # 按标签执行
   bookhunter run --tag daily --tag telegram
 
-  # 交互式选择要执行的任务
-  bookhunter run --interactive
-
   # 并行执行所有任务
   bookhunter run --parallel
 
@@ -58,7 +53,6 @@ func init() {
 	rootCmd.AddCommand(runCmd)
 
 	runCmd.Flags().StringSliceVarP(&runTags, "tag", "t", []string{}, "按标签筛选任务（可多次指定）")
-	runCmd.Flags().BoolVarP(&runInteractive, "interactive", "i", false, "交互式选择要执行的任务")
 	runCmd.Flags().BoolVarP(&runParallel, "parallel", "p", false, "并行执行所有任务")
 	runCmd.Flags().BoolVar(&runDryRun, "dry-run", false, "预览模式，显示将要执行的任务但不实际执行")
 	runCmd.Flags().BoolVarP(&runForce, "force", "f", false, "强制执行禁用的任务")
@@ -75,21 +69,7 @@ func runTask(cmd *cobra.Command, args []string) {
 	// 检查配置文件是否存在
 	if !task.ConfigExists(configPath) {
 		fmt.Println(ui.RenderError("配置文件不存在: " + configPath))
-		fmt.Println(ui.RenderInfo("是否创建示例配置文件？[Y/n]"))
-
-		var answer string
-		fmt.Scanln(&answer)
-		answer = strings.ToLower(strings.TrimSpace(answer))
-
-		if answer == "" || answer == "y" || answer == "yes" {
-			if err := task.CreateExampleConfig(configPath); err != nil {
-				log.Exit(fmt.Errorf("创建示例配置失败: %w", err))
-			}
-			fmt.Println(ui.RenderSuccess("示例配置已创建: " + configPath))
-			fmt.Println(ui.RenderInfo("请编辑配置文件后再次运行"))
-			os.Exit(0)
-		}
-
+		fmt.Println(ui.RenderInfo("运行 'bookhunter task create-example' 创建示例配置"))
 		os.Exit(1)
 	}
 
@@ -100,25 +80,7 @@ func runTask(cmd *cobra.Command, args []string) {
 	// 获取要执行的任务
 	var tasksToRun []task.Task
 
-	if runInteractive {
-		// 交互式选择
-		allTasks, err := manager.List(task.TaskFilter{})
-		log.Exit(err)
-
-		if len(allTasks) == 0 {
-			log.Exit(fmt.Errorf("没有可用的任务"))
-		}
-
-		selected, err := taskui.SelectTasks(allTasks)
-		log.Exit(err)
-
-		if len(selected) == 0 {
-			fmt.Println(ui.RenderWarning("未选择任何任务"))
-			os.Exit(0)
-		}
-
-		tasksToRun = selected
-	} else if len(runTags) > 0 {
+	if len(runTags) > 0 {
 		// 按标签筛选
 		tasksToRun = manager.GetTasksByTag(runTags...)
 		if len(tasksToRun) == 0 {
@@ -150,7 +112,7 @@ func runTask(cmd *cobra.Command, args []string) {
 		if len(disabledTasks) > 0 {
 			fmt.Println(ui.RenderWarning(fmt.Sprintf("以下任务已禁用: %v", disabledTasks)))
 			fmt.Println(ui.RenderInfo("使用 --force 参数强制执行禁用的任务"))
-			
+
 			// 过滤掉禁用的任务
 			var enabledTasks []task.Task
 			for _, t := range tasksToRun {
@@ -174,19 +136,6 @@ func runTask(cmd *cobra.Command, args []string) {
 	if runDryRun {
 		fmt.Println(ui.RenderInfo("预览模式 - 不会实际执行任务"))
 		os.Exit(0)
-	}
-
-	// 确认执行
-	if !runInteractive {
-		fmt.Println(ui.RenderInfo("确认执行？[Y/n]"))
-		var answer string
-		fmt.Scanln(&answer)
-		answer = strings.ToLower(strings.TrimSpace(answer))
-
-		if answer != "" && answer != "y" && answer != "yes" {
-			fmt.Println(ui.RenderWarning("已取消"))
-			os.Exit(0)
-		}
 	}
 
 	// 创建执行器
@@ -234,4 +183,3 @@ func runTask(cmd *cobra.Command, args []string) {
 		os.Exit(1)
 	}
 }
-

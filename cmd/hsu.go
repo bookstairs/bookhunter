@@ -8,8 +8,6 @@ import (
 	"github.com/bookstairs/bookhunter/internal/log"
 )
 
-const hsuWebsite = "https://book.hsu.life"
-
 var hsuCmd = &cobra.Command{
 	Use:   "hsu",
 	Short: "A tool for downloading book from hsu.life",
@@ -30,13 +28,35 @@ var hsuCmd = &cobra.Command{
 			Row("Thread Limit (req/min)", flags.RateLimit).
 			Print()
 
-		flags.Website = hsuWebsite
+		// 构建参数 map
+		cmdArgs := map[string]interface{}{
+			"username":      flags.Username,
+			"password":      flags.Password,
+			"formats":       flags.Formats,
+			"directory":     flags.DownloadPath,
+			"initialBookID": flags.InitialBookID,
+			"rename":        flags.Rename,
+			"thread":        flags.Thread,
+			"ratelimit":     flags.RateLimit,
+			"keywords":      flags.Keywords,
+		}
 
-		// Create the fetcher.
-		f, err := flags.NewFetcher(fetcher.Hsu, map[string]string{
-			"username": flags.Username,
-			"password": flags.Password,
-		})
+		// 全局参数
+		globalArgs := &fetcher.GlobalArgs{
+			ConfigRoot: flags.ConfigRoot,
+			Proxy:      flags.Proxy,
+			Retry:      flags.Retry,
+			SkipError:  flags.SkipError,
+		}
+
+		// 使用 FetcherBuilder 创建 fetcher
+		builder := &fetcher.FetcherBuilder{
+			Category:   fetcher.Hsu,
+			Args:       cmdArgs,
+			GlobalArgs: globalArgs,
+		}
+
+		f, err := builder.Build()
 		log.Exit(err)
 
 		// Start downloading the books.

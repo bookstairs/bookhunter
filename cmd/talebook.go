@@ -41,11 +41,36 @@ var talebookDownloadCmd = &cobra.Command{
 			Row("Thread Limit (req/min)", flags.RateLimit).
 			Print()
 
-		// Create the fetcher.
-		f, err := flags.NewFetcher(fetcher.Talebook, map[string]string{
-			"username": flags.Username,
-			"password": flags.Password,
-		})
+		// 构建参数 map
+		cmdArgs := map[string]interface{}{
+			"website":       flags.Website,
+			"username":      flags.Username,
+			"password":      flags.Password,
+			"formats":       flags.Formats,
+			"directory":     flags.DownloadPath,
+			"initialBookID": flags.InitialBookID,
+			"rename":        flags.Rename,
+			"thread":        flags.Thread,
+			"ratelimit":     flags.RateLimit,
+			"keywords":      flags.Keywords,
+		}
+
+		// 全局参数
+		globalArgs := &fetcher.GlobalArgs{
+			ConfigRoot: flags.ConfigRoot,
+			Proxy:      flags.Proxy,
+			Retry:      flags.Retry,
+			SkipError:  flags.SkipError,
+		}
+
+		// 使用 FetcherBuilder 创建 fetcher
+		builder := &fetcher.FetcherBuilder{
+			Category:   fetcher.Talebook,
+			Args:       cmdArgs,
+			GlobalArgs: globalArgs,
+		}
+
+		f, err := builder.Build()
 		log.Exit(err)
 
 		// Start downloading the books.

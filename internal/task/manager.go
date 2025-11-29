@@ -30,6 +30,11 @@ func (m *Manager) GetConfig() *TaskConfig {
 	return m.config
 }
 
+// ConfigPath 获取配置文件路径
+func (m *Manager) ConfigPath() string {
+	return m.configPath
+}
+
 // Save 保存配置到文件
 func (m *Manager) Save() error {
 	return SaveConfig(m.config, m.configPath)
@@ -125,33 +130,33 @@ func (m *Manager) GetTasksByCategory(categories ...string) []Task {
 // GetTasksByName 根据名称获取任务（可多个）
 func (m *Manager) GetTasksByName(names ...string) ([]Task, error) {
 	tasks := m.config.FilterTasks(TaskFilter{Names: names})
-	
+
 	if len(tasks) != len(names) {
 		// 有些任务不存在，找出来报告
 		found := make(map[string]bool)
 		for _, task := range tasks {
 			found[task.Name] = true
 		}
-		
+
 		var missing []string
 		for _, name := range names {
 			if !found[name] {
 				missing = append(missing, name)
 			}
 		}
-		
+
 		if len(missing) > 0 {
 			return tasks, fmt.Errorf("部分任务不存在: %v", missing)
 		}
 	}
-	
+
 	return tasks, nil
 }
 
 // ListTasksFormatted 格式化列出任务（使用 UI 组件）
 func (m *Manager) ListTasksFormatted(filter TaskFilter) string {
 	tasks := m.config.FilterTasks(filter)
-	
+
 	if len(tasks) == 0 {
 		return ui.RenderWarning("没有找到匹配的任务")
 	}
@@ -201,28 +206,28 @@ func (m *Manager) ShowTaskDetail(name string) (string, error) {
 	var details string
 	details += ui.RenderTitle(task.Name) + "\n"
 	details += ui.RenderSeparator(50) + "\n\n"
-	
+
 	if task.Description != "" {
 		details += ui.StyleMuted.Render("描述: ") + task.Description + "\n"
 	}
-	
+
 	status := "启用"
 	if !task.Enabled {
 		status = "禁用"
 	}
 	details += ui.StyleMuted.Render("状态: ") + status + "\n"
-	
+
 	if len(task.Tags) > 0 {
 		details += ui.StyleMuted.Render("标签: ") + fmt.Sprintf("%v", task.Tags) + "\n"
 	}
-	
+
 	details += ui.StyleMuted.Render("类别: ") + task.Command.Category + "\n"
 	details += "\n" + ui.StyleMuted.Render("参数:") + "\n"
-	
+
 	for key, value := range task.Command.Args {
 		details += fmt.Sprintf("  %s: %v\n", key, value)
 	}
-	
+
 	return details, nil
 }
 
@@ -230,18 +235,17 @@ func (m *Manager) ShowTaskDetail(name string) (string, error) {
 func (m *Manager) GetStats() map[string]int {
 	stats := make(map[string]int)
 	stats["total"] = len(m.config.Tasks)
-	
+
 	for _, task := range m.config.Tasks {
 		if task.Enabled {
 			stats["enabled"]++
 		} else {
 			stats["disabled"]++
 		}
-		
+
 		// 按类别统计
 		stats["category_"+task.Command.Category]++
 	}
-	
+
 	return stats
 }
-

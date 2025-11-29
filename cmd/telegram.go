@@ -17,8 +17,7 @@ var telegramCmd = &cobra.Command{
 	Short: "A tool for downloading books from telegram channel",
 	Run: func(cmd *cobra.Command, args []string) {
 		// Remove prefix for telegram.
-		flags.Website = flags.ChannelID
-		flags.ChannelID = strings.TrimPrefix(flags.ChannelID, "https://t.me/")
+		channelID := strings.TrimPrefix(flags.ChannelID, "https://t.me/")
 
 		// Print download configuration.
 		log.NewPrinter().
@@ -26,7 +25,7 @@ var telegramCmd = &cobra.Command{
 			Head(log.DefaultHead...).
 			Row("Config Path", flags.ConfigRoot).
 			Row("Proxy", flags.Proxy).
-			Row("Channel ID", flags.ChannelID).
+			Row("Channel ID", channelID).
 			Row("Mobile", flags.HideSensitive(flags.Mobile)).
 			Row("AppID", flags.HideSensitive(strconv.FormatInt(flags.AppID, 10))).
 			Row("AppHash", flags.HideSensitive(flags.AppHash)).
@@ -40,14 +39,39 @@ var telegramCmd = &cobra.Command{
 			Row("Thread Limit (req/min)", flags.RateLimit).
 			Print()
 
-		// Create the fetcher.
-		f, err := flags.NewFetcher(fetcher.Telegram, map[string]string{
-			"channelID": flags.ChannelID,
-			"mobile":    flags.Mobile,
-			"reLogin":   strconv.FormatBool(flags.ReLogin),
-			"appID":     strconv.FormatInt(flags.AppID, 10),
-			"appHash":   flags.AppHash,
-		})
+		// 构建参数 map
+		cmdArgs := map[string]interface{}{
+			"channelID":     channelID,
+			"mobile":        flags.Mobile,
+			"relogin":       flags.ReLogin,
+			"appID":         flags.AppID,
+			"appHash":       flags.AppHash,
+			"formats":       flags.Formats,
+			"extract":       flags.Extract,
+			"directory":     flags.DownloadPath,
+			"initialBookID": flags.InitialBookID,
+			"rename":        flags.Rename,
+			"thread":        flags.Thread,
+			"ratelimit":     flags.RateLimit,
+			"keywords":      flags.Keywords,
+		}
+
+		// 全局参数
+		globalArgs := &fetcher.GlobalArgs{
+			ConfigRoot: flags.ConfigRoot,
+			Proxy:      flags.Proxy,
+			Retry:      flags.Retry,
+			SkipError:  flags.SkipError,
+		}
+
+		// 使用 FetcherBuilder 创建 fetcher
+		builder := &fetcher.FetcherBuilder{
+			Category:   fetcher.Telegram,
+			Args:       cmdArgs,
+			GlobalArgs: globalArgs,
+		}
+
+		f, err := builder.Build()
 		log.Exit(err)
 
 		// Wait all the threads have finished.

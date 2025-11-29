@@ -48,10 +48,16 @@ by your running environment.
 
 ```bash
 # Create example configuration
-bookhunter run  # Will prompt to create config if not exists
+bookhunter task create-example
+
+# Edit the configuration file
+vi ~/.config/bookhunter/tasks.yaml
 
 # List all configured tasks
 bookhunter task list
+
+# Validate configuration
+bookhunter task validate
 
 # Run all enabled tasks
 bookhunter run
@@ -59,12 +65,8 @@ bookhunter run
 # Run specific tasks
 bookhunter run mothlib-telegram sobooks-download
 
-# Interactive task selection
-bookhunter run --interactive
-
-# Enable/disable tasks
-bookhunter task enable mothlib-telegram
-bookhunter task disable sobooks-download
+# Run by tags
+bookhunter run --tag daily
 ```
 
 See [Task Management Guide](#task-management) for details.
@@ -300,6 +302,11 @@ tasks:
 
 ### Task Commands
 
+**Create example configuration:**
+```bash
+bookhunter task create-example
+```
+
 **List tasks:**
 ```bash
 # List all tasks
@@ -315,26 +322,15 @@ bookhunter task list --tag telegram
 bookhunter task list --category sobooks
 ```
 
-**Show task details:**
-```bash
-bookhunter task show mothlib-telegram
-```
-
-**Enable/disable tasks:**
-```bash
-bookhunter task enable mothlib-telegram
-bookhunter task disable sobooks-download
-```
-
-**Remove tasks:**
-```bash
-bookhunter task remove old-task
-bookhunter task remove old-task --force  # Skip confirmation
-```
-
 **Validate configuration:**
 ```bash
 bookhunter task validate
+```
+
+**Edit tasks:**
+Edit the YAML configuration file directly:
+```bash
+vi ~/.config/bookhunter/tasks.yaml
 ```
 
 ### Running Tasks
@@ -355,11 +351,6 @@ bookhunter run --tag telegram
 bookhunter run --tag daily --tag telegram  # Multiple tags
 ```
 
-**Interactive selection:**
-```bash
-bookhunter run --interactive
-```
-
 **Preview mode (dry-run):**
 ```bash
 bookhunter run --dry-run
@@ -375,26 +366,85 @@ bookhunter run --parallel
 bookhunter run disabled-task --force
 ```
 
+### Task Management
+
+**List tasks:**
+```bash
+bookhunter task list                    # List all tasks
+bookhunter task list --enabled          # List enabled tasks
+bookhunter task list --tag telegram     # Filter by tag
+```
+
+**Create configuration:**
+```bash
+bookhunter task create-example          # Create example config
+```
+
+**Edit tasks:**
+```bash
+# Edit the YAML configuration file directly
+vi ~/.config/bookhunter/tasks.yaml
+```
+
+**Validate configuration:**
+```bash
+bookhunter task validate
+```
+
 ### Getting Started
 
-1. Run any command to create example configuration:
+**🎯 Recommended Workflow**:
+
+1. Create example configuration:
    ```bash
-   bookhunter run
+   bookhunter task create-example
    ```
 
 2. Edit the configuration file:
    ```bash
    vi ~/.config/bookhunter/tasks.yaml
    ```
+   
+   Fill in your actual parameters (API keys, passwords, etc.)
 
-3. Fill in your actual parameters (API keys, passwords, etc.)
-
-4. Enable tasks you want to use:
+3. Verify configuration:
    ```bash
-   bookhunter task enable mothlib-telegram
+   bookhunter task validate
    ```
 
-5. Run your tasks:
+4. List and run tasks:
    ```bash
+   bookhunter task list
    bookhunter run
    ```
+
+### Configuration File Format
+
+The task configuration file uses YAML format. See `tasks.example.yaml` for examples.
+
+**Basic Structure**:
+
+```yaml
+version: "1.0"
+tasks:
+  - name: "task-name"
+    description: "Task description"
+    enabled: true
+    tags: ["tag1", "tag2"]
+    command:
+      category: "telegram"  # or sobooks/talebook/k12/hsu
+      args:
+        # Category-specific parameters
+```
+
+**Supported Parameters by Category**:
+
+| Category | Required | Optional | Total |
+|----------|----------|----------|-------|
+| telegram | 3 (appID, appHash, channelID) | 7 | 10 |
+| sobooks | 1 (code) | 7 | 8 |
+| talebook | 2 (username, password) | 5 | 7 |
+| k12 | 0 | 6 | 6 |
+| hsu | 2 (username, password) | 6 | 8 |
+
+📚 **See**: `tasks.example.yaml` for complete configuration examples.
