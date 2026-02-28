@@ -11,6 +11,10 @@ import (
 )
 
 func (t *Telegram) ChannelInfo() (*ChannelInfo, error) {
+	if err := t.checkSessionRefresh(); err != nil {
+		return nil, err
+	}
+
 	var channelID int64
 	var accessHash int64
 	var err error

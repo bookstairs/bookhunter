@@ -11,6 +11,10 @@ import (
 )
 
 func (t *Telegram) DownloadFile(f *File, writer io.Writer) error {
+	if err := t.checkSessionRefresh(); err != nil {
+		return err
+	}
+
 	tool := downloader.NewDownloader()
 	thread := int(math.Ceil(float64(f.Size) / (512 * 1024)))
 	_, err := tool.Download(t.client.API(), f.Document).WithThreads(thread).Stream(t.ctx, writer)
@@ -20,6 +24,10 @@ func (t *Telegram) DownloadFile(f *File, writer io.Writer) error {
 
 // ParseMessage will parse the given message id.
 func (t *Telegram) ParseMessage(info *ChannelInfo, msgID int64) ([]File, error) {
+	if err := t.checkSessionRefresh(); err != nil {
+		return nil, err
+	}
+
 	var files []File
 	// This API is translated from official C++ client.
 	api := t.client.API()

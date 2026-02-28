@@ -2,25 +2,31 @@ package telegram
 
 import (
 	"context"
+	"time"
 
 	"github.com/gotd/contrib/bg"
 	"github.com/gotd/contrib/middleware/floodwait"
 	"github.com/gotd/td/session"
 	"github.com/gotd/td/telegram"
+	"github.com/gotd/td/telegram/auth"
 	"github.com/gotd/td/telegram/dcs"
 	"github.com/gotd/td/tg"
 
 	"github.com/bookstairs/bookhunter/internal/file"
 )
 
+// sessionRefreshInterval defines how often the session should be refreshed.
+const sessionRefreshInterval = 3 * time.Hour
+
 type (
 	Telegram struct {
-		channelID string
-		mobile    string
-		appID     int64
-		appHash   string
-		client    *telegram.Client
-		ctx       context.Context
+		channelID          string
+		mobile             string
+		appID              int64
+		appHash            string
+		client             *telegram.Client
+		ctx                context.Context
+		lastSessionRefresh time.Time
 	}
 
 	ChannelInfo struct {
@@ -80,4 +86,28 @@ func New(channelID, mobile string, appID int64, appHash string, sessionPath, pro
 	}
 
 	return t, nil
+}
+
+// RefreshSession will refresh the telegram session using Auth().IfNecessary().
+func (t *Telegram) RefreshSession() error {
+	flow := auth.NewFlow(&terminalAuth{mobile: t.mobile}, auth.SendCodeOptions{})
+	if err := t.client.Auth().IfNecessary(t.ctx, flow); err != nil {
+		return err
+	}
+
+	t.lastSessionRefresh = time.Now()
+	return nil
+}
+
+// EnsureSessionValid ensures the session is valid, refreshing if necessary (every 3 hours).
+func (t *Telegram) EnsureSessionValid() error {
+	if time.Since(t.lastSessionRefresh) > sessionRefreshInterval {
+		return t.RefreshSession()
+	}
+	return nil
+}
+
+// checkSessionRefresh is an alias for EnsureSessionValid for compatibility
+func (t *Telegram) checkSessionRefresh() error {
+	return t.EnsureSessionValid()
 }

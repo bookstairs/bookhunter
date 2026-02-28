@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/gotd/td/telegram/auth"
 	"github.com/gotd/td/tg"
@@ -27,6 +28,7 @@ func (t *Telegram) Authentication() error {
 		return errors.New("failed to login, please check you login info or refresh the session by --refresh")
 	}
 
+	t.lastSessionRefresh = time.Now()
 	return nil
 }
 
